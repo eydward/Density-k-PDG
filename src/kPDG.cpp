@@ -10,8 +10,23 @@ constexpr int K = 2;
 // Maximum number of vertices in any graph. Note the code makes assumptions
 // that N<=8 by using 8-bit bitmasks. If N>8 the data type must change.
 constexpr int N = 7;
+// Maximum number of possible edges in a graph. Use static allocation to minimize overhead.
+constexpr int MAX_EDGES = 36;
+
 // Special value to indicate an edge is undirected.
 constexpr uint8 UNDIRECTED = 0xFF;
+
+// Specifies one edge in the graph. The vertex_set is a bitmasks of all vertices in the edge.
+// Example 00001011 means vertices {0,1,3}.
+// The head_vertex is the id of the head vertex if the edge is directed,
+// or UNDIRECTED if the edge is undirected.
+struct Edge {
+  uint8 vertex_set;
+  uint8 head_vertex;
+
+  Edge() : vertex_set(0), head_vertex(0) {}
+  Edge(uint8 vset, uint8 head) : vertex_set(vset), head_vertex(head) {}
+};
 
 // Represent the characteristics of a vertex, that is invariant under graph isomorphisms.
 struct VertexSignature {
@@ -35,14 +50,32 @@ struct Graph {
   // The map from signatures to the set of vertices in a bitmask.
   map<VertexSignature, uint8> vertices;
 
+  // Number of edges in this graph.
+  uint8 edge_count;
+
   // The edge set in this graph.
-  // The key is a bitmask of all vertices in the edge. Example 00001011 means vertices {0,1,3}.
-  // The value is the id of the head vertex if the edge is directed,
-  // or UNDIRECTED if the edge is undirected.
-  map<uint8, uint8> edges;
+  Edge edges[MAX_EDGES];
+
+  Graph() : hash(0), edge_count(0), edges{} {}
+
+  // Returns true if the edge specified by the bitmask of the vertices in the edge is allowed
+  // to be added to the graph (this vertex set does not yet exist in the edges).
+  bool edge_allowed(uint8 vertices) const {
+    for (int i = 0; i < edge_count; i++) {
+      if (vertices == edges[i].vertex_set) return false;
+    }
+    return true;
+  }
+
+  // Add an edge to the graph. It's caller's responsibility to make sure this is allowed.
+  void add_edge(uint8 vset, uint8 head) { edges[edge_count++] = Edge(vset, head); }
 
   // Returns a hash code of this graph, which is invariant under isomorphisms.
   void init() {
+    // Sort edges
+    sort(edges, edges + edge_count,
+         [](const Edge& a, const Edge& b) { return a.vertex_set < b.vertex_set; });
+
     // Compute signatures of vertices.
 
     // Finally, compute hash.
@@ -58,9 +91,57 @@ struct Graph {
     // TODO
     return true;
   }
+
+  // Helper function of print().
+  static void print_vertices(uint8 vertices) {
+    for (int i = 0; i < N; i++) {
+      if ((vertices & 1) != 0) {
+        cout << i;
+      }
+      vertices >>= 1;
+    }
+  }
+  // Print the graph to the console for debugging purpose.
+  void print() const {
+    cout << "Graph[" << hex << hash << ", \n";
+
+    bool is_first = true;
+    cout << "  undir {";
+    for (int i = 0; i < edge_count; i++) {
+      if (edges[i].head_vertex == UNDIRECTED) {
+        if (!is_first) {
+          cout << ", ";
+        }
+        print_vertices(edges[i].vertex_set);
+        is_first = false;
+      }
+    }
+
+    cout << "}\n  dir   {";
+    is_first = true;
+    for (int i = 0; i < edge_count; i++) {
+      if (edges[i].head_vertex != UNDIRECTED) {
+        if (!is_first) {
+          cout << ", ";
+        }
+        print_vertices(edges[i].vertex_set);
+        cout << ">" << (int)edges[i].head_vertex;
+        is_first = false;
+      }
+    }
+    cout << "}]\n";
+  }
 };
 
 int main() {
-  cout << sizeof(VertexSignature) << sizeof(size_t);
+  cout << sizeof(Graph) << "\n";
+
+  Graph g;
+  g.add_edge(0b11100, UNDIRECTED);
+  g.add_edge(0b1100010, 5);
+  g.add_edge(0b1110, 2);
+  g.add_edge(0b1011, UNDIRECTED);
+  g.init();
+  g.print();
   return 0;
 }
