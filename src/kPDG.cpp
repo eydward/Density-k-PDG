@@ -47,8 +47,8 @@ struct Graph {
   // The hash code is invariant under isomorphisms.
   uint64 hash;
 
-  // The map from signatures to the set of vertices in a bitmask.
-  map<VertexSignature, uint8> vertices;
+  // The signatures of each vertex
+  VertexSignature vertices[N];
 
   // Number of edges in this graph.
   uint8 edge_count;
@@ -56,7 +56,7 @@ struct Graph {
   // The edge set in this graph.
   Edge edges[MAX_EDGES];
 
-  Graph() : hash(0), edge_count(0), edges{} {}
+  Graph() : hash(0), vertices{}, edge_count(0), edges{} {}
 
   // Returns true if the edge specified by the bitmask of the vertices in the edge is allowed
   // to be added to the graph (this vertex set does not yet exist in the edges).
@@ -68,7 +68,11 @@ struct Graph {
   }
 
   // Add an edge to the graph. It's caller's responsibility to make sure this is allowed.
-  void add_edge(uint8 vset, uint8 head) { edges[edge_count++] = Edge(vset, head); }
+  // And the input is consistent (head is inside the vertex set).
+  void add_edge(uint8 vset, uint8 head) {
+    assert(head == UNDIRECTED || ((1 << head) & vset) != 0);
+    edges[edge_count++] = Edge(vset, head);
+  }
 
   // Returns a hash code of this graph, which is invariant under isomorphisms.
   void init() {
@@ -76,13 +80,28 @@ struct Graph {
     sort(edges, edges + edge_count,
          [](const Edge& a, const Edge& b) { return a.vertex_set < b.vertex_set; });
 
-    // Compute signatures of vertices.
+    // Compute signatures of vertices, first pass (degrees, but not hash code).
+    for (int i = 0; i < edge_count; i++) {
+      uint8 head = edges[i].head_vertex;
+      for (int v = 0; v < N; v++) {
+        uint8 mask = 1 << v;
+        if ((edges[i].vertex_set & mask) != 0) {
+          if (head == UNDIRECTED) {
+            vertices[v].degree_undirected++;
+          } else if (head == v) {
+            vertices[v].degree_head++;
+          } else {
+            vertices[v].degree_tail++;
+          }
+        }
+      }
+    }
 
     // Finally, compute hash.
     hash = 0;
-    for (const auto& kv : vertices) {
-      hash ^= kv.first.get_hash() + 0x9E3779B97F4A7C15ull + (hash << 12) + (hash >> 4);
-    }
+    // for (const auto& kv : vertices) {
+    //  hash ^= kv.first.get_hash() + 0x9E3779B97F4A7C15ull + (hash << 12) + (hash >> 4);
+    //}
   }
 
   // Returns true if this graph is isomorphic to the other.
@@ -129,7 +148,13 @@ struct Graph {
         is_first = false;
       }
     }
-    cout << "}]\n";
+    cout << "},\n";
+    for (int i = 0; i < N; i++) {
+      cout << "  V[" << i << "]: du=" << (int)vertices[i].degree_undirected
+           << ", dh=" << (int)vertices[i].degree_head << ", dt=" << (int)vertices[i].degree_tail
+           << ", hash=" << vertices[i].neighbor_hash << "\n";
+    }
+    cout << "]\n";
   }
 };
 
