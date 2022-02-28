@@ -301,8 +301,30 @@ struct Graph {
       if (pa->vertices[v].get_hash() != pb->vertices[v].get_hash()) return false;
     }
 
+    // Opportunistic check: if after canonicalization, the two graphs are identical,
+    // then they are isomorphic.
+    if (pa->is_identical(*pb)) return true;
+
     // Now all the easy checks are done, have to permute and check.
+    // The set of vertices with the same signature can permute among themselves.
+    // If the two graphs are identical, then we've found isomorphism. Otherwise after
+    // all permutations are tried, we declare the two graphs as non-isomorphic.
     // TODO
+    cout << "**** WARNING: UNIMPLEMENTED final isomorphism check:\n";
+    pa->print();
+    pb->print();
+    return false;
+  }
+
+  // Returns true if the two graphs are identical (exactly same edge sets).
+  template <int K1, int N1, int MAX_EDGES1>
+  bool is_identical(const Graph<K1, N1, MAX_EDGES1>& other) const {
+    if (edge_count != other.edge_count) return false;
+    for (int i = 0; i < edge_count; i++) {
+      if (edges[i].vertex_set != other.edges[i].vertex_set ||
+          edges[i].head_vertex != other.edges[i].head_vertex)
+        return false;
+    }
     return true;
   }
 
