@@ -74,3 +74,17 @@ TEST(GraphTest, T3) {
   EXPECT_EQ(g.vertices[4].degree_head, 0);
   EXPECT_EQ(g.vertices[4].degree_tail, 1);
 }
+
+TEST(GraphTest, Clear) {
+  Graph<3, 5, 5> g;
+  g.add_edge(0b1011, UNDIRECTED);  // 013
+  g.add_edge(0b1110, 2);           // 123>2
+  g.add_edge(0b1101, UNDIRECTED);  // 023
+  g.add_edge(0b11100, 2);          // 234>2
+  g.init();
+
+  g.clear();
+  EXPECT_EQ(g.hash, 0);
+  EXPECT_EQ(g.edge_count, 0);
+  EXPECT_EQ(g.vertices[1].get_hash(), 0);
+}

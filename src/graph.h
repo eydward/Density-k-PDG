@@ -39,6 +39,14 @@ struct VertexSignature {
   uint64 get_hash() const { return *reinterpret_cast<const uint64*>(this); }
 };
 
+// Combines value into the hash and returns the combined hash.
+uint32 hash_combine32(uint32 hash, uint32 value) {
+  return hash ^= value + 0x9E3779B9ul + (hash << 6) + (hash >> 2);
+}
+uint64 hash_combine64(uint64 hash, uint64 value) {
+  return hash ^= value + 0x9E3779B97F4A7C15ull + (hash << 12) + (hash >> 4);
+}
+
 // Represents a k-PDG, with the data structure optimized for computing isomorphisms.
 // Template parameters:
 //   K = number of vertices in each edge.
@@ -46,7 +54,6 @@ struct VertexSignature {
 //       that N<=8 by using 8-bit bitmasks. If N>8 the data type must change.
 //   MAX_EDGES = Maximum number of possible edges in a graph.
 //               We use static allocation to minimize overhead.
-
 template <int K, int N, int MAX_EDGES>
 struct Graph {
   // n vertices in this graph: 0, 1, ..., n-1.
@@ -63,7 +70,7 @@ struct Graph {
   // The edge set in this graph.
   Edge edges[MAX_EDGES];
 
-  Graph() : hash(0), vertices{}, edge_count(0), edges{} {}
+  Graph() : hash(0), vertices{}, edge_count(0) {}
 
   // Returns true if the edge specified by the bitmask of the vertices in the edge is allowed
   // to be added to the graph (this vertex set does not yet exist in the edges).
@@ -112,6 +119,7 @@ struct Graph {
       }
     }
 
+#if !NDEBUG
     // DEBUG print
     for (int v = 0; v < N; v++) {
       cout << "N_undr[" << v << "]: ";
@@ -122,19 +130,67 @@ struct Graph {
       print_vertices(neighbors_tail[v]);
       cout << "\n";
     }
+#endif
+
     // Compute signature of vertices, second pass (neighbor hash).
     // Note we can't update the signatures in the structure during the computation, so use
     // a working copy first.
     uint32 neighbor_hash[N]{0};
     for (int v = 0; v < N; v++) {
+      int neighbor_count = 0;
+      hash_neighbors(neighbors_undirected[v], neighbor_hash[v]);
+      hash_neighbors(neighbors_head[v], neighbor_hash[v]);
+      hash_neighbors(neighbors_tail[v], neighbor_hash[v]);
+    }
+    // Now copy the working values back into the vertex signatures
+    for (int v = 0; v < N; v++) {
+      vertices[v].neighbor_hash = neighbor_hash[v];
     }
 
-    // Finally, compute hash.
+    // Finally, compute hash for the entire graph.
     hash = 0;
-    // for (const auto& kv : vertices) {
-    //  hash ^= kv.first.get_hash() + 0x9E3779B97F4A7C15ull + (hash << 12) + (hash >> 4);
-    //}
+    for (int v = 0; v < N; v++) {
+      hash = hash_combine64(hash, vertices[v].get_hash());
+    }
   }
+
+  void hash_neighbors(uint8 neighbors, uint32& hash) {
+    // The working buffer to compute hash in deterministic order.
+    uint32 signatures[N];
+    if (neighbors == 0) {
+      hash = hash_combine32(hash, 0x12345678);
+    } else {
+      int neighbor_count = 0;
+      for (int i = 0; neighbors != 0; i++) {
+        if ((neighbors & 0x1) != 0) {
+          signatures[neighbor_count++] = static_cast<uint32>(vertices[i].get_hash());
+        }
+        neighbors >>= 1;
+      }
+
+      // Sort to make hash combination process invariant to isomorphisms.
+      if (neighbor_count > 1) {
+        sort(signatures, signatures + neighbor_count);
+      }
+      for (int i = 0; i < neighbor_count; i++) {
+        hash = hash_combine32(hash, signatures[i]);
+      }
+    }
+  }
+
+  void clear() {
+    hash = 0;
+    edge_count = 0;
+    for (int v = 0; v < N; v++) {
+      *reinterpret_cast<uint64*>(&vertices[v]) = 0;
+    }
+  }
+
+  // Returns a graph isomorphic to this graph, by applying vertex permutation.
+  // The first parameter specifies the permutation. For example p={1,2,0,3} means
+  //  0->1, 1->2, 2->0, 3->3.
+  // The second parameter is the resulting graph.
+  void permute(int p[N], Graph& g) const {}
 
   // Returns true if this graph is isomorphic to the other.
   bool is_isomorphic(const Graph& other) const {
