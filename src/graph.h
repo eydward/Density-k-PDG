@@ -149,8 +149,14 @@ struct Graph {
 
     // Finally, compute hash for the entire graph.
     hash = 0;
+    uint64 signatures[N];
     for (int v = 0; v < N; v++) {
-      hash = hash_combine64(hash, vertices[v].get_hash());
+      signatures[v] = vertices[v].get_hash();
+    }
+    sort(signatures, signatures + N);
+    // TODO: this should fail test, must sort first.
+    for (int v = 0; v < N; v++) {
+      hash = hash_combine64(hash, signatures[v]);
     }
   }
 
@@ -190,7 +196,25 @@ struct Graph {
   // The first parameter specifies the permutation. For example p={1,2,0,3} means
   //  0->1, 1->2, 2->0, 3->3.
   // The second parameter is the resulting graph.
-  void permute(int p[N], Graph& g) const {}
+  void permute(int p[N], Graph& g) const {
+    g.clear();
+    // Copy the edges with permutation.
+    for (int i = 0; i < edge_count; i++) {
+      if (edges[i].head_vertex == UNDIRECTED) {
+        g.edges[i].head_vertex = UNDIRECTED;
+      } else {
+        g.edges[i].head_vertex = p[edges[i].head_vertex];
+      }
+      g.edges[i].vertex_set = 0;
+      for (int v = 0; v < N; v++) {
+        if ((edges[i].vertex_set & (1 << v)) != 0) {
+          g.edges[i].vertex_set |= (1 << p[v]);
+        }
+      }
+    }
+    g.edge_count = edge_count;
+    g.init();
+  }
 
   // Returns true if this graph is isomorphic to the other.
   bool is_isomorphic(const Graph& other) const {

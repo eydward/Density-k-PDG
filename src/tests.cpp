@@ -88,3 +88,19 @@ TEST(GraphTest, Clear) {
   EXPECT_EQ(g.edge_count, 0);
   EXPECT_EQ(g.vertices[1].get_hash(), 0);
 }
+
+TEST(GraphTest, Permute) {
+  Graph<3, 5, 5> g;
+  g.add_edge(0b1011, UNDIRECTED);  // 013
+  g.add_edge(0b1110, 2);           // 123>2
+  g.add_edge(0b1101, UNDIRECTED);  // 023
+  g.add_edge(0b11100, 2);          // 234>2
+  g.init();
+
+  Graph<3, 5, 5> h;
+  int p[5]{0, 1, 2, 3, 4};
+  do {
+    g.permute(p, h);
+    EXPECT_EQ(g.hash, h.hash);
+  } while (next_permutation(p, p + 5));
+}
