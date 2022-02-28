@@ -3,19 +3,8 @@
   "tasks": [
     {
       "type": "shell",
-      "label": "C++: g++ build",
-      "command": "g++.exe",
-      "args": [
-        "-lm",
-        "-O2",
-        "-Wall",
-        "kPDG.cpp",
-        "-o",
-        "../bin/kPDG.exe"
-      ],
-      "problemMatcher": [
-        "$gcc"
-      ],
+      "label": "build test",
+      "command": "bazel build ... & bazel test ...",
       "group": {
         "kind": "build",
         "isDefault": true
