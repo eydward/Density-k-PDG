@@ -3,7 +3,7 @@ load("@rules_cc//cc:defs.bzl", "cc_binary")
 cc_library(
   name = "graph",
   hdrs = ["graph.h"],
-  srcs = ["graph.cpp"],
+  srcs = [],
 )
 
 cc_binary(
