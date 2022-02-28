@@ -11,8 +11,13 @@ int main() {
   g.init();
   g.print();
 
-  Graph<3, 5, 5> h;
-  g.canonicalize(h);
-  h.print();
+  Graph<3, 8, 5> h, f, e;
+  g.copy_without_init(h);
+  int p[8]{3, 4, 5, 6, 7, 0, 1, 2};
+  h.permute(p, f);
+  f.print();
+  f.canonicalize(e);
+  e.print();
+
   return 0;
 }

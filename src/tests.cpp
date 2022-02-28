@@ -9,6 +9,8 @@ TEST(GraphTest, Init) {
   g.add_edge(0b1011, UNDIRECTED);   // 013
   g.init();
 
+  EXPECT_FALSE(g.is_canonical);
+
   EXPECT_EQ(4, g.edge_count);
   EXPECT_EQ(g.edges[0].vertex_set, 0b1011);
   EXPECT_EQ(g.edges[0].head_vertex, UNDIRECTED);
@@ -106,11 +108,35 @@ TEST(GraphTest, Canonicalize) {
   Graph<3, 5, 5> h;
   g.canonicalize(h);
 
+  EXPECT_FALSE(g.is_canonical);
+  EXPECT_TRUE(h.is_canonical);
   EXPECT_EQ(g.hash, h.hash);
   EXPECT_TRUE(h.is_isomorphic(g));
   for (int v = 0; v < 4; v++) {
-    EXPECT_LE(h.vertices[v].get_hash(), h.vertices[v + 1].get_hash());
+    EXPECT_GE(h.vertices[v].get_hash(), h.vertices[v + 1].get_hash());
   }
+}
+
+TEST(GraphTest, Canonicalize2) {
+  Graph<3, 8, 5> g;
+  g.add_edge(0b1011000, UNDIRECTED);  // 346
+  g.add_edge(0b1110000, 5);           // 456>5
+  g.add_edge(0b1101000, UNDIRECTED);  // 356
+  g.add_edge(0b11100000, 5);          // 567>5
+  g.init();
+  EXPECT_EQ(g.vertices[0].get_degrees(), 0);
+  EXPECT_EQ(g.vertices[1].get_degrees(), 0);
+  EXPECT_EQ(g.vertices[2].get_degrees(), 0);
+
+  Graph<3, 8, 5> h;
+  g.canonicalize(h);
+  EXPECT_EQ(g.hash, h.hash);
+  EXPECT_TRUE(h.is_isomorphic(g));
+  EXPECT_TRUE(h.is_canonical);
+  EXPECT_EQ(h.vertex_count, 5);
+
+  Graph<3, 5, 5> f = get_T3();
+  EXPECT_EQ(h.hash, f.hash);
 }
 
 TEST(GraphTest, Copy) {

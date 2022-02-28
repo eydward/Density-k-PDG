@@ -73,10 +73,18 @@ struct Graph {
   // Number of edges in this graph.
   uint8 edge_count;
 
+  // True if the graph is canonicalized (vertex signatures are in descreasing order).
+  bool is_canonical;
+
+  // Number of vertices that have degrees >0.
+  // Only available if is_canonical is true, in which case the rest of the
+  // vertices array can be ignored.
+  uint8 vertex_count;
+
   // The edge set in this graph.
   Edge edges[MAX_EDGES];
 
-  Graph() : hash(0), vertices{}, edge_count(0) {}
+  Graph() : hash(0), vertices{}, edge_count(0), is_canonical(false), vertex_count(0) {}
 
   // Returns true if the edge specified by the bitmask of the vertices in the edge is allowed
   // to be added to the graph (this vertex set does not yet exist in the edges).
@@ -90,7 +98,11 @@ struct Graph {
   // Add an edge to the graph. It's caller's responsibility to make sure this is allowed.
   // And the input is consistent (head is inside the vertex set).
   void add_edge(uint8 vset, uint8 head) {
+#if !NDEBUG
     assert(head == UNDIRECTED || ((1 << head) & vset) != 0);
+    assert(edge_allowed(vset));
+    assert(__builtin_popcount(vset) == K);
+#endif
     edges[edge_count++] = Edge(vset, head);
   }
 
@@ -125,7 +137,7 @@ struct Graph {
       }
     }
 
-#if !NDEBUG
+#if false
     // DEBUG print
     for (int v = 0; v < N; v++) {
       cout << "N_undr[" << v << "]: ";
@@ -159,9 +171,10 @@ struct Graph {
     for (int v = 0; v < N; v++) {
       signatures[v] = vertices[v].get_hash();
     }
-    sort(signatures, signatures + N);
-    // TODO: this should fail test, must sort first.
-    for (int v = 0; v < N; v++) {
+    // Note we sort by descreasing order, to put heavily used vertices at the beginning.
+    sort(signatures, signatures + N, greater<uint64>());
+    // Stop the hash combination once we reach vertices with 0 degrees.
+    for (int v = 0; v < N && (signatures[v] >> 32 != 0); v++) {
       hash = hash_combine64(hash, signatures[v]);
     }
   }
@@ -190,9 +203,12 @@ struct Graph {
     }
   }
 
+  // Resets the current graph to no edges.
   void clear() {
     hash = 0;
     edge_count = 0;
+    is_canonical = false;
+    vertex_count = 0;
     for (int v = 0; v < N; v++) {
       *reinterpret_cast<uint64*>(&vertices[v]) = 0;
     }
@@ -225,21 +241,32 @@ struct Graph {
   // Returns the canonicalized graph in g, where the vertices are ordered by their signatures.
   void canonicalize(Graph& g) const {
     // First get sorted vertex indices by the vertex signatures.
+    // Note we sort by descreasing order, to push vertices to lower indices.
     int s[N];
     for (int v = 0; v < N; v++) s[v] = v;
     sort(s, s + N,
-         [this](int a, int b) { return vertices[a].get_hash() < vertices[b].get_hash(); });
+         [this](int a, int b) { return vertices[a].get_hash() > vertices[b].get_hash(); });
     // Now compute the inverse, which gives the permutation used to canonicalize.
     int p[N];
     for (int v = 0; v < N; v++) {
       p[s[v]] = v;
     }
     permute(p, g);
+    g.is_canonical = true;
+    for (int v = 0; v < N; v++) {
+      if (g.vertices[v].get_degrees() != 0) {
+        g.vertex_count++;
+      } else {
+        break;
+      }
+    }
   }
 
   // Makes a copy of this graph to g, without calling init. The caller can add/remove edges,
   // and must call init() before using g.
-  void copy_without_init(Graph& g) const {
+  template <int K1, int N1, int MAX_EDGES1>
+  void copy_without_init(Graph<K1, N1, MAX_EDGES1>& g) const {
+    static_assert(K <= K1 && N <= N1 && MAX_EDGES <= MAX_EDGES1);
     for (int i = 0; i < edge_count; i++) {
       g.edges[i] = edges[i];
     }
@@ -247,8 +274,34 @@ struct Graph {
   }
 
   // Returns true if this graph is isomorphic to the other.
-  bool is_isomorphic(const Graph& other) const {
+  template <int K1, int N1, int MAX_EDGES1>
+  bool is_isomorphic(const Graph<K1, N1, MAX_EDGES1>& other) const {
     if (edge_count != other.edge_count || hash != other.hash) return false;
+
+    // Canonicalize if necessary.
+    const Graph *pa, *pb;
+    if (is_canonical) {
+      pa = this;
+    } else {
+      Graph<K, N, MAX_EDGES> c;
+      canonicalize(c);
+      pa = &c;
+    }
+    if (other.is_canonical) {
+      pb = &other;
+    } else {
+      Graph<K1, N1, MAX_EDGES1> other_c;
+      canonicalize(other_c);
+      pb = &other_c;
+    }
+
+    // Verify vertex signatures are same.
+    if (pa->vertex_count != pb->vertex_count) return false;
+    for (int v = 0; v < pa->vertex_count; v++) {
+      if (pa->vertices[v].get_hash() != pb->vertices[v].get_hash()) return false;
+    }
+
+    // Now all the easy checks are done, have to permute and check.
     // TODO
     return true;
   }
@@ -286,7 +339,8 @@ struct Graph {
       cout << "  V[" << v << "]: du=" << (int)vertices[v].degree_undirected
            << ", dh=" << (int)vertices[v].degree_head << ", dt=" << (int)vertices[v].degree_tail
            << ", neighbor=" << vertices[v].neighbor_hash << ", hash=" << hex
-           << vertices[v].get_hash() << "\n";
+           << vertices[v].get_hash() << ", canonical=" << is_canonical
+           << ", vcnt=" << (int)vertex_count << "\n";
     }
     cout << "]\n";
   }
