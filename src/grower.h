@@ -16,7 +16,12 @@ class Grower {
   unordered_set<G, GraphHasher, GraphComparer> canonicals[N];
 
   void grow_step(int n) {
-    for (const G& g : canonicals[n]) {
+    for (const G& g : canonicals[n - 1]) {
+      assert(n == K || (g.is_canonical && g.vertex_count == n - 1));
+      assert(g.vertices[n - 1].get_degrees() == 0);
+
+      for (uint8 mask = 0; mask < (1 << n); mask++) {
+      }
     }
   }
 
@@ -28,7 +33,7 @@ class Grower {
     g.init();
     canonicals[K - 1].insert(g);
 
-    for (int n = K - 1; n < max_n; n++) {
+    for (int n = K; n <= max_n; n++) {
       grow_step(n);
     }
   }
