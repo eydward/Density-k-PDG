@@ -237,6 +237,15 @@ struct Graph {
     permute(p, g);
   }
 
+  // Makes a copy of this graph to g, without calling init. The caller can add/remove edges,
+  // and must call init() before using g.
+  void copy_without_init(Graph& g) const {
+    for (int i = 0; i < edge_count; i++) {
+      g.edges[i] = edges[i];
+    }
+    g.edge_count = edge_count;
+  }
+
   // Returns true if this graph is isomorphic to the other.
   bool is_isomorphic(const Graph& other) const {
     if (edge_count != other.edge_count || hash != other.hash) return false;

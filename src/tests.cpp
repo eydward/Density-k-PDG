@@ -36,13 +36,19 @@ TEST(GraphTest, Init) {
   EXPECT_EQ(g.vertices[3].degree_tail, 1);
 }
 
-TEST(GraphTest, T3) {
+// Utility function to create and initialize T_3.
+Graph<3, 5, 5> get_T3() {
   Graph<3, 5, 5> g;
   g.add_edge(0b1011, UNDIRECTED);  // 013
   g.add_edge(0b1110, 2);           // 123>2
   g.add_edge(0b1101, UNDIRECTED);  // 023
   g.add_edge(0b11100, 2);          // 234>2
   g.init();
+  return g;
+}
+
+TEST(GraphTest, T3) {
+  Graph<3, 5, 5> g = get_T3();
 
   EXPECT_EQ(4, g.edge_count);
   EXPECT_EQ(g.edges[0].vertex_set, 0b1011);
@@ -76,13 +82,7 @@ TEST(GraphTest, T3) {
 }
 
 TEST(GraphTest, Clear) {
-  Graph<3, 5, 5> g;
-  g.add_edge(0b1011, UNDIRECTED);  // 013
-  g.add_edge(0b1110, 2);           // 123>2
-  g.add_edge(0b1101, UNDIRECTED);  // 023
-  g.add_edge(0b11100, 2);          // 234>2
-  g.init();
-
+  Graph<3, 5, 5> g = get_T3();
   g.clear();
   EXPECT_EQ(g.hash, 0);
   EXPECT_EQ(g.edge_count, 0);
@@ -90,13 +90,7 @@ TEST(GraphTest, Clear) {
 }
 
 TEST(GraphTest, Permute) {
-  Graph<3, 5, 5> g;
-  g.add_edge(0b1011, UNDIRECTED);  // 013
-  g.add_edge(0b1110, 2);           // 123>2
-  g.add_edge(0b1101, UNDIRECTED);  // 023
-  g.add_edge(0b11100, 2);          // 234>2
-  g.init();
-
+  Graph<3, 5, 5> g = get_T3();
   Graph<3, 5, 5> h;
   int p[5]{0, 1, 2, 3, 4};
   do {
@@ -108,13 +102,7 @@ TEST(GraphTest, Permute) {
 }
 
 TEST(GraphTest, Canonicalize) {
-  Graph<3, 5, 5> g;
-  g.add_edge(0b1011, UNDIRECTED);  // 013
-  g.add_edge(0b1110, 2);           // 123>2
-  g.add_edge(0b1101, UNDIRECTED);  // 023
-  g.add_edge(0b11100, 2);          // 234>2
-  g.init();
-
+  Graph<3, 5, 5> g = get_T3();
   Graph<3, 5, 5> h;
   g.canonicalize(h);
 
@@ -123,4 +111,32 @@ TEST(GraphTest, Canonicalize) {
   for (int v = 0; v < 4; v++) {
     EXPECT_LE(h.vertices[v].get_hash(), h.vertices[v + 1].get_hash());
   }
+}
+
+TEST(GraphTest, Copy) {
+  Graph<3, 5, 5> g = get_T3();
+  Graph<3, 5, 5> h;
+  g.copy_without_init(h);
+  h.init();
+  EXPECT_EQ(g.hash, h.hash);
+  EXPECT_TRUE(h.is_isomorphic(g));
+}
+
+TEST(GraphTest, NonIsomorphic) {
+  Graph<3, 5, 5> g = get_T3();
+
+  Graph<3, 5, 5> h;
+  g.copy_without_init(h);
+  h.add_edge(0b10110, UNDIRECTED);  // 124
+  h.init();
+
+  Graph<3, 5, 5> f;
+  g.copy_without_init(f);
+  f.add_edge(0b10110, 1);  // 124
+  f.init();
+
+  EXPECT_NE(g.hash, f.hash);
+  EXPECT_FALSE(f.is_isomorphic(g));
+  EXPECT_NE(h.hash, f.hash);
+  EXPECT_FALSE(f.is_isomorphic(h));
 }
