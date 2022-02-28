@@ -102,5 +102,25 @@ TEST(GraphTest, Permute) {
   do {
     g.permute(p, h);
     EXPECT_EQ(g.hash, h.hash);
+    EXPECT_TRUE(h.is_isomorphic(g));
+
   } while (next_permutation(p, p + 5));
+}
+
+TEST(GraphTest, Canonicalize) {
+  Graph<3, 5, 5> g;
+  g.add_edge(0b1011, UNDIRECTED);  // 013
+  g.add_edge(0b1110, 2);           // 123>2
+  g.add_edge(0b1101, UNDIRECTED);  // 023
+  g.add_edge(0b11100, 2);          // 234>2
+  g.init();
+
+  Graph<3, 5, 5> h;
+  g.canonicalize(h);
+
+  EXPECT_EQ(g.hash, h.hash);
+  EXPECT_TRUE(h.is_isomorphic(g));
+  for (int v = 0; v < 4; v++) {
+    EXPECT_LE(h.vertices[v].get_hash(), h.vertices[v + 1].get_hash());
+  }
 }

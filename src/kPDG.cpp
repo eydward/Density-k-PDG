@@ -10,5 +10,9 @@ int main() {
   g.add_edge(0b11100, 2);          // 234>2
   g.init();
   g.print();
+
+  Graph<3, 5, 5> h;
+  g.canonicalize(h);
+  h.print();
   return 0;
 }

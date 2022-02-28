@@ -24,16 +24,22 @@ struct Edge {
 
 // Represent the characteristics of a vertex, that is invariant under graph isomorphisms.
 struct VertexSignature {
-  uint8 degree_undirected;  // Number of undirected edges through this vertex.
-  uint8 degree_head;        // Number of directed edges using this vertex as the head.
-  uint8 degree_tail;        // Number of directed edges through this vertex but not as head.
-  uint8 reserved;           // Not used, for memory alignment purpose.
-
   // Combined hash code of the signatures (excluding hashes) of neighbors. Algorithm:
   // Let N_u, N_h, N_t be the neighboring vertex sets that correspond to the 3 degree counts above.
   // Within each set, sort by the signature values (without neighbor_hash value) of the vertices.
   // Then combine the hash with this given order.
   uint32 neighbor_hash;
+
+  uint8 degree_undirected;  // Number of undirected edges through this vertex.
+  uint8 degree_head;        // Number of directed edges using this vertex as the head.
+  uint8 degree_tail;        // Number of directed edges through this vertex but not as head.
+  uint8 reserved;           // Not used, for memory alignment purpose.
+
+  // Returns a 32-bit code that represents degree information.
+  uint32 get_degrees() const {
+    return static_cast<uint32>(degree_undirected) << 16 | static_cast<uint32>(degree_head) << 8 |
+           static_cast<uint32>(degree_tail);
+  }
 
   // Returns a 64-bit hash code to represent the data.
   uint64 get_hash() const { return *reinterpret_cast<const uint64*>(this); }
@@ -169,7 +175,7 @@ struct Graph {
       int neighbor_count = 0;
       for (int i = 0; neighbors != 0; i++) {
         if ((neighbors & 0x1) != 0) {
-          signatures[neighbor_count++] = static_cast<uint32>(vertices[i].get_hash());
+          signatures[neighbor_count++] = vertices[i].get_degrees();
         }
         neighbors >>= 1;
       }
@@ -216,9 +222,24 @@ struct Graph {
     g.init();
   }
 
+  // Returns the canonicalized graph in g, where the vertices are ordered by their signatures.
+  void canonicalize(Graph& g) const {
+    // First get sorted vertex indices by the vertex signatures.
+    int s[N];
+    for (int v = 0; v < N; v++) s[v] = v;
+    sort(s, s + N,
+         [this](int a, int b) { return vertices[a].get_hash() < vertices[b].get_hash(); });
+    // Now compute the inverse, which gives the permutation used to canonicalize.
+    int p[N];
+    for (int v = 0; v < N; v++) {
+      p[s[v]] = v;
+    }
+    permute(p, g);
+  }
+
   // Returns true if this graph is isomorphic to the other.
   bool is_isomorphic(const Graph& other) const {
-    if (hash != other.hash) return false;
+    if (edge_count != other.edge_count || hash != other.hash) return false;
     // TODO
     return true;
   }
