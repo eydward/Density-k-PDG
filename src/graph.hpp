@@ -285,6 +285,22 @@ bool Graph<K, N, MAX_EDGES>::is_isomorphic(const Graph<K1, N1, MAX_EDGES1>& othe
   // The set of vertices with the same signature can permute among themselves.
   // If the two graphs are identical, then we've found isomorphism. Otherwise after
   // all permutations are tried, we declare the two graphs as non-isomorphic.
+
+  vector<vector<uint8>> perm_sets;
+  for (int v = 0; v < N - 1 && vertices[v].get_degrees() > 0; v++) {
+    if (vertices[v + 1].get_hash() == vertices[v].get_hash()) {
+      perm_sets.push_back(vector<uint8>());
+      int t = v;
+      while (vertices[t].get_hash() == vertices[v].get_hash()) {
+        perm_sets.back().push_back(t);
+        t++;
+      }
+      v = t;
+    }
+  }
+  if (perm_sets.size() > 0) {
+  }
+
   // TODO
   cout << "**** WARNING: UNIMPLEMENTED final isomorphism check:\n";
   pa->print();
