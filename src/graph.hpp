@@ -1,0 +1,314 @@
+// Helper function for debug print().
+void print_vertices(uint8 vertices, int N) {
+  for (int v = 0; v < N; v++) {
+    if ((vertices & 1) != 0) {
+      cout << v;
+    }
+    vertices >>= 1;
+  }
+}
+
+template <int K, int N, int MAX_EDGES>
+bool Graph<K, N, MAX_EDGES>::edge_allowed(uint8 vertices) const {
+  for (int i = 0; i < edge_count; i++) {
+    if (vertices == edges[i].vertex_set) return false;
+  }
+  return true;
+}
+
+template <int K, int N, int MAX_EDGES>
+void Graph<K, N, MAX_EDGES>::add_edge(uint8 vset, uint8 head) {
+#if !NDEBUG
+  assert(head == UNDIRECTED || ((1 << head) & vset) != 0);
+  assert(edge_allowed(vset));
+  assert(__builtin_popcount(vset) == K);
+#endif
+  edges[edge_count++] = Edge(vset, head);
+}
+
+// Initializes everything in this graph from the edge set.
+template <int K, int N, int MAX_EDGES>
+void Graph<K, N, MAX_EDGES>::init() {
+  // Sort edges
+  sort(edges, edges + edge_count,
+       [](const Edge& a, const Edge& b) { return a.vertex_set < b.vertex_set; });
+
+  // Compute signatures of vertices, first pass (degrees, but not hash code).
+  // As a side product, also gather the neighbor vertex sets of each vertex.
+  uint8 neighbors_undirected[N]{0};
+  uint8 neighbors_head[N]{0};  // neighbors_head[i]: head vertex is i.
+  uint8 neighbors_tail[N]{0};
+
+  for (int i = 0; i < edge_count; i++) {
+    uint8 head = edges[i].head_vertex;
+    for (int v = 0; v < N; v++) {
+      uint8 mask = 1 << v;
+      if ((edges[i].vertex_set & mask) != 0) {
+        if (head == UNDIRECTED) {
+          vertices[v].degree_undirected++;
+          neighbors_undirected[v] |= (edges[i].vertex_set & ~(1 << v));
+        } else if (head == v) {
+          vertices[v].degree_head++;
+          neighbors_head[v] |= (edges[i].vertex_set & ~(1 << v));
+        } else {
+          vertices[v].degree_tail++;
+          neighbors_tail[v] |= (edges[i].vertex_set & ~((1 << v) | (1 << head)));
+        }
+      }
+    }
+  }
+
+#if false
+    // DEBUG print
+    for (int v = 0; v < N; v++) {
+      cout << "N_undr[" << v << "]: ";
+      print_vertices(neighbors_undirected[v], N);
+      cout << "\nN_head[" << v << "]: ";
+      print_vertices(neighbors_head[v], N);
+      cout << "\nN_tail[" << v << "]: ";
+      print_vertices(neighbors_tail[v], N);
+      cout << "\n";
+    }
+#endif
+
+  // Compute signature of vertices, second pass (neighbor hash).
+  // Note we can't update the signatures in the structure during the computation, so use
+  // a working copy first.
+  uint32 neighbor_hash[N]{0};
+  for (int v = 0; v < N; v++) {
+    int neighbor_count = 0;
+    hash_neighbors(neighbors_undirected[v], neighbor_hash[v]);
+    hash_neighbors(neighbors_head[v], neighbor_hash[v]);
+    hash_neighbors(neighbors_tail[v], neighbor_hash[v]);
+  }
+  // Now copy the working values back into the vertex signatures
+  for (int v = 0; v < N; v++) {
+    vertices[v].neighbor_hash = neighbor_hash[v];
+  }
+
+  // Finally, compute hash for the entire graph.
+  hash = 0;
+  uint64 signatures[N];
+  for (int v = 0; v < N; v++) {
+    signatures[v] = vertices[v].get_hash();
+  }
+  // Note we sort by descreasing order, to put heavily used vertices at the beginning.
+  sort(signatures, signatures + N, greater<uint64>());
+  // Stop the hash combination once we reach vertices with 0 degrees.
+  for (int v = 0; v < N && (signatures[v] >> 32 != 0); v++) {
+    hash = hash_combine64(hash, signatures[v]);
+  }
+}
+
+template <int K, int N, int MAX_EDGES>
+void Graph<K, N, MAX_EDGES>::hash_neighbors(uint8 neighbors, uint32& hash) {
+  // The working buffer to compute hash in deterministic order.
+  uint32 signatures[N];
+  if (neighbors == 0) {
+    hash = hash_combine32(hash, 0x12345678);
+  } else {
+    int neighbor_count = 0;
+    for (int i = 0; neighbors != 0; i++) {
+      if ((neighbors & 0x1) != 0) {
+        signatures[neighbor_count++] = vertices[i].get_degrees();
+      }
+      neighbors >>= 1;
+    }
+
+    // Sort to make hash combination process invariant to isomorphisms.
+    if (neighbor_count > 1) {
+      sort(signatures, signatures + neighbor_count);
+    }
+    for (int i = 0; i < neighbor_count; i++) {
+      hash = hash_combine32(hash, signatures[i]);
+    }
+  }
+}
+
+// Resets the current graph to no edges.
+template <int K, int N, int MAX_EDGES>
+void Graph<K, N, MAX_EDGES>::clear() {
+  hash = 0;
+  edge_count = 0;
+  is_canonical = false;
+  vertex_count = 0;
+  for (int v = 0; v < N; v++) {
+    *reinterpret_cast<uint64*>(&vertices[v]) = 0;
+  }
+}
+
+// Returns a graph isomorphic to this graph, by applying vertex permutation.
+// The first parameter specifies the permutation. For example p={1,2,0,3} means
+//  0->1, 1->2, 2->0, 3->3.
+// The second parameter is the resulting graph.
+template <int K, int N, int MAX_EDGES>
+void Graph<K, N, MAX_EDGES>::permute(int p[N], Graph& g) const {
+  g.clear();
+  // Copy the edges with permutation.
+  for (int i = 0; i < edge_count; i++) {
+    if (edges[i].head_vertex == UNDIRECTED) {
+      g.edges[i].head_vertex = UNDIRECTED;
+    } else {
+      g.edges[i].head_vertex = p[edges[i].head_vertex];
+    }
+    g.edges[i].vertex_set = 0;
+    for (int v = 0; v < N; v++) {
+      if ((edges[i].vertex_set & (1 << v)) != 0) {
+        g.edges[i].vertex_set |= (1 << p[v]);
+      }
+    }
+  }
+  g.edge_count = edge_count;
+  g.init();
+}
+
+// Returns the canonicalized graph in g, where the vertices are ordered by their signatures.
+template <int K, int N, int MAX_EDGES>
+void Graph<K, N, MAX_EDGES>::canonicalize(Graph& g) const {
+  // First get sorted vertex indices by the vertex signatures.
+  // Note we sort by descreasing order, to push vertices to lower indices.
+  int s[N];
+  for (int v = 0; v < N; v++) s[v] = v;
+  sort(s, s + N, [this](int a, int b) { return vertices[a].get_hash() > vertices[b].get_hash(); });
+  // Now compute the inverse, which gives the permutation used to canonicalize.
+  int p[N];
+  for (int v = 0; v < N; v++) {
+    p[s[v]] = v;
+  }
+  permute(p, g);
+  g.is_canonical = true;
+  for (int v = 0; v < N; v++) {
+    if (g.vertices[v].get_degrees() != 0) {
+      g.vertex_count++;
+    } else {
+      break;
+    }
+  }
+}
+
+// Makes a copy of this graph to g, without calling init. The caller can add/remove edges,
+// and must call init() before using g.
+template <int K, int N, int MAX_EDGES>
+template <int K1, int N1, int MAX_EDGES1>
+void Graph<K, N, MAX_EDGES>::copy_without_init(Graph<K1, N1, MAX_EDGES1>& g) const {
+  g.clear();
+  static_assert(K <= K1 && N <= N1 && MAX_EDGES <= MAX_EDGES1);
+  for (int i = 0; i < edge_count; i++) {
+    g.edges[i] = edges[i];
+  }
+  g.edge_count = edge_count;
+}
+
+// Returns true if this graph is isomorphic to the other.
+template <int K, int N, int MAX_EDGES>
+template <int K1, int N1, int MAX_EDGES1>
+bool Graph<K, N, MAX_EDGES>::is_isomorphic(const Graph<K1, N1, MAX_EDGES1>& other) const {
+  if (edge_count != other.edge_count || hash != other.hash) return false;
+
+  // Canonicalize if necessary.
+  const Graph *pa, *pb;
+  if (is_canonical) {
+    pa = this;
+  } else {
+    Graph<K, N, MAX_EDGES> c;
+    canonicalize(c);
+    pa = &c;
+  }
+  if (other.is_canonical) {
+    pb = &other;
+  } else {
+    Graph<K1, N1, MAX_EDGES1> other_c;
+    canonicalize(other_c);
+    pb = &other_c;
+  }
+
+  // Verify vertex signatures are same.
+  if (pa->vertex_count != pb->vertex_count) return false;
+  for (int v = 0; v < pa->vertex_count; v++) {
+    if (pa->vertices[v].get_hash() != pb->vertices[v].get_hash()) return false;
+  }
+
+  // Opportunistic check: if after canonicalization, the two graphs are identical,
+  // then they are isomorphic.
+  if (pa->is_identical(*pb)) return true;
+
+  // Now all the easy checks are done, have to permute and check.
+  // The set of vertices with the same signature can permute among themselves.
+  // If the two graphs are identical, then we've found isomorphism. Otherwise after
+  // all permutations are tried, we declare the two graphs as non-isomorphic.
+  // TODO
+  cout << "**** WARNING: UNIMPLEMENTED final isomorphism check:\n";
+  pa->print();
+  pb->print();
+  return false;
+}
+
+// Returns true if the two graphs are identical (exactly same edge sets).
+template <int K, int N, int MAX_EDGES>
+template <int K1, int N1, int MAX_EDGES1>
+bool Graph<K, N, MAX_EDGES>::is_identical(const Graph<K1, N1, MAX_EDGES1>& other) const {
+  if (edge_count != other.edge_count) return false;
+  for (int i = 0; i < edge_count; i++) {
+    if (edges[i].vertex_set != other.edges[i].vertex_set ||
+        edges[i].head_vertex != other.edges[i].head_vertex)
+      return false;
+  }
+  return true;
+}
+
+// Print the graph to the console for debugging purpose.
+template <int K, int N, int MAX_EDGES>
+void Graph<K, N, MAX_EDGES>::print() const {
+  cout << "Graph[" << hex << hash << ", canonical=" << is_canonical
+       << ", vcnt=" << (int)vertex_count << ", \n";
+
+  bool is_first = true;
+  cout << "  undir {";
+  for (int i = 0; i < edge_count; i++) {
+    if (edges[i].head_vertex == UNDIRECTED) {
+      if (!is_first) {
+        cout << ", ";
+      }
+      print_vertices(edges[i].vertex_set, N);
+      is_first = false;
+    }
+  }
+
+  cout << "}\n  dir   {";
+  is_first = true;
+  for (int i = 0; i < edge_count; i++) {
+    if (edges[i].head_vertex != UNDIRECTED) {
+      if (!is_first) {
+        cout << ", ";
+      }
+      print_vertices(edges[i].vertex_set, N);
+      cout << ">" << (int)edges[i].head_vertex;
+      is_first = false;
+    }
+  }
+  cout << "},\n";
+  for (int v = 0; v < N; v++) {
+    cout << "  V[" << v << "]: du=" << (int)vertices[v].degree_undirected
+         << ", dh=" << (int)vertices[v].degree_head << ", dt=" << (int)vertices[v].degree_tail
+         << ", neighbor=" << vertices[v].neighbor_hash << ", hash=" << hex << vertices[v].get_hash()
+         << "\n";
+  }
+  cout << "]\n";
+}
+
+template <int K, int N, int MAX_EDGES>
+void Graph<K, N, MAX_EDGES>::print_concise() const {
+  cout << "  {";
+  bool is_first = true;
+  for (int i = 0; i < edge_count; i++) {
+    if (!is_first) {
+      cout << ", ";
+    }
+    is_first = false;
+    print_vertices(edges[i].vertex_set, N);
+    if (edges[i].head_vertex != UNDIRECTED) {
+      cout << ">" << (int)edges[i].head_vertex;
+    }
+  }
+  cout << "}\n";
+}
