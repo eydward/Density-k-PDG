@@ -100,14 +100,13 @@ TEST(GraphTest, Permute) {
     g.permute(p, h);
     EXPECT_EQ(g.hash, h.hash);
     EXPECT_TRUE(h.is_isomorphic(g));
-
   } while (next_permutation(p, p + 5));
 }
 
 TEST(GraphTest, Canonicalize) {
   Graph<3, 5, 5> g = get_T3();
-  Graph<3, 5, 5> h;
-  g.canonicalize(h);
+  Graph<3, 5, 5> h = get_T3();
+  h.canonicalize();
 
   EXPECT_FALSE(g.is_canonical);
   EXPECT_TRUE(h.is_canonical);
@@ -129,8 +128,8 @@ TEST(GraphTest, Canonicalize2) {
   EXPECT_EQ(g.vertices[1].get_degrees(), 0);
   EXPECT_EQ(g.vertices[2].get_degrees(), 0);
 
-  Graph<3, 8, 5> h;
-  g.canonicalize(h);
+  Graph<3, 8, 5> h = g;
+  h.canonicalize();
   EXPECT_EQ(g.hash, h.hash);
   EXPECT_TRUE(h.is_isomorphic(g));
   EXPECT_TRUE(h.is_canonical);
@@ -144,7 +143,8 @@ TEST(GraphTest, Canonicalize3) {
   Graph<2, 7, 21> g, h;
   g.add_edge(0b0101, UNDIRECTED);
   g.init();
-  g.canonicalize(h);
+  g.copy(h);
+  h.canonicalize();
   EXPECT_TRUE(h.is_canonical);
   EXPECT_EQ(h.vertex_count, 2);
 }
@@ -176,6 +176,8 @@ TEST(GraphTest, NonIsomorphic) {
   EXPECT_NE(h.hash, f.hash);
   EXPECT_FALSE(f.is_isomorphic(h));
 }
+
+TEST(GraphTest, Isomorphic) { Graph<2, 7, 10> g, h; }
 
 TEST(GrowerTest, G72) {
   Grower<2, 7, 21> s;

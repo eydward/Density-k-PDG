@@ -67,12 +67,8 @@ struct Graph {
   // The hash code is invariant under isomorphisms.
   uint64 hash;
 
-  // The signatures of each vertex
-  VertexSignature vertices[N];
-
-  // Number of edges in this graph.
-  uint8 edge_count;
-
+  // True if the graph is initialized (hash, vertices have content).
+  bool is_init;
   // True if the graph is canonicalized (vertex signatures are in descreasing order).
   bool is_canonical;
 
@@ -81,10 +77,15 @@ struct Graph {
   // vertices array can be ignored.
   uint8 vertex_count;
 
+  // Number of edges in this graph.
+  uint8 edge_count;
   // The edge set in this graph.
   Edge edges[MAX_EDGES];
 
-  Graph() : hash(0), vertices{}, edge_count(0), is_canonical(false), vertex_count(0) {}
+  // The signatures of each vertex
+  VertexSignature vertices[N];
+
+  Graph();
 
   // Returns true if the edge specified by the bitmask of the vertices in the edge is allowed
   // to be added to the graph (this vertex set does not yet exist in the edges).
@@ -108,8 +109,11 @@ struct Graph {
   // The second parameter is the resulting graph.
   void permute(int p[N], Graph& g) const;
 
-  // Returns the canonicalized graph in g, where the vertices are ordered by their signatures.
-  void canonicalize(Graph& g) const;
+  // Canonicalized this graph, so that the vertices are ordered by their signatures.
+  void canonicalize();
+
+  // Makes a copy of this graph to g.
+  void copy(Graph& g) const;
 
   // Makes a copy of this graph to g, without calling init. The caller can add/remove edges,
   // and must call init() before using g.

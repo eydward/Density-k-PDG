@@ -1,3 +1,5 @@
+#pragma once
+
 #include "graph.h"
 
 // Grow set of non-isomorphic graphs from empty graph, by adding one vertex at a time.
@@ -36,7 +38,7 @@ class Grower {
       current.insert(g);
       unordered_set<G, GraphHasher, GraphComparer> next;
 
-      G copy, canonical;
+      G copy;
       for (int i = 0; i < edge_candidates.size(); i++) {
         for (const G& start : current) {
           for (const uint8 edge : edge_candidates) {
@@ -46,11 +48,11 @@ class Grower {
                 start.copy_without_init(copy);
                 copy.add_edge(edge, head < 0 ? UNDIRECTED : head);
                 copy.init();
-                copy.canonicalize(canonical);
+                copy.canonicalize();
 
-                if (!canonicals[n].contains(canonical) && !current.contains(canonical) &&
-                    !next.contains(canonical)) {
-                  next.insert(canonical);
+                if (!canonicals[n].contains(copy) && !current.contains(copy) &&
+                    !next.contains(copy)) {
+                  next.insert(copy);
                 }
               }
             }

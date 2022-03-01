@@ -1,3 +1,5 @@
+#pragma once
+
 // Helper function for debug print().
 void print_vertices(uint8 vertices, int N) {
   for (int v = 0; v < N; v++) {
@@ -9,6 +11,12 @@ void print_vertices(uint8 vertices, int N) {
 }
 
 template <int K, int N, int MAX_EDGES>
+Graph<K, N, MAX_EDGES>::Graph()
+    : hash(0), is_init(false), is_canonical(false), vertex_count(0), edge_count(0), vertices{} {}
+
+// Returns true if the edge specified by the bitmask of the vertices in the edge is allowed
+// to be added to the graph (this vertex set does not yet exist in the edges).
+template <int K, int N, int MAX_EDGES>
 bool Graph<K, N, MAX_EDGES>::edge_allowed(uint8 vertices) const {
   for (int i = 0; i < edge_count; i++) {
     if (vertices == edges[i].vertex_set) return false;
@@ -16,6 +24,8 @@ bool Graph<K, N, MAX_EDGES>::edge_allowed(uint8 vertices) const {
   return true;
 }
 
+// Add an edge to the graph. It's caller's responsibility to make sure this is allowed.
+// And the input is consistent (head is inside the vertex set).
 template <int K, int N, int MAX_EDGES>
 void Graph<K, N, MAX_EDGES>::add_edge(uint8 vset, uint8 head) {
 #if !NDEBUG
@@ -29,6 +39,17 @@ void Graph<K, N, MAX_EDGES>::add_edge(uint8 vset, uint8 head) {
 // Initializes everything in this graph from the edge set.
 template <int K, int N, int MAX_EDGES>
 void Graph<K, N, MAX_EDGES>::init() {
+  if (is_init) {
+    hash = 0;
+    is_canonical = false;
+    vertex_count = 0;
+    for (int v = 0; v < N; v++) {
+      *reinterpret_cast<uint64*>(&vertices[v]) = 0;
+    }
+  } else {
+    is_init = true;
+  }
+
   // Sort edges
   sort(edges, edges + edge_count,
        [](const Edge& a, const Edge& b) { return a.vertex_set < b.vertex_set; });
@@ -129,9 +150,8 @@ void Graph<K, N, MAX_EDGES>::hash_neighbors(uint8 neighbors, uint32& hash) {
 template <int K, int N, int MAX_EDGES>
 void Graph<K, N, MAX_EDGES>::clear() {
   hash = 0;
-  edge_count = 0;
-  is_canonical = false;
-  vertex_count = 0;
+  is_init = is_canonical = false;
+  edge_count = vertex_count = 0;
   for (int v = 0; v < N; v++) {
     *reinterpret_cast<uint64*>(&vertices[v]) = 0;
   }
@@ -143,7 +163,6 @@ void Graph<K, N, MAX_EDGES>::clear() {
 // The second parameter is the resulting graph.
 template <int K, int N, int MAX_EDGES>
 void Graph<K, N, MAX_EDGES>::permute(int p[N], Graph& g) const {
-  g.clear();
   // Copy the edges with permutation.
   for (int i = 0; i < edge_count; i++) {
     if (edges[i].head_vertex == UNDIRECTED) {
@@ -164,7 +183,7 @@ void Graph<K, N, MAX_EDGES>::permute(int p[N], Graph& g) const {
 
 // Returns the canonicalized graph in g, where the vertices are ordered by their signatures.
 template <int K, int N, int MAX_EDGES>
-void Graph<K, N, MAX_EDGES>::canonicalize(Graph& g) const {
+void Graph<K, N, MAX_EDGES>::canonicalize() {
   // First get sorted vertex indices by the vertex signatures.
   // Note we sort by descreasing order, to push vertices to lower indices.
   int s[N];
@@ -175,14 +194,44 @@ void Graph<K, N, MAX_EDGES>::canonicalize(Graph& g) const {
   for (int v = 0; v < N; v++) {
     p[s[v]] = v;
   }
-  permute(p, g);
-  g.is_canonical = true;
+
+  for (int i = 0; i < edge_count; i++) {
+    uint8 vset = edges[i].vertex_set;
+    if (edges[i].head_vertex != UNDIRECTED) {
+      edges[i].head_vertex = p[edges[i].head_vertex];
+    }
+    edges[i].vertex_set = 0;
+    for (int v = 0; v < N; v++) {
+      if ((vset & (1 << v)) != 0) {
+        edges[i].vertex_set |= (1 << p[v]);
+      }
+    }
+  }
+
+  init();
+  is_canonical = true;
   for (int v = 0; v < N; v++) {
-    if (g.vertices[v].get_degrees() != 0) {
-      g.vertex_count++;
+    if (vertices[v].get_degrees() != 0) {
+      vertex_count++;
     } else {
       break;
     }
+  }
+}
+
+// Makes a copy of this graph to g.
+template <int K, int N, int MAX_EDGES>
+void Graph<K, N, MAX_EDGES>::copy(Graph& g) const {
+  g.hash = hash;
+  for (int v = 0; v < N; v++) {
+    *reinterpret_cast<uint64*>(&g.vertices[v]) = *reinterpret_cast<const uint64*>(&vertices[v]);
+  }
+  g.is_init = is_init;
+  g.is_canonical = is_canonical;
+  g.vertex_count = vertex_count;
+  g.edge_count = edge_count;
+  for (int i = 0; i < edge_count; i++) {
+    g.edges[i] = edges[i];
   }
 }
 
@@ -191,7 +240,6 @@ void Graph<K, N, MAX_EDGES>::canonicalize(Graph& g) const {
 template <int K, int N, int MAX_EDGES>
 template <int K1, int N1, int MAX_EDGES1>
 void Graph<K, N, MAX_EDGES>::copy_without_init(Graph<K1, N1, MAX_EDGES1>& g) const {
-  g.clear();
   static_assert(K <= K1 && N <= N1 && MAX_EDGES <= MAX_EDGES1);
   for (int i = 0; i < edge_count; i++) {
     g.edges[i] = edges[i];
@@ -206,20 +254,21 @@ bool Graph<K, N, MAX_EDGES>::is_isomorphic(const Graph<K1, N1, MAX_EDGES1>& othe
   if (edge_count != other.edge_count || hash != other.hash) return false;
 
   // Canonicalize if necessary.
+  Graph this_copy, other_copy;
   const Graph *pa, *pb;
   if (is_canonical) {
     pa = this;
   } else {
-    Graph<K, N, MAX_EDGES> c;
-    canonicalize(c);
-    pa = &c;
+    copy(this_copy);
+    this_copy.canonicalize();
+    pa = &this_copy;
   }
   if (other.is_canonical) {
     pb = &other;
   } else {
-    Graph<K1, N1, MAX_EDGES1> other_c;
-    canonicalize(other_c);
-    pb = &other_c;
+    other.copy(other_copy);
+    other_copy.canonicalize();
+    pb = &other_copy;
   }
 
   // Verify vertex signatures are same.
@@ -259,7 +308,7 @@ bool Graph<K, N, MAX_EDGES>::is_identical(const Graph<K1, N1, MAX_EDGES1>& other
 // Print the graph to the console for debugging purpose.
 template <int K, int N, int MAX_EDGES>
 void Graph<K, N, MAX_EDGES>::print() const {
-  cout << "Graph[" << hex << hash << ", canonical=" << is_canonical
+  cout << "Graph[" << hex << hash << ", init=" << is_init << ", canonical=" << is_canonical
        << ", vcnt=" << (int)vertex_count << ", \n";
 
   bool is_first = true;

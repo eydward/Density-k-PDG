@@ -12,6 +12,8 @@ int main() {
   // g.add_edge(0b11100, 2);          // 234>2
   // g.init();
   // g.print();
+  // g.canonicalize();
+  // g.print();
 
   // Graph<3, 8, 5> h, f, e;
   // g.copy_without_init(h);
