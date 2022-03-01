@@ -4,12 +4,14 @@ cc_library(
   name = "graph",
   hdrs = ["graph.h", "grower.h"],
   srcs = [],
+  copts = ["-std=c++20"],
 )
 
 cc_binary(
   name = "kPDG",
   srcs = ["kPDG.cpp"],
   deps = [":graph"],
+  copts = ["-std=c++20"],
 )
 
 cc_test(
@@ -20,4 +22,5 @@ cc_test(
     "@gtest//:gtest",
     "@gtest//:gtest_main",
   ],
+  copts = ["-std=c++20"],
 )

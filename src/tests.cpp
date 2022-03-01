@@ -1,4 +1,5 @@
 #include "graph.h"
+#include "grower.h"
 #include "gtest/gtest.h"
 
 TEST(GraphTest, Init) {
@@ -139,6 +140,15 @@ TEST(GraphTest, Canonicalize2) {
   EXPECT_EQ(h.hash, f.hash);
 }
 
+TEST(GraphTest, Canonicalize3) {
+  Graph<2, 7, 21> g, h;
+  g.add_edge(0b0101, UNDIRECTED);
+  g.init();
+  g.canonicalize(h);
+  EXPECT_TRUE(h.is_canonical);
+  EXPECT_EQ(h.vertex_count, 2);
+}
+
 TEST(GraphTest, Copy) {
   Graph<3, 5, 5> g = get_T3();
   Graph<3, 5, 5> h;
@@ -165,4 +175,13 @@ TEST(GraphTest, NonIsomorphic) {
   EXPECT_FALSE(f.is_isomorphic(g));
   EXPECT_NE(h.hash, f.hash);
   EXPECT_FALSE(f.is_isomorphic(h));
+}
+
+TEST(GrowerTest, G72) {
+  Grower<2, 7, 21> s;
+  s.grow(3);
+  EXPECT_EQ(s.canonicals[0].size(), 0);
+  EXPECT_EQ(s.canonicals[1].size(), 1);
+  EXPECT_EQ(s.canonicals[2].size(), 2);
+  EXPECT_EQ(s.canonicals[3].size(), 13);
 }

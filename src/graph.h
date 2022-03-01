@@ -266,6 +266,7 @@ struct Graph {
   // and must call init() before using g.
   template <int K1, int N1, int MAX_EDGES1>
   void copy_without_init(Graph<K1, N1, MAX_EDGES1>& g) const {
+    g.clear();
     static_assert(K <= K1 && N <= N1 && MAX_EDGES <= MAX_EDGES1);
     for (int i = 0; i < edge_count; i++) {
       g.edges[i] = edges[i];
@@ -330,7 +331,8 @@ struct Graph {
 
   // Print the graph to the console for debugging purpose.
   void print() const {
-    cout << "Graph[" << hex << hash << ", \n";
+    cout << "Graph[" << hex << hash << ", canonical=" << is_canonical
+         << ", vcnt=" << (int)vertex_count << ", \n";
 
     bool is_first = true;
     cout << "  undir {";
@@ -361,10 +363,25 @@ struct Graph {
       cout << "  V[" << v << "]: du=" << (int)vertices[v].degree_undirected
            << ", dh=" << (int)vertices[v].degree_head << ", dt=" << (int)vertices[v].degree_tail
            << ", neighbor=" << vertices[v].neighbor_hash << ", hash=" << hex
-           << vertices[v].get_hash() << ", canonical=" << is_canonical
-           << ", vcnt=" << (int)vertex_count << "\n";
+           << vertices[v].get_hash() << "\n";
     }
     cout << "]\n";
+  }
+
+  void print_concise() const {
+    cout << "  {";
+    bool is_first = true;
+    for (int i = 0; i < edge_count; i++) {
+      if (!is_first) {
+        cout << ", ";
+      }
+      is_first = false;
+      print_vertices(edges[i].vertex_set);
+      if (edges[i].head_vertex != UNDIRECTED) {
+        cout << ">" << (int)edges[i].head_vertex;
+      }
+    }
+    cout << "}\n";
   }
 
   // Helper function for debug print().

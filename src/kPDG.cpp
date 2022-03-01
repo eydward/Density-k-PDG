@@ -22,7 +22,8 @@ int main() {
   // e.print();
 
   Grower<2, 7, 21> s;
-  s.grow(3);
+  s.grow(4);
+  s.print();
 
   return 0;
 }
