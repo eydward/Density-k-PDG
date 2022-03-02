@@ -1,6 +1,9 @@
+#include "gmock/gmock.h"
 #include "graph.h"
 #include "grower.h"
 #include "gtest/gtest.h"
+
+using namespace testing;
 
 TEST(GraphTest, Init) {
   Graph<3, 7, 10> g;
@@ -103,6 +106,31 @@ TEST(GraphTest, Permute) {
   } while (next_permutation(p, p + 5));
 }
 
+TEST(GraphTest, PermuteCanonical) {
+  Graph<3, 5, 5> g = get_T3();
+  g.canonicalize();
+  Graph<3, 5, 5> h;
+  int p[5]{0, 1, 2, 3, 4};
+  g.permute_canonical(p, h);
+  EXPECT_TRUE(g.is_identical(h));
+}
+
+TEST(GraphTest, PermuteCanonical2) {
+  Graph<2, 4, 4> g, h, f;
+  g.add_edge(0b1001, UNDIRECTED);  // 03
+  g.add_edge(0b0110, UNDIRECTED);  // 12
+  g.add_edge(0b0101, 2);           // 02>2
+  g.add_edge(0b1010, 3);           // 13>3
+  g.init();
+  g.canonicalize();
+
+  int p[4]{0, 1, 3, 2};
+  g.permute_canonical(p, h);
+  EXPECT_TRUE(g.is_isomorphic(h));
+  h.permute_canonical(p, f);
+  EXPECT_TRUE(g.is_identical(f));
+}
+
 TEST(GraphTest, Canonicalize) {
   Graph<3, 5, 5> g = get_T3();
   Graph<3, 5, 5> h = get_T3();
@@ -186,4 +214,52 @@ TEST(GrowerTest, G72) {
   EXPECT_EQ(s.canonicals[1].size(), 1);
   EXPECT_EQ(s.canonicals[2].size(), 2);
   EXPECT_EQ(s.canonicals[3].size(), 13);
+}
+
+TEST(PermutatorTest, Permutate) {
+  vector<pair<int, int>> sets{make_pair(0, 2)};
+  Permutator<3> perm(move(sets));
+  EXPECT_TRUE(perm.next());
+  ASSERT_THAT(perm.p, ElementsAre(1, 0, 2));
+  EXPECT_FALSE(perm.next());
+}
+
+TEST(PermutatorTest, Permutate2) {
+  vector<pair<int, int>> sets{make_pair(0, 2), make_pair(3, 5)};
+  Permutator<6> perm(move(sets));
+  EXPECT_TRUE(perm.next());
+  ASSERT_THAT(perm.p, ElementsAre(1, 0, 2, 3, 4, 5));
+  EXPECT_TRUE(perm.next());
+  ASSERT_THAT(perm.p, ElementsAre(0, 1, 2, 4, 3, 5));
+  EXPECT_TRUE(perm.next());
+  ASSERT_THAT(perm.p, ElementsAre(1, 0, 2, 4, 3, 5));
+  EXPECT_FALSE(perm.next());
+}
+
+TEST(PermutatorTest, Permutate3) {
+  vector<pair<int, int>> sets{make_pair(0, 3), make_pair(3, 5)};
+  Permutator<5> perm(move(sets));
+  EXPECT_TRUE(perm.next());
+  ASSERT_THAT(perm.p, ElementsAre(0, 1, 2, 4, 3));
+  EXPECT_TRUE(perm.next());
+  ASSERT_THAT(perm.p, ElementsAre(0, 2, 1, 3, 4));
+  EXPECT_TRUE(perm.next());
+  ASSERT_THAT(perm.p, ElementsAre(0, 2, 1, 4, 3));
+  EXPECT_TRUE(perm.next());
+  ASSERT_THAT(perm.p, ElementsAre(1, 0, 2, 3, 4));
+  EXPECT_TRUE(perm.next());
+  ASSERT_THAT(perm.p, ElementsAre(1, 0, 2, 4, 3));
+  EXPECT_TRUE(perm.next());
+  ASSERT_THAT(perm.p, ElementsAre(1, 2, 0, 3, 4));
+  EXPECT_TRUE(perm.next());
+  ASSERT_THAT(perm.p, ElementsAre(1, 2, 0, 4, 3));
+  EXPECT_TRUE(perm.next());
+  ASSERT_THAT(perm.p, ElementsAre(2, 0, 1, 3, 4));
+  EXPECT_TRUE(perm.next());
+  ASSERT_THAT(perm.p, ElementsAre(2, 0, 1, 4, 3));
+  EXPECT_TRUE(perm.next());
+  ASSERT_THAT(perm.p, ElementsAre(2, 1, 0, 3, 4));
+  EXPECT_TRUE(perm.next());
+  ASSERT_THAT(perm.p, ElementsAre(2, 1, 0, 4, 3));
+  EXPECT_FALSE(perm.next());
 }

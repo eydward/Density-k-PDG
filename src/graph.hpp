@@ -1,4 +1,5 @@
 #pragma once
+#include "permutator.h"
 
 // Helper function for debug print().
 void print_vertices(uint8 vertices, int N) {
@@ -180,6 +181,35 @@ void Graph<K, N, MAX_EDGES>::permute(int p[N], Graph& g) const {
   g.edge_count = edge_count;
   g.init();
 }
+template <int K, int N, int MAX_EDGES>
+void Graph<K, N, MAX_EDGES>::permute_canonical(int p[N], Graph& g) const {
+  assert(is_canonical);
+  // Copy the edges with permutation.
+  for (int i = 0; i < edge_count; i++) {
+    if (edges[i].head_vertex == UNDIRECTED) {
+      g.edges[i].head_vertex = UNDIRECTED;
+    } else {
+      g.edges[i].head_vertex = p[edges[i].head_vertex];
+    }
+    g.edges[i].vertex_set = 0;
+    for (int v = 0; v < N; v++) {
+      if ((edges[i].vertex_set & (1 << v)) != 0) {
+        g.edges[i].vertex_set |= (1 << p[v]);
+      }
+    }
+  }
+  sort(g.edges, g.edges + edge_count,
+       [](const Edge& a, const Edge& b) { return a.vertex_set < b.vertex_set; });
+
+  g.hash = hash;
+  g.is_init = is_init;
+  g.is_canonical = is_canonical;
+  g.vertex_count = vertex_count;
+  g.edge_count = edge_count;
+  for (int v = 0; v < N; v++) {
+    g.vertices[v] = vertices[v];
+  }
+}
 
 // Returns the canonicalized graph in g, where the vertices are ordered by their signatures.
 template <int K, int N, int MAX_EDGES>
@@ -286,25 +316,31 @@ bool Graph<K, N, MAX_EDGES>::is_isomorphic(const Graph<K1, N1, MAX_EDGES1>& othe
   // If the two graphs are identical, then we've found isomorphism. Otherwise after
   // all permutations are tried, we declare the two graphs as non-isomorphic.
 
-  vector<vector<uint8>> perm_sets;
+  vector<pair<int, int>> perm_sets;
   for (int v = 0; v < N - 1 && vertices[v].get_degrees() > 0; v++) {
     if (vertices[v + 1].get_hash() == vertices[v].get_hash()) {
-      perm_sets.push_back(vector<uint8>());
       int t = v;
-      while (vertices[t].get_hash() == vertices[v].get_hash()) {
-        perm_sets.back().push_back(t);
+      while (t < N && vertices[t].get_hash() == vertices[v].get_hash()) {
         t++;
       }
+      perm_sets.push_back(make_pair(v, t));
       v = t;
     }
   }
   if (perm_sets.size() > 0) {
+    Permutator<N> perm(move(perm_sets));
+    Graph h;
+    while (perm.next()) {
+      pa->permute_canonical(perm.p, h);
+      if (h.is_identical(*pb)) return true;
+    }
   }
 
-  // TODO
-  cout << "**** WARNING: UNIMPLEMENTED final isomorphism check:\n";
+#if !NDEBUG
+  cout << "**** WARNING: final isomorphism check:\n";
   pa->print();
   pb->print();
+#endif
   return false;
 }
 

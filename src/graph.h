@@ -109,6 +109,10 @@ struct Graph {
   // The second parameter is the resulting graph.
   void permute(int p[N], Graph& g) const;
 
+  // Similar to permute(), except the current graph must be canonicalized, and the permutation
+  // is guaranteed to perserve that.
+  void permute_canonical(int p[N], Graph& g) const;
+
   // Canonicalized this graph, so that the vertices are ordered by their signatures.
   void canonicalize();
 

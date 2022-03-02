@@ -2,7 +2,7 @@ load("@rules_cc//cc:defs.bzl", "cc_binary")
 
 cc_library(
   name = "graph",
-  hdrs = ["graph.h", "graph.hpp", "grower.h"],
+  hdrs = ["graph.h", "graph.hpp", "grower.h", "permutator.h"],
   srcs = [],
   copts = ["-std=c++20"],
 )

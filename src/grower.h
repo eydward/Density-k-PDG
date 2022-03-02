@@ -75,7 +75,7 @@ class Grower {
 
  public:
   // One canonical graphs with n vertices in each isomorphism class is in canonicals[n].
-  unordered_set<G, GraphHasher, GraphComparer> canonicals[N];
+  unordered_set<G, GraphHasher, GraphComparer> canonicals[N + 1];
 
   // Find all canonical isomorphism class representations with up to max_n vertices.
   void grow(int max_n) {
@@ -92,11 +92,11 @@ class Grower {
   // Debug print the content of the canonicals after the growth.
   void print() {
     cout << dec;
-    for (int i = 0; i < N; i++) {
+    for (int i = 0; i < N + 1; i++) {
       cout << "order=" << i << " : # canonicals=" << canonicals[i].size() << "\n";
-      for (const G& g : canonicals[i]) {
-        g.print_concise();
-      }
+      // for (const G& g : canonicals[i]) {
+      //   g.print_concise();
+      // }
     }
   }
 };
