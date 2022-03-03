@@ -46,10 +46,10 @@ struct VertexSignature {
 };
 
 // Combines value into the hash and returns the combined hash.
-uint32 hash_combine32(uint32 hash, uint32 value) {
+inline uint32 hash_combine32(uint32 hash, uint32 value) {
   return hash ^= value + 0x9E3779B9ul + (hash << 6) + (hash >> 2);
 }
-uint64 hash_combine64(uint64 hash, uint64 value) {
+inline uint64 hash_combine64(uint64 hash, uint64 value) {
   return hash ^= value + 0x9E3779B97F4A7C15ull + (hash << 12) + (hash >> 4);
 }
 
@@ -137,4 +137,23 @@ struct Graph {
   void print_concise() const;
 };
 
-#include "graph.hpp"
+// Holds all statistical counters to keep track of number of operations during the search.
+struct Counters {
+  static uint64 graph_inits;
+  static uint64 graph_copies;
+  static uint64 graph_canonicalize_ops;
+  static uint64 graph_isomorphic_tests;
+  // Number of isomorphic tests that have to use vertex permutations.
+  static uint64 graph_isomorphic_expensive;
+  // Number of isomorphic tests that result in no, but had identical hash
+  static uint64 graph_isomorphic_hash_no;
+  static uint64 graph_identical_tests;
+  static uint64 graph_permute_ops;
+  static uint64 graph_permute_canonical_ops;
+  static std::chrono::time_point<std::chrono::steady_clock> start_time;
+
+  // Start the stopwatch, which will be used by print_counters to calculate elapsed time.
+  static void start_stopwatch();
+  // Prints the counter values to console.
+  static void print_counters();
+};

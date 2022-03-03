@@ -1,5 +1,6 @@
 #include "gmock/gmock.h"
 #include "graph.h"
+#include "graph.hpp"
 #include "grower.h"
 #include "gtest/gtest.h"
 
