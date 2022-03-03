@@ -121,16 +121,16 @@ struct Graph {
 
   // Makes a copy of this graph to g, without calling init. The caller can add/remove edges,
   // and must call init() before using g.
-  template <int K1, int N1, int MAX_EDGES1>
-  void copy_without_init(Graph<K1, N1, MAX_EDGES1>& g) const;
+  template <int N1, int MAX_EDGES1>
+  void copy_without_init(Graph<K, N1, MAX_EDGES1>& g) const;
 
   // Returns true if this graph is isomorphic to the other.
-  template <int K1, int N1, int MAX_EDGES1>
-  bool is_isomorphic(const Graph<K1, N1, MAX_EDGES1>& other) const;
+  template <int N1, int MAX_EDGES1>
+  bool is_isomorphic(const Graph<K, N1, MAX_EDGES1>& other) const;
 
   // Returns true if the two graphs are identical (exactly same edge sets).
-  template <int K1, int N1, int MAX_EDGES1>
-  bool is_identical(const Graph<K1, N1, MAX_EDGES1>& other) const;
+  template <int N1, int MAX_EDGES1>
+  bool is_identical(const Graph<K, N1, MAX_EDGES1>& other) const;
 
   // Print the graph to the console for debugging purpose.
   void print() const;

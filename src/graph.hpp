@@ -279,11 +279,11 @@ void Graph<K, N, MAX_EDGES>::copy(Graph& g) const {
 // Makes a copy of this graph to g, without calling init. The caller can add/remove edges,
 // and must call init() before using g.
 template <int K, int N, int MAX_EDGES>
-template <int K1, int N1, int MAX_EDGES1>
-void Graph<K, N, MAX_EDGES>::copy_without_init(Graph<K1, N1, MAX_EDGES1>& g) const {
+template <int N1, int MAX_EDGES1>
+void Graph<K, N, MAX_EDGES>::copy_without_init(Graph<K, N1, MAX_EDGES1>& g) const {
   ++Counters::graph_copies;
 
-  static_assert(K <= K1 && N <= N1 && MAX_EDGES <= MAX_EDGES1);
+  static_assert(N <= N1 && MAX_EDGES <= MAX_EDGES1);
   for (int i = 0; i < edge_count; i++) {
     g.edges[i] = edges[i];
   }
@@ -292,8 +292,8 @@ void Graph<K, N, MAX_EDGES>::copy_without_init(Graph<K1, N1, MAX_EDGES1>& g) con
 
 // Returns true if this graph is isomorphic to the other.
 template <int K, int N, int MAX_EDGES>
-template <int K1, int N1, int MAX_EDGES1>
-bool Graph<K, N, MAX_EDGES>::is_isomorphic(const Graph<K1, N1, MAX_EDGES1>& other) const {
+template <int N1, int MAX_EDGES1>
+bool Graph<K, N, MAX_EDGES>::is_isomorphic(const Graph<K, N1, MAX_EDGES1>& other) const {
   ++Counters::graph_isomorphic_tests;
 
   if (edge_count != other.edge_count || hash != other.hash) return false;
@@ -365,8 +365,8 @@ bool Graph<K, N, MAX_EDGES>::is_isomorphic(const Graph<K1, N1, MAX_EDGES1>& othe
 
 // Returns true if the two graphs are identical (exactly same edge sets).
 template <int K, int N, int MAX_EDGES>
-template <int K1, int N1, int MAX_EDGES1>
-bool Graph<K, N, MAX_EDGES>::is_identical(const Graph<K1, N1, MAX_EDGES1>& other) const {
+template <int N1, int MAX_EDGES1>
+bool Graph<K, N, MAX_EDGES>::is_identical(const Graph<K, N1, MAX_EDGES1>& other) const {
   ++Counters::graph_identical_tests;
 
   if (edge_count != other.edge_count) return false;
