@@ -378,6 +378,69 @@ bool Graph<K, N, MAX_EDGES>::is_identical(const Graph<K, N1, MAX_EDGES1>& other)
   return true;
 }
 
+// Returns true if the graph contains the generalized triangle T_k as a subgraph, where
+// v is one of the vertices of the T_k subgraph.
+// T_k is defined as (K+1)-vertex, 3-edge K-graph, with two undirected edges and one directed
+// edge, where all edges share the same set of vertices except for {1,2,3}.
+// For example T_2={12, 13, 23>3}, T_3={124, 134, 234>3}, T_4={1245, 1345, 2345>3}, etc.
+//
+// Note that in k-PDG, subgraph definition is subtle: A is a subgraph of B iff A can be obtained
+// from B, by repeatedly (1) delete a vertex (2) delete an edge (3) forget the direction of
+// an edge.
+template <int K, int N, int MAX_EDGES>
+bool Graph<K, N, MAX_EDGES>::contains_Tk(int v) const {
+  // There are two possibilities that $v \in T_k \subseteq H$.
+  // (1) v is in the "triangle with stem cut off". Namely:
+  //     exists vertices $x,y$, and vertex set $S$ with size $K-2$, $S$ disjoint
+  //     from $v,x,y$, such that there are 3 edges: $S\cup vx, S\cup vy, S\cup xy$,
+  //     and at least one of the 3 edges is directed, with the head being one of $v,x,y$.
+  // (2) v is in the "common stem". Namely:
+  //     exists vertices $x,y,z$, and vertex set $S$ with size $K-3$ and $x\in S$, $S$ disjoint
+  //     from $x,y,z$, such that there are 3 edges: $S\cup xy, S\cup yz, S\cup zx$,
+  //     and at least one of the 3 edges is directed, with the head being one of $x,y,z$.
+
+  // Check for possibility (1). Example to understand the code below:
+  //   K=3, v=2, x=1, y=0.
+  //   e_i  = 00001110
+  //   e_j  = 00001101
+  //   m    = 00000011
+  //   mask = 00001111
+  //   e_k  = 00001011
+  for (int i = 0; i < edge_count - 1; i++) {
+    uint8 e_i = edges[i].vertex_set;
+    if ((e_i & (1 << v)) == 0) continue;
+
+    for (int j = i + 1; j < edge_count; j++) {
+      uint8 e_j = edges[j].vertex_set;
+      if ((e_j & (1 << v)) == 0) continue;
+
+      uint8 m = e_i ^ e_j;
+      if (__builtin_popcount(m) == 2) {
+        uint8 mask = m | edges[i].vertex_set;
+        for (int k = 0; k < edge_count; k++) {
+          if (k == i || k == j) continue;
+
+          uint8 e_k = edges[k].vertex_set;
+          if ((e_k & (1 << v)) != 0) continue;
+
+          if (__builtin_popcount(mask ^ e_k) == 1) {
+            // At this point we know the 3 edges have the vertex sets we want, check directions.
+            if (edges[i].head_vertex == v || edges[j].head_vertex == v) return true;
+            if ((m & (1 << edges[i].head_vertex)) != 0 || (m & (1 << edges[j].head_vertex)) != 0 ||
+                (m & (1 << edges[k].head_vertex)) != 0)
+              return true;
+          }
+        }
+      }
+    }
+  }
+
+  // Check for possibility (2).
+  // TODO
+
+  return false;
+}
+
 // Print the graph to the console for debugging purpose.
 template <int K, int N, int MAX_EDGES>
 void Graph<K, N, MAX_EDGES>::print() const {

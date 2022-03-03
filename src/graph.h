@@ -132,6 +132,17 @@ struct Graph {
   template <int N1, int MAX_EDGES1>
   bool is_identical(const Graph<K, N1, MAX_EDGES1>& other) const;
 
+  // Returns true if the graph contains the generalized triangle T_k as a subgraph, where
+  // v is one of the vertices of the T_k subgraph.
+  // T_k is defined as (K+1)-vertex, 3-edge K-graph, with two undirected edges and one directed
+  // edge, where all edges share the same set of vertices except for {1,2,3}.
+  // For example T_2={12, 13, 23>3}, T_3={124, 134, 234>3}, T_4={1245, 1345, 2345>3}, etc.
+  //
+  // Note that in k-PDG, subgraph definition is subtle: A is a subgraph of B iff A can be obtained
+  // from B, by repeatedly (1) delete a vertex (2) delete an edge (3) forget the direction of
+  // an edge.
+  bool contains_Tk(int v) const;
+
   // Print the graph to the console for debugging purpose.
   void print() const;
   void print_concise() const;
