@@ -19,8 +19,8 @@ void print_vertices(uint8 vertices, int N) {
   }
 }
 
-template <int K, int N, int MAX_EDGES>
-Graph<K, N, MAX_EDGES>::Graph()
+template <int K, int N>
+Graph<K, N>::Graph()
     : hash(0),
       is_init(false),
       is_canonical(false),
@@ -31,11 +31,11 @@ Graph<K, N, MAX_EDGES>::Graph()
 
 // Returns theta such that (undirected edge density) + theta (directed edge density) = 1.
 // Namely, returns theta = (binom_nk - (undirected edge count)) / (directed edge count).
-template <int K, int N, int MAX_EDGES>
-Fraction Graph<K, N, MAX_EDGES>::get_theta() const {
+template <int K, int N>
+Fraction Graph<K, N>::get_theta() const {
   uint8 directed = edge_count - undirected_edge_count;
   if (directed > 0) {
-    return Fraction(BINOM_NK - undirected_edge_count, directed);
+    return Fraction(MAX_EDGES - undirected_edge_count, directed);
   } else {
     return Fraction(1E8, 1);
   }
@@ -43,8 +43,8 @@ Fraction Graph<K, N, MAX_EDGES>::get_theta() const {
 
 // Returns true if the edge specified by the bitmask of the vertices in the edge is allowed
 // to be added to the graph (this vertex set does not yet exist in the edges).
-template <int K, int N, int MAX_EDGES>
-bool Graph<K, N, MAX_EDGES>::edge_allowed(uint8 vertices) const {
+template <int K, int N>
+bool Graph<K, N>::edge_allowed(uint8 vertices) const {
   for (int i = 0; i < edge_count; i++) {
     if (vertices == edges[i].vertex_set) return false;
   }
@@ -53,8 +53,8 @@ bool Graph<K, N, MAX_EDGES>::edge_allowed(uint8 vertices) const {
 
 // Add an edge to the graph. It's caller's responsibility to make sure this is allowed.
 // And the input is consistent (head is inside the vertex set).
-template <int K, int N, int MAX_EDGES>
-void Graph<K, N, MAX_EDGES>::add_edge(uint8 vset, uint8 head) {
+template <int K, int N>
+void Graph<K, N>::add_edge(uint8 vset, uint8 head) {
 #if !NDEBUG
   assert(head == UNDIRECTED || ((1 << head) & vset) != 0);
   assert(edge_allowed(vset));
@@ -67,8 +67,8 @@ void Graph<K, N, MAX_EDGES>::add_edge(uint8 vset, uint8 head) {
 }
 
 // Initializes everything in this graph from the edge set.
-template <int K, int N, int MAX_EDGES>
-void Graph<K, N, MAX_EDGES>::init() {
+template <int K, int N>
+void Graph<K, N>::init() {
   ++Counters::graph_inits;
 
   if (is_init) {
@@ -153,8 +153,8 @@ void Graph<K, N, MAX_EDGES>::init() {
   }
 }
 
-template <int K, int N, int MAX_EDGES>
-void Graph<K, N, MAX_EDGES>::hash_neighbors(uint8 neighbors, uint32& hash) {
+template <int K, int N>
+void Graph<K, N>::hash_neighbors(uint8 neighbors, uint32& hash) {
   // The working buffer to compute hash in deterministic order.
   uint32 signatures[N];
   if (neighbors == 0) {
@@ -179,8 +179,8 @@ void Graph<K, N, MAX_EDGES>::hash_neighbors(uint8 neighbors, uint32& hash) {
 }
 
 // Resets the current graph to no edges.
-template <int K, int N, int MAX_EDGES>
-void Graph<K, N, MAX_EDGES>::clear() {
+template <int K, int N>
+void Graph<K, N>::clear() {
   hash = 0;
   is_init = is_canonical = false;
   edge_count = undirected_edge_count = vertex_count = 0;
@@ -193,8 +193,8 @@ void Graph<K, N, MAX_EDGES>::clear() {
 // The first parameter specifies the permutation. For example p={1,2,0,3} means
 //  0->1, 1->2, 2->0, 3->3.
 // The second parameter is the resulting graph.
-template <int K, int N, int MAX_EDGES>
-void Graph<K, N, MAX_EDGES>::permute(int p[N], Graph& g) const {
+template <int K, int N>
+void Graph<K, N>::permute(int p[N], Graph& g) const {
   ++Counters::graph_permute_ops;
 
   // Copy the edges with permutation.
@@ -216,8 +216,8 @@ void Graph<K, N, MAX_EDGES>::permute(int p[N], Graph& g) const {
   g.init();
 }
 
-template <int K, int N, int MAX_EDGES>
-void Graph<K, N, MAX_EDGES>::permute_canonical(int p[N], Graph& g) const {
+template <int K, int N>
+void Graph<K, N>::permute_canonical(int p[N], Graph& g) const {
   ++Counters::graph_permute_canonical_ops;
 
   assert(is_canonical);
@@ -250,8 +250,8 @@ void Graph<K, N, MAX_EDGES>::permute_canonical(int p[N], Graph& g) const {
 }
 
 // Returns the canonicalized graph in g, where the vertices are ordered by their signatures.
-template <int K, int N, int MAX_EDGES>
-void Graph<K, N, MAX_EDGES>::canonicalize() {
+template <int K, int N>
+void Graph<K, N>::canonicalize() {
   ++Counters::graph_canonicalize_ops;
 
   // First get sorted vertex indices by the vertex signatures.
@@ -290,8 +290,8 @@ void Graph<K, N, MAX_EDGES>::canonicalize() {
 }
 
 // Makes a copy of this graph to g.
-template <int K, int N, int MAX_EDGES>
-void Graph<K, N, MAX_EDGES>::copy(Graph& g) const {
+template <int K, int N>
+void Graph<K, N>::copy(Graph& g) const {
   ++Counters::graph_copies;
 
   g.hash = hash;
@@ -310,12 +310,10 @@ void Graph<K, N, MAX_EDGES>::copy(Graph& g) const {
 
 // Makes a copy of this graph to g, without calling init. The caller can add/remove edges,
 // and must call init() before using g.
-template <int K, int N, int MAX_EDGES>
-template <int N1, int MAX_EDGES1>
-void Graph<K, N, MAX_EDGES>::copy_without_init(Graph<K, N1, MAX_EDGES1>& g) const {
+template <int K, int N>
+void Graph<K, N>::copy_without_init(Graph& g) const {
   ++Counters::graph_copies;
 
-  static_assert(N <= N1 && MAX_EDGES <= MAX_EDGES1);
   for (int i = 0; i < edge_count; i++) {
     g.edges[i] = edges[i];
   }
@@ -324,9 +322,8 @@ void Graph<K, N, MAX_EDGES>::copy_without_init(Graph<K, N1, MAX_EDGES1>& g) cons
 }
 
 // Returns true if this graph is isomorphic to the other.
-template <int K, int N, int MAX_EDGES>
-template <int N1, int MAX_EDGES1>
-bool Graph<K, N, MAX_EDGES>::is_isomorphic(const Graph<K, N1, MAX_EDGES1>& other) const {
+template <int K, int N>
+bool Graph<K, N>::is_isomorphic(const Graph& other) const {
   ++Counters::graph_isomorphic_tests;
 
   if (edge_count != other.edge_count || undirected_edge_count != other.undirected_edge_count ||
@@ -399,9 +396,8 @@ bool Graph<K, N, MAX_EDGES>::is_isomorphic(const Graph<K, N1, MAX_EDGES1>& other
 }
 
 // Returns true if the two graphs are identical (exactly same edge sets).
-template <int K, int N, int MAX_EDGES>
-template <int N1, int MAX_EDGES1>
-bool Graph<K, N, MAX_EDGES>::is_identical(const Graph<K, N1, MAX_EDGES1>& other) const {
+template <int K, int N>
+bool Graph<K, N>::is_identical(const Graph& other) const {
   ++Counters::graph_identical_tests;
 
   if (edge_count != other.edge_count) return false;
@@ -422,8 +418,8 @@ bool Graph<K, N, MAX_EDGES>::is_identical(const Graph<K, N1, MAX_EDGES1>& other)
 // Note that in k-PDG, subgraph definition is subtle: A is a subgraph of B iff A can be obtained
 // from B, by repeatedly (1) delete a vertex (2) delete an edge (3) forget the direction of
 // an edge.
-template <int K, int N, int MAX_EDGES>
-bool Graph<K, N, MAX_EDGES>::contains_Tk(int v) const {
+template <int K, int N>
+bool Graph<K, N>::contains_Tk(int v) const {
   ++Counters::graph_contains_Tk_tests;
 
   // There are two possibilities that $v \in T_k \subseteq H$.
@@ -476,8 +472,8 @@ bool Graph<K, N, MAX_EDGES>::contains_Tk(int v) const {
 }
 
 // Print the graph to the console for debugging purpose.
-template <int K, int N, int MAX_EDGES>
-void Graph<K, N, MAX_EDGES>::print() const {
+template <int K, int N>
+void Graph<K, N>::print() const {
   cout << "Graph[" << hex << hash << ", init=" << is_init << ", canonical=" << is_canonical
        << ", vcnt=" << (int)vertex_count << ", \n";
 
@@ -515,8 +511,8 @@ void Graph<K, N, MAX_EDGES>::print() const {
   cout << "]\n";
 }
 
-template <int K, int N, int MAX_EDGES>
-void Graph<K, N, MAX_EDGES>::print_concise() const {
+template <int K, int N>
+void Graph<K, N>::print_concise() const {
   cout << "  {";
   bool is_first = true;
   for (int i = 0; i < edge_count; i++) {

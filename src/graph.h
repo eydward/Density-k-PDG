@@ -55,10 +55,10 @@ struct VertexSignature {
 //   MAX_EDGES = Maximum number of possible edges in a graph.
 //               We use static allocation to minimize overhead.
 // The n vertices in this graph: 0, 1, ..., n-1.
-template <int K, int N, int MAX_EDGES>
+template <int K, int N>
 struct Graph {
   // The constant n choose k. Used to compute theta.
-  static constexpr int BINOM_NK = compute_binom(N, K);
+  static constexpr int MAX_EDGES = compute_binom(N, K);
 
   // The hash code is invariant under isomorphisms.
   uint64 hash;
@@ -125,16 +125,13 @@ struct Graph {
 
   // Makes a copy of this graph to g, without calling init. The caller can add/remove edges,
   // and must call init() before using g.
-  template <int N1, int MAX_EDGES1>
-  void copy_without_init(Graph<K, N1, MAX_EDGES1>& g) const;
+  void copy_without_init(Graph& g) const;
 
   // Returns true if this graph is isomorphic to the other.
-  template <int N1, int MAX_EDGES1>
-  bool is_isomorphic(const Graph<K, N1, MAX_EDGES1>& other) const;
+  bool is_isomorphic(const Graph& other) const;
 
   // Returns true if the two graphs are identical (exactly same edge sets).
-  template <int N1, int MAX_EDGES1>
-  bool is_identical(const Graph<K, N1, MAX_EDGES1>& other) const;
+  bool is_identical(const Graph& other) const;
 
   // Returns true if the graph contains the generalized triangle T_k as a subgraph, where
   // v is one of the vertices of the T_k subgraph.
@@ -174,8 +171,9 @@ struct Counters {
 
   // If the given theta is less than min_theta, assign it to min_theta.
   static void observe_theta(const Fraction& theta);
-  // Start the stopwatch, which will be used by print_counters to calculate elapsed time.
-  static void start_stopwatch();
+  // Resets all values to 0, and starts the stopwatch, which will be used
+  // by print_counters to calculate elapsed time.
+  static void initialize();
   // Prints the counter values to console.
   static void print_counters();
 };

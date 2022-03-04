@@ -3,10 +3,10 @@
 #include "grower.h"
 
 int main() {
-  Counters::start_stopwatch();
+  Counters::initialize();
 
-  Grower<2, 4, 6> s;
-  s.grow(4);
+  Grower<3, 4> s;
+  s.grow();
   s.print(true);
 
   Counters::print_counters();

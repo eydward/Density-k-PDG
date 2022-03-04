@@ -3,9 +3,9 @@
 #include "graph.h"
 
 // Grow set of non-isomorphic graphs from empty graph, by adding one vertex at a time.
-template <int K, int N, int MAX_EDGES>
+template <int K, int N>
 class Grower {
-  typedef Graph<K, N, MAX_EDGES> G;
+  typedef Graph<K, N> G;
 
   struct GraphHasher {
     size_t operator()(const G& g) const { return g.hash; }
@@ -83,7 +83,7 @@ class Grower {
   unordered_set<G, GraphHasher, GraphComparer> canonicals[N + 1];
 
   // Find all canonical isomorphism class representations with up to max_n vertices.
-  void grow(int max_n) {
+  void grow(int max_n = N) {
     // Initialize empty graph with k-1 vertices.
     G g;
     g.init();

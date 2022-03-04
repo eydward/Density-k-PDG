@@ -1,8 +1,8 @@
 #include "graph.h"
 
 // The constant n choose k. Used to compute theta.
-template <int K, int N, int MAX_EDGES>
-constexpr int Graph<K, N, MAX_EDGES>::BINOM_NK;
+template <int K, int N>
+constexpr int Graph<K, N>::MAX_EDGES;
 
 Fraction Counters::min_theta(1E8, 1);
 uint64 Counters::graph_inits = 0;
@@ -23,7 +23,20 @@ void Counters::observe_theta(const Fraction& theta) {
   }
 }
 
-void Counters::start_stopwatch() { start_time = std::chrono::steady_clock::now(); }
+void Counters::initialize() {
+  min_theta = Fraction(1E8, 1);
+  graph_inits = 0;
+  graph_copies = 0;
+  graph_canonicalize_ops = 0;
+  graph_isomorphic_tests = 0;
+  graph_isomorphic_expensive = 0;
+  graph_isomorphic_hash_no = 0;
+  graph_identical_tests = 0;
+  graph_permute_ops = 0;
+  graph_permute_canonical_ops = 0;
+  graph_contains_Tk_tests = 0;
+  start_time = std::chrono::steady_clock::now();
+}
 
 void Counters::print_counters() {
   const auto end = std::chrono::steady_clock::now();
