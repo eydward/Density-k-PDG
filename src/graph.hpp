@@ -13,7 +13,13 @@ void print_vertices(uint8 vertices, int N) {
 
 template <int K, int N, int MAX_EDGES>
 Graph<K, N, MAX_EDGES>::Graph()
-    : hash(0), is_init(false), is_canonical(false), vertex_count(0), edge_count(0), vertices{} {}
+    : hash(0),
+      is_init(false),
+      is_canonical(false),
+      vertex_count(0),
+      edge_count(0),
+      undirected_edge_count(0),
+      vertices{} {}
 
 // Returns true if the edge specified by the bitmask of the vertices in the edge is allowed
 // to be added to the graph (this vertex set does not yet exist in the edges).
@@ -35,6 +41,9 @@ void Graph<K, N, MAX_EDGES>::add_edge(uint8 vset, uint8 head) {
   assert(__builtin_popcount(vset) == K);
 #endif
   edges[edge_count++] = Edge(vset, head);
+  if (head == UNDIRECTED) {
+    ++undirected_edge_count;
+  }
 }
 
 // Initializes everything in this graph from the edge set.
@@ -154,7 +163,7 @@ template <int K, int N, int MAX_EDGES>
 void Graph<K, N, MAX_EDGES>::clear() {
   hash = 0;
   is_init = is_canonical = false;
-  edge_count = vertex_count = 0;
+  edge_count = undirected_edge_count = vertex_count = 0;
   for (int v = 0; v < N; v++) {
     *reinterpret_cast<uint64*>(&vertices[v]) = 0;
   }
@@ -183,6 +192,7 @@ void Graph<K, N, MAX_EDGES>::permute(int p[N], Graph& g) const {
     }
   }
   g.edge_count = edge_count;
+  g.undirected_edge_count = undirected_edge_count;
   g.init();
 }
 
@@ -213,6 +223,7 @@ void Graph<K, N, MAX_EDGES>::permute_canonical(int p[N], Graph& g) const {
   g.is_canonical = is_canonical;
   g.vertex_count = vertex_count;
   g.edge_count = edge_count;
+  g.undirected_edge_count = undirected_edge_count;
   for (int v = 0; v < N; v++) {
     g.vertices[v] = vertices[v];
   }
@@ -271,6 +282,7 @@ void Graph<K, N, MAX_EDGES>::copy(Graph& g) const {
   g.is_canonical = is_canonical;
   g.vertex_count = vertex_count;
   g.edge_count = edge_count;
+  g.undirected_edge_count = undirected_edge_count;
   for (int i = 0; i < edge_count; i++) {
     g.edges[i] = edges[i];
   }
@@ -288,6 +300,7 @@ void Graph<K, N, MAX_EDGES>::copy_without_init(Graph<K, N1, MAX_EDGES1>& g) cons
     g.edges[i] = edges[i];
   }
   g.edge_count = edge_count;
+  g.undirected_edge_count = undirected_edge_count;
 }
 
 // Returns true if this graph is isomorphic to the other.
@@ -296,7 +309,9 @@ template <int N1, int MAX_EDGES1>
 bool Graph<K, N, MAX_EDGES>::is_isomorphic(const Graph<K, N1, MAX_EDGES1>& other) const {
   ++Counters::graph_isomorphic_tests;
 
-  if (edge_count != other.edge_count || hash != other.hash) return false;
+  if (edge_count != other.edge_count || undirected_edge_count != other.undirected_edge_count ||
+      hash != other.hash)
+    return false;
 
   // Canonicalize if necessary.
   Graph this_copy, other_copy;
@@ -355,7 +370,7 @@ bool Graph<K, N, MAX_EDGES>::is_isomorphic(const Graph<K, N1, MAX_EDGES1>& other
 
   ++Counters::graph_isomorphic_hash_no;
 
-#if !NDEBUG
+#if false
   cout << "**** WARNING: final isomorphism check:\n";
   pa->print();
   pb->print();

@@ -79,6 +79,10 @@ struct Graph {
 
   // Number of edges in this graph.
   uint8 edge_count;
+
+  // Number of edges that are undirected.
+  uint8 undirected_edge_count;
+
   // The edge set in this graph.
   Edge edges[MAX_EDGES];
 

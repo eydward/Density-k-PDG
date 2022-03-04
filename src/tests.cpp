@@ -17,6 +17,7 @@ TEST(GraphTest, Init) {
   EXPECT_FALSE(g.is_canonical);
 
   EXPECT_EQ(4, g.edge_count);
+  EXPECT_EQ(2, g.undirected_edge_count);
   EXPECT_EQ(g.edges[0].vertex_set, 0b1011);
   EXPECT_EQ(g.edges[0].head_vertex, UNDIRECTED);
   EXPECT_EQ(g.edges[1].vertex_set, 0b1110);
@@ -93,6 +94,7 @@ TEST(GraphTest, Clear) {
   g.clear();
   EXPECT_EQ(g.hash, 0);
   EXPECT_EQ(g.edge_count, 0);
+  EXPECT_EQ(g.undirected_edge_count, 0);
   EXPECT_EQ(g.vertices[1].get_hash(), 0);
 }
 
@@ -104,6 +106,8 @@ TEST(GraphTest, PermuteIsomorphic) {
     g.permute(p, h);
     EXPECT_EQ(g.hash, h.hash);
     EXPECT_TRUE(h.is_isomorphic(g));
+    EXPECT_EQ(g.edge_count, 4);
+    EXPECT_EQ(g.undirected_edge_count, 2);
   } while (next_permutation(p, p + 5));
 }
 
@@ -114,6 +118,8 @@ TEST(GraphTest, PermuteCanonical) {
   int p[5]{0, 1, 2, 3, 4};
   g.permute_canonical(p, h);
   EXPECT_TRUE(g.is_identical(h));
+  EXPECT_EQ(h.edge_count, 4);
+  EXPECT_EQ(h.undirected_edge_count, 2);
 }
 
 TEST(GraphTest, PermuteCanonical2) {
@@ -180,11 +186,16 @@ TEST(GraphTest, Canonicalize3) {
 
 TEST(GraphTest, Copy) {
   Graph<3, 5, 5> g = get_T3();
+  g.add_edge(0b0111, UNDIRECTED);
+  g.init();
   Graph<3, 5, 5> h;
   g.copy_without_init(h);
   h.init();
   EXPECT_EQ(g.hash, h.hash);
   EXPECT_TRUE(h.is_isomorphic(g));
+  EXPECT_EQ(g.edge_count, h.edge_count);
+  EXPECT_EQ(g.undirected_edge_count, 3);
+  EXPECT_EQ(g.undirected_edge_count, h.undirected_edge_count);
 }
 
 TEST(GraphTest, NonIsomorphic) {
@@ -243,7 +254,7 @@ TEST(GrowerTest, G72) {
   EXPECT_EQ(s.canonicals[0].size(), 0);
   EXPECT_EQ(s.canonicals[1].size(), 1);
   EXPECT_EQ(s.canonicals[2].size(), 2);
-  EXPECT_EQ(s.canonicals[3].size(), 13);
+  EXPECT_EQ(s.canonicals[3].size(), 7);
 }
 
 TEST(PermutatorTest, Permutate) {
