@@ -389,6 +389,8 @@ bool Graph<K, N, MAX_EDGES>::is_identical(const Graph<K, N1, MAX_EDGES1>& other)
 // an edge.
 template <int K, int N, int MAX_EDGES>
 bool Graph<K, N, MAX_EDGES>::contains_Tk(int v) const {
+  ++Counters::graph_contains_Tk_tests;
+
   // There are two possibilities that $v \in T_k \subseteq H$.
   // (1) v is in the "triangle with stem cut off". Namely:
   //     exists vertices $x,y$, and vertex set $S$ with size $K-2$, $S$ disjoint

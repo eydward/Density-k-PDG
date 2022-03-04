@@ -14,8 +14,10 @@ class Grower {
     bool operator()(const G& g, const G& h) const { return g.is_isomorphic(h); }
   };
 
-  // Constructs all non-isomorphic graphs with n vertices, and add them to the canonicals.
-  // Before calling this, all such graphs with <n vertices must already be in the canonicals.
+  // Constructs all non-isomorphic graphs with n vertices that are T_k-free,
+  // and add them to the canonicals. Before calling this, all such graphs
+  // with <n vertices must already be in the canonicals.
+  // Note all edges added in this step contains vertex (n-1).
   void grow_step(int n) {
     for (const G& g : canonicals[n - 1]) {
       assert(n == K || (g.is_canonical && g.vertex_count == n - 1));
@@ -47,6 +49,8 @@ class Grower {
                 if (head >= 0 && (edge & (1 << head)) == 0) continue;
                 start.copy_without_init(copy);
                 copy.add_edge(edge, head < 0 ? UNDIRECTED : head);
+                if (copy.contains_Tk(n - 1)) continue;
+
                 copy.init();
                 copy.canonicalize();
 
@@ -90,13 +94,16 @@ class Grower {
   }
 
   // Debug print the content of the canonicals after the growth.
-  void print() {
+  // If print_graphs==true, print stats and all graphs. Otherwise prints stats only.
+  void print(bool print_graphs) {
     cout << dec;
     for (int i = 0; i < N + 1; i++) {
       cout << "order=" << i << " : # canonicals=" << canonicals[i].size() << "\n";
-      // for (const G& g : canonicals[i]) {
-      //   g.print_concise();
-      // }
+      if (print_graphs) {
+        for (const G& g : canonicals[i]) {
+          g.print_concise();
+        }
+      }
     }
   }
 };

@@ -9,6 +9,7 @@ uint64 Counters::graph_isomorphic_hash_no = 0;
 uint64 Counters::graph_identical_tests = 0;
 uint64 Counters::graph_permute_ops = 0;
 uint64 Counters::graph_permute_canonical_ops = 0;
+uint64 Counters::graph_contains_Tk_tests = 0;
 std::chrono::time_point<std::chrono::steady_clock> Counters::start_time;
 
 void Counters::start_stopwatch() { start_time = std::chrono::steady_clock::now(); }
@@ -27,6 +28,7 @@ void Counters::print_counters() {
        << "\nGraph isomorphic tests\t= " << graph_isomorphic_tests
        << "\n    Expensive tests\t= " << graph_isomorphic_expensive
        << "\n    False w/ hash match\t= " << graph_isomorphic_hash_no
-       << "\nGraph identical tests\t= " << graph_identical_tests;
+       << "\nGraph identical tests\t= " << graph_identical_tests
+       << "\nGraph contains T_k\t= " << graph_contains_Tk_tests;
   cout << "\n--------------------------------------------------\n";
 }

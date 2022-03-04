@@ -141,6 +141,9 @@ struct Graph {
   // Note that in k-PDG, subgraph definition is subtle: A is a subgraph of B iff A can be obtained
   // from B, by repeatedly (1) delete a vertex (2) delete an edge (3) forget the direction of
   // an edge.
+  //
+  // Note: unlike other functions, this function only relies on edges array and therefore
+  // can be called without calling init(), which saves time when doing T_k free growing.
   bool contains_Tk(int v) const;
 
   // Print the graph to the console for debugging purpose.
@@ -161,6 +164,7 @@ struct Counters {
   static uint64 graph_identical_tests;
   static uint64 graph_permute_ops;
   static uint64 graph_permute_canonical_ops;
+  static uint64 graph_contains_Tk_tests;
   static std::chrono::time_point<std::chrono::steady_clock> start_time;
 
   // Start the stopwatch, which will be used by print_counters to calculate elapsed time.
