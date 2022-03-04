@@ -83,20 +83,25 @@ class Grower {
   unordered_set<G, GraphHasher, GraphComparer> canonicals[N + 1];
 
   // Find all canonical isomorphism class representations with up to max_n vertices.
-  void grow(int max_n = N) {
+  void grow() {
+    cout << "Searching for all T_k-free k-PDGs\n    K= " << K
+         << " (number of vertices in each edge)\n    N= " << N
+         << " (total number of vertices in each graph)\n    E= " << G::MAX_EDGES
+         << " (maximum possible number of edges in each graph)\n";
+
     // Initialize empty graph with k-1 vertices.
     G g;
     g.init();
     canonicals[K - 1].insert(g);
 
-    for (int n = K; n <= max_n; n++) {
+    for (int n = K; n <= N; n++) {
       grow_step(n);
     }
   }
 
   // Debug print the content of the canonicals after the growth.
   // If print_graphs==true, print stats and all graphs. Otherwise prints stats only.
-  void print(bool print_graphs) {
+  void print(bool print_graphs) const {
     cout << dec;
     for (int i = 0; i < N + 1; i++) {
       cout << "order=" << i << " : # canonicals=" << canonicals[i].size() << "\n";

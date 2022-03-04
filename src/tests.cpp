@@ -263,8 +263,8 @@ TEST(GraphTest, Theta) {
 }
 
 TEST(GrowerTest, G72) {
-  Grower<2, 7> s;
-  s.grow(3);
+  Grower<2, 3> s;
+  s.grow();
   EXPECT_EQ(s.canonicals[0].size(), 0);
   EXPECT_EQ(s.canonicals[1].size(), 1);
   EXPECT_EQ(s.canonicals[2].size(), 2);

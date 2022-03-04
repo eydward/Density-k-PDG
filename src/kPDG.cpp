@@ -5,9 +5,9 @@
 int main() {
   Counters::initialize();
 
-  Grower<3, 4> s;
+  Grower<2, 7> s;
   s.grow();
-  s.print(true);
+  s.print(false);
 
   Counters::print_counters();
   return 0;
