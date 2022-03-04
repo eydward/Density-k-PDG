@@ -1,6 +1,8 @@
 #pragma once
 
 #include <bits/stdc++.h>
+
+#include "fraction.h"
 using namespace std;
 
 using uint8 = unsigned __int8;
@@ -45,14 +47,6 @@ struct VertexSignature {
   uint64 get_hash() const { return *reinterpret_cast<const uint64*>(this); }
 };
 
-// Combines value into the hash and returns the combined hash.
-inline uint32 hash_combine32(uint32 hash, uint32 value) {
-  return hash ^= value + 0x9E3779B9ul + (hash << 6) + (hash >> 2);
-}
-inline uint64 hash_combine64(uint64 hash, uint64 value) {
-  return hash ^= value + 0x9E3779B97F4A7C15ull + (hash << 12) + (hash >> 4);
-}
-
 // Represents a k-PDG, with the data structure optimized for computing isomorphisms.
 // Template parameters:
 //   K = number of vertices in each edge.
@@ -60,9 +54,11 @@ inline uint64 hash_combine64(uint64 hash, uint64 value) {
 //       that N<=8 by using 8-bit bitmasks. If N>8 the data type must change.
 //   MAX_EDGES = Maximum number of possible edges in a graph.
 //               We use static allocation to minimize overhead.
+// The n vertices in this graph: 0, 1, ..., n-1.
 template <int K, int N, int MAX_EDGES>
 struct Graph {
-  // n vertices in this graph: 0, 1, ..., n-1.
+  // The constant n choose k. Used to compute theta.
+  static constexpr int BINOM_NK = compute_binom(N, K);
 
   // The hash code is invariant under isomorphisms.
   uint64 hash;

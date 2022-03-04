@@ -1,3 +1,4 @@
+#include "fraction.h"
 #include "gmock/gmock.h"
 #include "graph.h"
 #include "graph.hpp"
@@ -248,6 +249,14 @@ TEST(GraphTest, NotContainsT3) {
   } while (next_permutation(p, p + 5));
 }
 
+TEST(GraphTest, Binom) {
+  int binom = Graph<3, 5, 5>::BINOM_NK;
+  EXPECT_EQ(binom, 10);
+
+  binom = Graph<4, 8, 20>::BINOM_NK;
+  EXPECT_EQ(binom, 70);
+}
+
 TEST(GrowerTest, G72) {
   Grower<2, 7, 21> s;
   s.grow(3);
@@ -303,4 +312,18 @@ TEST(PermutatorTest, Permutate3) {
   EXPECT_TRUE(perm.next());
   ASSERT_THAT(perm.p, ElementsAre(2, 1, 0, 4, 3));
   EXPECT_FALSE(perm.next());
+}
+
+TEST(FractionTest, Fractions) {
+  Fraction a(4, 6);
+  EXPECT_EQ(a.n, 2);
+  EXPECT_EQ(a.d, 3);
+
+  Fraction b(3, 5);
+  EXPECT_TRUE(a > b);
+  EXPECT_TRUE(a >= b);
+  EXPECT_TRUE(b < a);
+  EXPECT_TRUE(b <= a);
+  EXPECT_TRUE(b != a);
+  EXPECT_FALSE(b == a);
 }

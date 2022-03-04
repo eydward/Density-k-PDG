@@ -1,5 +1,9 @@
 #include "graph.h"
 
+// The constant n choose k. Used to compute theta.
+template <int K, int N, int MAX_EDGES>
+constexpr int Graph<K, N, MAX_EDGES>::BINOM_NK;
+
 uint64 Counters::graph_inits = 0;
 uint64 Counters::graph_copies = 0;
 uint64 Counters::graph_canonicalize_ops = 0;

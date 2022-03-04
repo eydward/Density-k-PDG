@@ -1,6 +1,14 @@
 #pragma once
 #include "permutator.h"
 
+// Combines value into the hash and returns the combined hash.
+inline uint32 hash_combine32(uint32 hash, uint32 value) {
+  return hash ^= value + 0x9E3779B9ul + (hash << 6) + (hash >> 2);
+}
+inline uint64 hash_combine64(uint64 hash, uint64 value) {
+  return hash ^= value + 0x9E3779B97F4A7C15ull + (hash << 12) + (hash >> 4);
+}
+
 // Helper function for debug print().
 void print_vertices(uint8 vertices, int N) {
   for (int v = 0; v < N; v++) {
