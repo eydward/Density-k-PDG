@@ -5,7 +5,7 @@
 int main() {
   Counters::start_stopwatch();
 
-  Grower<2, 7, 21> s;
+  Grower<2, 4, 6> s;
   s.grow(4);
   s.print(true);
 

@@ -87,11 +87,15 @@ struct Graph {
 
   Graph();
 
+  // Returns theta such that (undirected edge density) + theta (directed edge density) = 1.
+  // Namely, returns theta = (binom_nk - (undirected edge count)) / (directed edge count).
+  Fraction get_theta() const;
+
   // Returns true if the edge specified by the bitmask of the vertices in the edge is allowed
   // to be added to the graph (this vertex set does not yet exist in the edges).
   bool edge_allowed(uint8 vertices) const;
 
-  // Add an edge to the graph. It's caller's responsibility to make sure this is allowed.
+  // Adds an edge to the graph. It's caller's responsibility to make sure this is allowed.
   // And the input is consistent (head is inside the vertex set).
   void add_edge(uint8 vset, uint8 head);
 
@@ -153,6 +157,7 @@ struct Graph {
 
 // Holds all statistical counters to keep track of number of operations during the search.
 struct Counters {
+  static Fraction min_theta;
   static uint64 graph_inits;
   static uint64 graph_copies;
   static uint64 graph_canonicalize_ops;
@@ -167,6 +172,8 @@ struct Counters {
   static uint64 graph_contains_Tk_tests;
   static std::chrono::time_point<std::chrono::steady_clock> start_time;
 
+  // If the given theta is less than min_theta, assign it to min_theta.
+  static void observe_theta(const Fraction& theta);
   // Start the stopwatch, which will be used by print_counters to calculate elapsed time.
   static void start_stopwatch();
   // Prints the counter values to console.

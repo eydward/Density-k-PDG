@@ -257,6 +257,11 @@ TEST(GraphTest, Binom) {
   EXPECT_EQ(binom, 70);
 }
 
+TEST(GraphTest, Theta) {
+  Graph<3, 5, 5> g = get_T3();
+  EXPECT_EQ(g.get_theta(), Fraction(4, 1));
+}
+
 TEST(GrowerTest, G72) {
   Grower<2, 7, 21> s;
   s.grow(3);

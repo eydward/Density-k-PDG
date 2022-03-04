@@ -29,6 +29,18 @@ Graph<K, N, MAX_EDGES>::Graph()
       undirected_edge_count(0),
       vertices{} {}
 
+// Returns theta such that (undirected edge density) + theta (directed edge density) = 1.
+// Namely, returns theta = (binom_nk - (undirected edge count)) / (directed edge count).
+template <int K, int N, int MAX_EDGES>
+Fraction Graph<K, N, MAX_EDGES>::get_theta() const {
+  uint8 directed = edge_count - undirected_edge_count;
+  if (directed > 0) {
+    return Fraction(BINOM_NK - undirected_edge_count, directed);
+  } else {
+    return Fraction(1E8, 1);
+  }
+}
+
 // Returns true if the edge specified by the bitmask of the vertices in the edge is allowed
 // to be added to the graph (this vertex set does not yet exist in the edges).
 template <int K, int N, int MAX_EDGES>
