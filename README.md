@@ -31,5 +31,7 @@ Run all commands in the project root directory.
 
 Note in order to optimize for speed, we try to avoid dynamic memory allocation as much as possible, so it uses C++ template and fixed arrays. Unfortunately it makes it a bit less friendly. To change configuration (k and n), you have to edit the kPDG.cpp file in the source directory, and re-compile. There is no command-line arguments for this purpose.
 
+Note the code currently is single-threaded, doesn't take advantage of multi-core machines and certainly not capable to run in distributed environment. This is TODO. 
+
 ## Algorithm Design Summary
 TODO
