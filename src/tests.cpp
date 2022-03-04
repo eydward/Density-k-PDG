@@ -96,7 +96,7 @@ TEST(GraphTest, Clear) {
   EXPECT_EQ(g.vertices[1].get_hash(), 0);
 }
 
-TEST(GraphTest, Permute) {
+TEST(GraphTest, PermuteIsomorphic) {
   Graph<3, 5, 5> g = get_T3();
   Graph<3, 5, 5> h;
   int p[5]{0, 1, 2, 3, 4};
@@ -206,7 +206,36 @@ TEST(GraphTest, NonIsomorphic) {
   EXPECT_FALSE(f.is_isomorphic(h));
 }
 
-TEST(GraphTest, Isomorphic) { Graph<2, 7, 10> g, h; }
+TEST(GraphTest, ContainsT3) {
+  Graph<3, 5, 5> g = get_T3();
+  Graph<3, 5, 5> h;
+
+  int p[5]{0, 1, 2, 3, 4};
+  do {
+    g.permute(p, h);
+    EXPECT_TRUE(h.contains_Tk(p[0]));
+    EXPECT_TRUE(h.contains_Tk(p[1]));
+    EXPECT_TRUE(h.contains_Tk(p[2]));
+    EXPECT_TRUE(h.contains_Tk(p[3]));
+    EXPECT_FALSE(h.contains_Tk(p[4]));
+  } while (next_permutation(p, p + 5));
+}
+
+TEST(GraphTest, NotContainsT3) {
+  Graph<3, 5, 5> g, h;
+  g.add_edge(0b1011, UNDIRECTED);  // 013
+  g.add_edge(0b1110, UNDIRECTED);  // 123
+  g.add_edge(0b1101, UNDIRECTED);  // 023
+  g.init();
+
+  int p[5]{0, 1, 2, 3, 4};
+  do {
+    g.permute(p, h);
+    for (int i = 0; i < 5; i++) {
+      EXPECT_FALSE(h.contains_Tk(i));
+    }
+  } while (next_permutation(p, p + 5));
+}
 
 TEST(GrowerTest, G72) {
   Grower<2, 7, 21> s;

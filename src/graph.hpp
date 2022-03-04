@@ -399,13 +399,16 @@ bool Graph<K, N, MAX_EDGES>::contains_Tk(int v) const {
   //     from $x,y,z$, such that there are 3 edges: $S\cup xy, S\cup yz, S\cup zx$,
   //     and at least one of the 3 edges is directed, with the head being one of $x,y,z$.
 
-  // Check for possibility (1). Example to understand the code below:
-  //   K=3, v=2, x=1, y=0.
-  //   e_i  = 00001110
-  //   e_j  = 00001101
+  // Check for the two possibilities. For the most part, the checking logic is same.
+  // Example to understand the code below:
+  //                      possibility (1)         possibility (2)
+  //                      S = {3,4,5,6}           S = {3,4,5,6}
+  //                      K=6, v=2, x=1, y=0.     K=6, v=4, x=2, y=1, z=0.
+  //   e_i  = 01111110    $S\cup vx$              $S\cup xy$
+  //   e_j  = 01111101    $S\cup vy$              $S\cup yz$
   //   m    = 00000011
-  //   mask = 00001111
-  //   e_k  = 00001011
+  //   mask = 01111111
+  //   e_k  = 01111011    $S\cup xy$              $S\cup zx$
   for (int i = 0; i < edge_count - 1; i++) {
     uint8 e_i = edges[i].vertex_set;
     if ((e_i & (1 << v)) == 0) continue;
@@ -421,8 +424,6 @@ bool Graph<K, N, MAX_EDGES>::contains_Tk(int v) const {
           if (k == i || k == j) continue;
 
           uint8 e_k = edges[k].vertex_set;
-          if ((e_k & (1 << v)) != 0) continue;
-
           if (__builtin_popcount(mask ^ e_k) == 1) {
             // At this point we know the 3 edges have the vertex sets we want, check directions.
             if (edges[i].head_vertex == v || edges[j].head_vertex == v) return true;
@@ -434,10 +435,6 @@ bool Graph<K, N, MAX_EDGES>::contains_Tk(int v) const {
       }
     }
   }
-
-  // Check for possibility (2).
-  // TODO
-
   return false;
 }
 
