@@ -1,8 +1,11 @@
 # Compute Turan Density Coefficient for k-PDG (k-uniform partially directed hypergraphs)
 
 ## Preliminary Results (to be verified)
+
 k = number of vertices in each edge
+
 n = number of vertices in each graph
+
 values in the table : minimum theta value across all graphs with n vertices that are T_k free. Where theta(H) is defined as alpha(H) + theta(H) beta(H) =1, alpha(H) is the undirected edge density in the graph, beta(H) is the directed edge density in the graph.
 
 | n   | k=2 | k=3   | k=4   | k=5   | k=6   |
@@ -15,7 +18,7 @@ values in the table : minimum theta value across all graphs with n vertices that
 | 7   | 7/4 | ?     | ?     |   9/5 |   3/2 | 
 | 8   |   ? |  ?    | ?     |   ?   |   ?   |
 
-**Note: the k=5, n=7, min_theta=9/5 should give original result, and prove the k-SAT counting conjecture by Bollobás, Brightwell, and Leader, for k=5 and k=6, following the "ENUMERATING k-SAT FUNCTIONS" paper. **
+**Note: the k=5, n=7, min_theta=9/5 should give original result, and prove the k-SAT counting conjecture by Bollobás, Brightwell, and Leader, for k=5 and k=6, following the "ENUMERATING k-SAT FUNCTIONS" paper.**
 
 ## Setup
 * In order to build and run the code, c++ 20 compatible compiler is required. My environment uses `gcc (Rev8, Built by MSYS2 project) 11.2.0`, but any recent release of gcc should work. 
