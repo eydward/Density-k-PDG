@@ -22,7 +22,7 @@ int main(int argc, char* argv[]) {
   ofstream log_stream(log);
   Counters::initialize(&log_stream);
 
-  Grower<6, 6> s(&log_stream);
+  Grower<2, 7> s(&log_stream);
   s.grow();
   s.print(false);
 

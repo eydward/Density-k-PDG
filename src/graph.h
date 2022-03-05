@@ -148,6 +148,16 @@ struct Graph {
   bool contains_Tk(int v) const;
 
   // Print the graph to the console for debugging purpose.
-  void print() const;
   void print_concise(std::ostream& os) const;
+  void print() const;
 };
+
+// Helper function for printing vertex list in an edge.
+inline void print_vertices(uint8 vertices, int N) {
+  for (int v = 0; v < N; v++) {
+    if ((vertices & 1) != 0) {
+      cout << v;
+    }
+    vertices >>= 1;
+  }
+}

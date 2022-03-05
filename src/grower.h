@@ -63,7 +63,7 @@ class Grower {
                 if (!canonicals[n].contains(copy) && !current.contains(copy) &&
                     !next.contains(copy)) {
                   next.insert(copy);
-                  Counters::observe_theta(copy.get_theta());
+                  Counters::observe_theta(copy);
                 }
               }
             }

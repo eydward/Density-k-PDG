@@ -10,16 +10,6 @@ inline uint64 hash_combine64(uint64 hash, uint64 value) {
   return hash ^= value + 0x9E3779B97F4A7C15ull + (hash << 12) + (hash >> 4);
 }
 
-// Helper function for debug print().
-void print_vertices(uint8 vertices, int N) {
-  for (int v = 0; v < N; v++) {
-    if ((vertices & 1) != 0) {
-      cout << v;
-    }
-    vertices >>= 1;
-  }
-}
-
 template <int K, int N>
 Graph<K, N>::Graph()
     : hash(0),
@@ -472,6 +462,24 @@ bool Graph<K, N>::contains_Tk(int v) const {
   return false;
 }
 
+template <int K, int N>
+void Graph<K, N>::print_concise(std::ostream& os) const {
+  os << "  {";
+  bool is_first = true;
+  for (int i = 0; i < edge_count; i++) {
+    if (!is_first) {
+      os << ", ";
+    }
+    is_first = false;
+    print_vertices(edges[i].vertex_set, N);
+    if (edges[i].head_vertex != UNDIRECTED) {
+      os << ">" << (int)edges[i].head_vertex;
+    }
+  }
+  os << "}\n";
+}
+
+#if false
 // Print the graph to the console for debugging purpose.
 template <int K, int N>
 void Graph<K, N>::print() const {
@@ -511,20 +519,4 @@ void Graph<K, N>::print() const {
   }
   cout << "]\n";
 }
-
-template <int K, int N>
-void Graph<K, N>::print_concise(std::ostream& os) const {
-  os << "  {";
-  bool is_first = true;
-  for (int i = 0; i < edge_count; i++) {
-    if (!is_first) {
-      os << ", ";
-    }
-    is_first = false;
-    print_vertices(edges[i].vertex_set, N);
-    if (edges[i].head_vertex != UNDIRECTED) {
-      os << ">" << (int)edges[i].head_vertex;
-    }
-  }
-  os << "}\n";
-}
+#endif
