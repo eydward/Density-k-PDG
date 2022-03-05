@@ -1,4 +1,5 @@
 #pragma once
+#include "counters.h"
 #include "permutator.h"
 
 // Combines value into the hash and returns the combined hash.

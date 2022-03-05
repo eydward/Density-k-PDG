@@ -84,6 +84,7 @@ class Grower {
 
   // Find all canonical isomorphism class representations with up to max_n vertices.
   void grow() {
+    static_assert(N <= 8);
     cout << "Searching for all T_k-free k-PDGs\n    K= " << K
          << " (number of vertices in each edge)\n    N= " << N
          << " (total number of vertices in each graph)\n    E= " << G::MAX_EDGES

@@ -5,7 +5,7 @@
 int main() {
   Counters::initialize();
 
-  Grower<3, 7> s;
+  Grower<6, 8> s;
   s.grow();
   s.print(false);
 

@@ -1,8 +1,7 @@
-#include "graph.h"
+#include "counters.h"
 
-// The constant n choose k. Used to compute theta.
-template <int K, int N>
-constexpr int Graph<K, N>::MAX_EDGES;
+#include <bits/stdc++.h>
+using namespace std;
 
 Fraction Counters::min_theta(1E8, 1);
 uint64 Counters::graph_inits = 0;
