@@ -4,10 +4,12 @@ cc_library(
     name="graph",
     hdrs=[
         "counters.h",
+        "edge_gen.h",
         "fraction.h",
         "graph.h",
         "graph.hpp",
         "grower.h",
+        "grower.hpp",
         "permutator.h",
     ],
     srcs=[
@@ -26,7 +28,12 @@ cc_binary(
 
 cc_test(
     name="graph_test",
-    srcs=["tests.cpp"],
+    srcs=[
+        "tests/fraction_test.cpp",
+        "tests/grower_test.cpp",
+        "tests/permutator_test.cpp",
+        "tests/graph_test.cpp",
+    ],
     deps=[
         ":graph",
         "@gtest//:gtest",

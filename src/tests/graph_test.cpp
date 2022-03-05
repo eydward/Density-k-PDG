@@ -1,8 +1,7 @@
-#include "fraction.h"
+#include "../graph.h"
+
+#include "../graph.hpp"
 #include "gmock/gmock.h"
-#include "graph.h"
-#include "graph.hpp"
-#include "grower.h"
 #include "gtest/gtest.h"
 
 using namespace testing;
@@ -260,100 +259,4 @@ TEST(GraphTest, Binom) {
 TEST(GraphTest, Theta) {
   Graph<3, 5> g = get_T3();
   EXPECT_EQ(g.get_theta(), Fraction(4, 1));
-}
-
-TEST(GrowerTest, G72) {
-  Grower<2, 3> s;
-  s.grow();
-  EXPECT_EQ(s.canonicals[0].size(), 0);
-  EXPECT_EQ(s.canonicals[1].size(), 1);
-  EXPECT_EQ(s.canonicals[2].size(), 2);
-  EXPECT_EQ(s.canonicals[3].size(), 7);
-}
-
-TEST(GrowerTest, G32) {
-  Counters::initialize();
-  Grower<2, 3> s;
-  s.grow();
-  EXPECT_TRUE(Counters::get_min_theta() == Fraction(3, 2));
-}
-TEST(GrowerTest, G42) {
-  Counters::initialize();
-  Grower<2, 4> s;
-  s.grow();
-  EXPECT_TRUE(Counters::get_min_theta() == Fraction(3, 2));
-}
-TEST(GrowerTest, G52) {
-  Counters::initialize();
-  Grower<2, 5> s;
-  s.grow();
-  EXPECT_TRUE(Counters::get_min_theta() == Fraction(5, 3));
-}
-TEST(GrowerTest, G43) {
-  Counters::initialize();
-  Grower<3, 4> s;
-  s.grow();
-  EXPECT_TRUE(Counters::get_min_theta() == Fraction(3, 2));
-}
-
-TEST(PermutatorTest, Permutate) {
-  std::vector<std::pair<int, int>> sets{std::make_pair(0, 2)};
-  Permutator<3> perm(std::move(sets));
-  EXPECT_TRUE(perm.next());
-  ASSERT_THAT(perm.p, ElementsAre(1, 0, 2));
-  EXPECT_FALSE(perm.next());
-}
-
-TEST(PermutatorTest, Permutate2) {
-  std::vector<std::pair<int, int>> sets{std::make_pair(0, 2), std::make_pair(3, 5)};
-  Permutator<6> perm(std::move(sets));
-  EXPECT_TRUE(perm.next());
-  ASSERT_THAT(perm.p, ElementsAre(1, 0, 2, 3, 4, 5));
-  EXPECT_TRUE(perm.next());
-  ASSERT_THAT(perm.p, ElementsAre(0, 1, 2, 4, 3, 5));
-  EXPECT_TRUE(perm.next());
-  ASSERT_THAT(perm.p, ElementsAre(1, 0, 2, 4, 3, 5));
-  EXPECT_FALSE(perm.next());
-}
-
-TEST(PermutatorTest, Permutate3) {
-  std::vector<std::pair<int, int>> sets{std::make_pair(0, 3), std::make_pair(3, 5)};
-  Permutator<5> perm(move(sets));
-  EXPECT_TRUE(perm.next());
-  ASSERT_THAT(perm.p, ElementsAre(0, 1, 2, 4, 3));
-  EXPECT_TRUE(perm.next());
-  ASSERT_THAT(perm.p, ElementsAre(0, 2, 1, 3, 4));
-  EXPECT_TRUE(perm.next());
-  ASSERT_THAT(perm.p, ElementsAre(0, 2, 1, 4, 3));
-  EXPECT_TRUE(perm.next());
-  ASSERT_THAT(perm.p, ElementsAre(1, 0, 2, 3, 4));
-  EXPECT_TRUE(perm.next());
-  ASSERT_THAT(perm.p, ElementsAre(1, 0, 2, 4, 3));
-  EXPECT_TRUE(perm.next());
-  ASSERT_THAT(perm.p, ElementsAre(1, 2, 0, 3, 4));
-  EXPECT_TRUE(perm.next());
-  ASSERT_THAT(perm.p, ElementsAre(1, 2, 0, 4, 3));
-  EXPECT_TRUE(perm.next());
-  ASSERT_THAT(perm.p, ElementsAre(2, 0, 1, 3, 4));
-  EXPECT_TRUE(perm.next());
-  ASSERT_THAT(perm.p, ElementsAre(2, 0, 1, 4, 3));
-  EXPECT_TRUE(perm.next());
-  ASSERT_THAT(perm.p, ElementsAre(2, 1, 0, 3, 4));
-  EXPECT_TRUE(perm.next());
-  ASSERT_THAT(perm.p, ElementsAre(2, 1, 0, 4, 3));
-  EXPECT_FALSE(perm.next());
-}
-
-TEST(FractionTest, Fractions) {
-  Fraction a(4, 6);
-  EXPECT_EQ(a.n, 2);
-  EXPECT_EQ(a.d, 3);
-
-  Fraction b(3, 5);
-  EXPECT_TRUE(a > b);
-  EXPECT_TRUE(a >= b);
-  EXPECT_TRUE(b < a);
-  EXPECT_TRUE(b <= a);
-  EXPECT_TRUE(b != a);
-  EXPECT_FALSE(b == a);
 }

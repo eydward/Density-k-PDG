@@ -1,9 +1,10 @@
 #include "graph.h"
 #include "graph.hpp"
 #include "grower.h"
+#include "grower.hpp"
 
-constexpr int K = 2;
-constexpr int N = 7;
+constexpr int K = 4;
+constexpr int N = 5;
 
 std::string get_log_file_name(const char* exe_path) {
   std::string path(exe_path);
@@ -27,7 +28,7 @@ int main(int argc, char* argv[]) {
 
   Grower<K, N> s(&log_stream);
   s.grow();
-  s.print(false);
+  s.print(true);
 
   Counters::print_counters();
   log_stream.flush();
