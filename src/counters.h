@@ -7,7 +7,7 @@ using uint64 = unsigned __int64;
 
 // Holds all statistical counters to keep track of number of operations during the search.
 struct Counters {
- public:
+ private:
   // The smallest theta value observed so far.
   static Fraction min_theta;
   // The edges in the graph that produces the min_theta.
@@ -25,7 +25,6 @@ struct Counters {
   // The log file, can be nullptr.
   static std::ofstream* log;
 
- public:
   static uint64 graph_inits;
   static uint64 graph_copies;
   static uint64 graph_canonicalize_ops;
@@ -40,6 +39,18 @@ struct Counters {
   static uint64 graph_contains_Tk_tests;
 
  public:
+  static Fraction get_min_theta() { return min_theta; }
+  static void increment_graph_inits() { ++graph_inits; }
+  static void increment_graph_copies() { ++graph_copies; }
+  static void increment_graph_canonicalize_ops() { ++graph_canonicalize_ops; }
+  static void increment_graph_isomorphic_tests() { ++graph_isomorphic_tests; }
+  static void increment_graph_isomorphic_expensive() { ++graph_isomorphic_expensive; }
+  static void increment_graph_isomorphic_hash_no() { ++graph_isomorphic_hash_no; }
+  static void increment_graph_identical_tests() { ++graph_identical_tests; }
+  static void increment_graph_permute_ops() { ++graph_permute_ops; }
+  static void increment_graph_permute_canonical_ops() { ++graph_permute_canonical_ops; }
+  static void increment_graph_contains_Tk_tests() { ++graph_contains_Tk_tests; }
+
   // If the given graph's theta is less than min_theta, assign it to min_theta.
   template <int K, int N>
   static void observe_theta(const Graph<K, N>& g) {

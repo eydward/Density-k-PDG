@@ -60,7 +60,7 @@ void Graph<K, N>::add_edge(uint8 vset, uint8 head) {
 // Initializes everything in this graph from the edge set.
 template <int K, int N>
 void Graph<K, N>::init() {
-  ++Counters::graph_inits;
+  Counters::increment_graph_inits();
 
   if (is_init) {
     hash = 0;
@@ -186,7 +186,7 @@ void Graph<K, N>::clear() {
 // The second parameter is the resulting graph.
 template <int K, int N>
 void Graph<K, N>::permute(int p[N], Graph& g) const {
-  ++Counters::graph_permute_ops;
+  Counters::increment_graph_permute_ops();
 
   // Copy the edges with permutation.
   for (int i = 0; i < edge_count; i++) {
@@ -209,7 +209,7 @@ void Graph<K, N>::permute(int p[N], Graph& g) const {
 
 template <int K, int N>
 void Graph<K, N>::permute_canonical(int p[N], Graph& g) const {
-  ++Counters::graph_permute_canonical_ops;
+  Counters::increment_graph_permute_canonical_ops();
 
   assert(is_canonical);
   // Copy the edges with permutation.
@@ -243,7 +243,7 @@ void Graph<K, N>::permute_canonical(int p[N], Graph& g) const {
 // Returns the canonicalized graph in g, where the vertices are ordered by their signatures.
 template <int K, int N>
 void Graph<K, N>::canonicalize() {
-  ++Counters::graph_canonicalize_ops;
+  Counters::increment_graph_canonicalize_ops();
 
   // First get sorted vertex indices by the vertex signatures.
   // Note we sort by descreasing order, to push vertices to lower indices.
@@ -283,7 +283,7 @@ void Graph<K, N>::canonicalize() {
 // Makes a copy of this graph to g.
 template <int K, int N>
 void Graph<K, N>::copy(Graph& g) const {
-  ++Counters::graph_copies;
+  Counters::increment_graph_copies();
 
   g.hash = hash;
   for (int v = 0; v < N; v++) {
@@ -303,7 +303,7 @@ void Graph<K, N>::copy(Graph& g) const {
 // and must call init() before using g.
 template <int K, int N>
 void Graph<K, N>::copy_without_init(Graph& g) const {
-  ++Counters::graph_copies;
+  Counters::increment_graph_copies();
 
   for (int i = 0; i < edge_count; i++) {
     g.edges[i] = edges[i];
@@ -315,7 +315,7 @@ void Graph<K, N>::copy_without_init(Graph& g) const {
 // Returns true if this graph is isomorphic to the other.
 template <int K, int N>
 bool Graph<K, N>::is_isomorphic(const Graph& other) const {
-  ++Counters::graph_isomorphic_tests;
+  Counters::increment_graph_isomorphic_tests();
 
   if (edge_count != other.edge_count || undirected_edge_count != other.undirected_edge_count ||
       hash != other.hash)
@@ -349,7 +349,7 @@ bool Graph<K, N>::is_isomorphic(const Graph& other) const {
   // then they are isomorphic.
   if (pa->is_identical(*pb)) return true;
 
-  ++Counters::graph_isomorphic_expensive;
+  Counters::increment_graph_isomorphic_expensive();
 
   // Now all the easy checks are done, have to permute and check.
   // The set of vertices with the same signature can permute among themselves.
@@ -376,7 +376,7 @@ bool Graph<K, N>::is_isomorphic(const Graph& other) const {
     }
   }
 
-  ++Counters::graph_isomorphic_hash_no;
+  Counters::increment_graph_isomorphic_hash_no();
 
 #if false
   cout << "**** WARNING: final isomorphism check:\n";
@@ -389,7 +389,7 @@ bool Graph<K, N>::is_isomorphic(const Graph& other) const {
 // Returns true if the two graphs are identical (exactly same edge sets).
 template <int K, int N>
 bool Graph<K, N>::is_identical(const Graph& other) const {
-  ++Counters::graph_identical_tests;
+  Counters::increment_graph_identical_tests();
 
   if (edge_count != other.edge_count) return false;
   for (int i = 0; i < edge_count; i++) {
@@ -411,7 +411,7 @@ bool Graph<K, N>::is_identical(const Graph& other) const {
 // an edge.
 template <int K, int N>
 bool Graph<K, N>::contains_Tk(int v) const {
-  ++Counters::graph_contains_Tk_tests;
+  Counters::increment_graph_contains_Tk_tests();
 
   // There are two possibilities that $v \in T_k \subseteq H$.
   // (1) v is in the "triangle with stem cut off". Namely:

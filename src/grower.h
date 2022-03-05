@@ -25,17 +25,17 @@ class Grower {
   // with <n vertices must already be in the canonicals.
   // Note all edges added in this step contains vertex (n-1).
   void grow_step(int n) {
+    // First find all edge candidates through the new vertex.
+    vector<uint8> edge_candidates;
+    for (uint8 mask = 0; mask < (1 << (n - 1)); mask++) {
+      if (__builtin_popcount(mask) == K - 1) {
+        edge_candidates.push_back(mask | (1 << (n - 1)));
+      }
+    }
+
     for (const G& g : canonicals[n - 1]) {
       assert(n == K || (g.is_canonical && g.vertex_count == n - 1));
       assert(g.vertices[n - 1].get_degrees() == 0);
-
-      // First find all edge candidates through the new vertex.
-      vector<uint8> edge_candidates;
-      for (uint8 mask = 0; mask < (1 << (n - 1)); mask++) {
-        if (__builtin_popcount(mask) == K - 1) {
-          edge_candidates.push_back(mask | (1 << (n - 1)));
-        }
-      }
 
       // Add one edge at a time:
       // (1) current = {g}, next = empty.
