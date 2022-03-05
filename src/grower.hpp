@@ -4,7 +4,7 @@
 
 // Find all canonical isomorphism class representations with up to max_n vertices.
 template <int K, int N>
-void Grower<K, N>::grow() {
+void Grower<K, N>::grow(bool alt_growth_impl) {
   static_assert(N <= 8);
   print_config(std::cout);
   if (log != nullptr) {
@@ -18,7 +18,11 @@ void Grower<K, N>::grow() {
   Counters::observe_theta(g);
 
   for (int n = K; n <= N; n++) {
-    grow_step(n);
+    if (alt_growth_impl) {
+      grow_step_impl_alt(n);
+    } else {
+      grow_step(n);
+    }
   }
 }
 

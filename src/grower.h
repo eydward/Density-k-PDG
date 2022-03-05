@@ -19,7 +19,7 @@ class Grower {
   };
 
   // The log file.
-  std::ofstream* const log;
+  std::ostream* const log;
   // Utility used to enumerate all edge sets to add.
   EdgeGenerator edge_gen;
 
@@ -36,13 +36,13 @@ class Grower {
   void print_state_to_stream(bool print_graphs, std::ostream& os);
 
  public:
-  Grower(std::ofstream* log_stream = nullptr) : log(log_stream) {}
+  Grower(std::ostream* log_stream = nullptr) : log(log_stream) {}
 
   // One canonical graphs with n vertices in each isomorphism class is in canonicals[n].
   std::unordered_set<G, GraphHasher, GraphComparer> canonicals[N + 1];
 
   // Find all canonical isomorphism class representations with up to max_n vertices.
-  void grow();
+  void grow(bool alt_growth_strategy);
 
   // Debug print the content of the canonicals after the growth.
   // If print_graphs==true, print stats and all graphs. Otherwise prints stats only.
