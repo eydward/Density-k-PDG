@@ -513,18 +513,18 @@ void Graph<K, N>::print() const {
 }
 
 template <int K, int N>
-void Graph<K, N>::print_concise() const {
-  cout << "  {";
+void Graph<K, N>::print_concise(std::ostream& os) const {
+  os << "  {";
   bool is_first = true;
   for (int i = 0; i < edge_count; i++) {
     if (!is_first) {
-      cout << ", ";
+      os << ", ";
     }
     is_first = false;
     print_vertices(edges[i].vertex_set, N);
     if (edges[i].head_vertex != UNDIRECTED) {
-      cout << ">" << (int)edges[i].head_vertex;
+      os << ">" << (int)edges[i].head_vertex;
     }
   }
-  cout << "}\n";
+  os << "}\n";
 }

@@ -149,5 +149,5 @@ struct Graph {
 
   // Print the graph to the console for debugging purpose.
   void print() const;
-  void print_concise() const;
+  void print_concise(std::ostream& os) const;
 };

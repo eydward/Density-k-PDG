@@ -5,14 +5,20 @@
 // Grow set of non-isomorphic graphs from empty graph, by adding one vertex at a time.
 template <int K, int N>
 class Grower {
+ private:
+  // Alias of the Graph type
   typedef Graph<K, N> G;
 
+  // Custom hash and compare for the Graph type. Treat isomorphic graphs as being equal.
   struct GraphHasher {
     size_t operator()(const G& g) const { return g.hash; }
   };
   struct GraphComparer {
     bool operator()(const G& g, const G& h) const { return g.is_isomorphic(h); }
   };
+
+  // The log file.
+  ofstream* const log;
 
   // Constructs all non-isomorphic graphs with n vertices that are T_k-free,
   // and add them to the canonicals. Before calling this, all such graphs
@@ -78,17 +84,36 @@ class Grower {
     }
   }
 
+  void print_config(ostream& os) {
+    os << "Searching for all T_k-free k-PDGs\n    K= " << K
+       << " (number of vertices in each edge)\n    N= " << N
+       << " (total number of vertices in each graph)\n    E= " << G::MAX_EDGES
+       << " (maximum possible number of edges in each graph)\n";
+  }
+  void print_state_to_stream(bool print_graphs, ostream& os) {
+    for (int i = 0; i < N + 1; i++) {
+      os << "order=" << i << " : # canonicals=" << canonicals[i].size() << "\n";
+      if (print_graphs) {
+        for (const G& g : canonicals[i]) {
+          g.print_concise(os);
+        }
+      }
+    }
+  }
+
  public:
+  Grower(ofstream* log_stream = nullptr) : log(log_stream) {}
+
   // One canonical graphs with n vertices in each isomorphism class is in canonicals[n].
   unordered_set<G, GraphHasher, GraphComparer> canonicals[N + 1];
 
   // Find all canonical isomorphism class representations with up to max_n vertices.
   void grow() {
     static_assert(N <= 8);
-    cout << "Searching for all T_k-free k-PDGs\n    K= " << K
-         << " (number of vertices in each edge)\n    N= " << N
-         << " (total number of vertices in each graph)\n    E= " << G::MAX_EDGES
-         << " (maximum possible number of edges in each graph)\n";
+    print_config(cout);
+    if (log != nullptr) {
+      print_config(*log);
+    }
 
     // Initialize empty graph with k-1 vertices.
     G g;
@@ -102,15 +127,10 @@ class Grower {
 
   // Debug print the content of the canonicals after the growth.
   // If print_graphs==true, print stats and all graphs. Otherwise prints stats only.
-  void print(bool print_graphs) const {
-    cout << dec;
-    for (int i = 0; i < N + 1; i++) {
-      cout << "order=" << i << " : # canonicals=" << canonicals[i].size() << "\n";
-      if (print_graphs) {
-        for (const G& g : canonicals[i]) {
-          g.print_concise();
-        }
-      }
+  void print(bool print_graphs) {
+    print_state_to_stream(print_graphs, cout);
+    if (log != nullptr) {
+      print_state_to_stream(print_graphs, *log);
     }
   }
 };
