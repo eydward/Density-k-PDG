@@ -56,7 +56,10 @@ All source code are in the `src` directory.
 ### Growing the Search Tree
 We use a simple idea to grow the search tree while try to avoid unnecessary work. This is implemented in `grower.h`.  Note all graphs are on N vertices {0,1,...,N-1}. When we say "a graph with n vertices" in this section, we mean the number of vertices that appear in some edges is n.
 
-1. Start with K-1 vertices {0,...,K-2} and 0 edge. Let n = K.
-2. Repeat until n > N:
+1. Start with K-1 vertices {0,...,K-2} and 0 edge. 
+2. Let n = K.  Let canonicals be empty set. 
+4. Repeat until n > N:
     - Add vertex (n-1) to the vertex set.
-    - 
+    - General all edge candidates that goes through the new vertex, by finding \binom{n-1}{k-1} sets without vertex (n-1), and add vertex (n-1) to each edge.
+    - For each graph g in the canonical set, we want to add all possible combinations of the edge candidates (2^\binom{n-1}{k-1} in total) to g and see if we can generate additional graphs that are not isomorphic to anything already in the canonical set. 
+        *  
