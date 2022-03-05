@@ -2,13 +2,13 @@
 
 ## Preliminary Results (to be verified)
 
-k = number of vertices in each edge
+K = number of vertices in each edge
 
-n = number of vertices in each graph
+N = number of vertices in each graph
 
-values in the table : minimum theta value across all graphs with n vertices that are T_k free. Where theta(H) is defined as alpha(H) + theta(H) beta(H) =1, alpha(H) is the undirected edge density in the graph, beta(H) is the directed edge density in the graph.
+values in the table : minimum theta value across all graphs with N vertices that are T_K free. Where theta(H) is defined as alpha(H) + theta(H) beta(H) =1, alpha(H) is the undirected edge density in the graph, beta(H) is the directed edge density in the graph.
 
-| n   | k=2 | k=3   | k=4   | k=5   | k=6   |
+| N   | K=2 | K=3   | K=4   | K=5   | K=6   |
 | --- | --- | ----- | ----- | ----- | ----- |
 | 2   |   1 |       |       |       |       |
 | 3   | 3/2 |   1   |       |       |       |
@@ -18,7 +18,7 @@ values in the table : minimum theta value across all graphs with n vertices that
 | 7   | 7/4 | ?     | ?     |   9/5 |   3/2 | 
 | 8   |   ? |  ?    | ?     |   ?   |   ?   |
 
-**Note: k=5, n=7, min_theta=9/5  should give original result, and prove the k-SAT counting conjecture by Bollobás, Brightwell, and Leader, for k=5 and k=6, following the "ENUMERATING k-SAT FUNCTIONS" paper.**
+**Note: K=5, N=7, min_theta=9/5  should give original result, and prove the k-SAT counting conjecture by Bollobás, Brightwell, and Leader, for k=5 and k=6, following the "ENUMERATING k-SAT FUNCTIONS" paper.**
 
 ## Setup
 * In order to build and run the code, c++ 20 compatible compiler is required. My environment uses `gcc (Rev8, Built by MSYS2 project) 11.2.0`, but any recent release of gcc should work. 
@@ -53,4 +53,10 @@ All source code are in the `src` directory.
 - `counters.h` and `counters.cpp`: the header and implementation of a bunch of counters. The minimum theta value is stored here with the graph producing it. Also contains a bunch of other statistical counters used to track the performance of the algorithm.
 
 ## Algorithm Design Summary
-TODO
+### Growing the Search Tree
+We use a simple idea to grow the search tree while try to avoid unnecessary work. This is implemented in `grower.h`.  Note all graphs are on N vertices {0,1,...,N-1}. When we say "a graph with n vertices" in this section, we mean the number of vertices that appear in some edges is n.
+
+1. Start with K-1 vertices {0,...,K-2} and 0 edge. Let n = K.
+2. Repeat until n > N:
+    - Add vertex (n-1) to the vertex set.
+    - 
