@@ -20,6 +20,8 @@ class Grower {
 
   // The log file.
   std::ofstream* const log;
+  // Utility used to enumerate all edge sets to add.
+  EdgeGenerator edge_gen;
 
   // Constructs all non-isomorphic graphs with n vertices that are T_k-free,
   // and add them to the canonicals. Before calling this, all such graphs

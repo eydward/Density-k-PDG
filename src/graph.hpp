@@ -465,19 +465,8 @@ bool Graph<K, N>::contains_Tk(int v) const {
 
 template <int K, int N>
 void Graph<K, N>::print_concise(std::ostream& os) const {
-  os << "  {";
-  bool is_first = true;
-  for (int i = 0; i < edge_count; i++) {
-    if (!is_first) {
-      os << ", ";
-    }
-    is_first = false;
-    print_vertices(os, edges[i].vertex_set, N);
-    if (edges[i].head_vertex != UNDIRECTED) {
-      os << ">" << (int)edges[i].head_vertex;
-    }
-  }
-  os << "}\n";
+  os << "  ";
+  Edge::print_edges(os, edge_count, edges);
 }
 
 #if false

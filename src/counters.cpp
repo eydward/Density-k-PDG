@@ -59,20 +59,8 @@ void Counters::print_counters_to_stream(std::ostream& os) {
 
   os << "\n---------- k=" << k << ", n=" << n << "-------------------------------"
      << "\nAccumulated canonicals\t= " << graph_accumulated_canonicals
-     << "\nMinimum theta = " << min_theta.n << " / " << min_theta.d << "\nProduced by graph: {";
-
-  bool is_first = true;
-  for (int i = 0; i < min_theta_edge_count; i++) {
-    if (!is_first) {
-      os << ", ";
-    }
-    is_first = false;
-    print_vertices(os, min_theta_edges[i].vertex_set, n);
-    if (min_theta_edges[i].head_vertex != UNDIRECTED) {
-      os << ">" << (int)min_theta_edges[i].head_vertex;
-    }
-  }
-  os << "}\n";
+     << "\nMinimum theta = " << min_theta.n << " / " << min_theta.d << "\nProduced by graph: ";
+  Edge::print_edges(os, min_theta_edge_count, min_theta_edges);
 
   os << "\nWall clock time:  "
      << std::chrono::duration_cast<std::chrono::milliseconds>(end - start_time).count() << "ms"

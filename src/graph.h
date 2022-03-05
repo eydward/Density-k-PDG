@@ -21,6 +21,11 @@ struct Edge {
 
   Edge() : vertex_set(0), head_vertex(0) {}
   Edge(uint8 vset, uint8 head) : vertex_set(vset), head_vertex(head) {}
+
+  // Utility function to print an edge array to the given output stream.
+  // Undirected edge is printed as "013" (for vertex set {0,1,3}),
+  // and directed edge is printed as "013>1" (for vertex set {0,1,3} and head vertex 1).
+  static void print_edges(std::ostream& os, uint8 edge_count, const Edge edges[]);
 };
 
 // Represent the characteristics of a vertex, that is invariant under graph isomorphisms.
@@ -150,13 +155,3 @@ struct Graph {
   void print_concise(std::ostream& os) const;
   void print() const;
 };
-
-// Helper function for printing vertex list in an edge.
-inline void print_vertices(std::ostream& os, uint8 vertices, int N) {
-  for (int v = 0; v < N; v++) {
-    if ((vertices & 1) != 0) {
-      os << v;
-    }
-    vertices >>= 1;
-  }
-}

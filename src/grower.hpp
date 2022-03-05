@@ -38,7 +38,7 @@ void Grower<K, N>::print(bool print_graphs) {
 // Note all edges added in this step contains vertex (n-1).
 template <int K, int N>
 void Grower<K, N>::grow_step(int n) {
-  EdgeGenerator<K, N> edge_gen(n);
+  edge_gen.initialize(K, n);
 
   for (const G& g : canonicals[n - 1]) {
     assert(n == K || (g.is_canonical && g.vertex_count == n - 1));

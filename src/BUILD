@@ -14,7 +14,9 @@ cc_library(
     ],
     srcs=[
         "counters.cpp",
+        "edge_gen.cpp",
         "fraction.cpp",
+        "graph.cpp",
     ],
     copts=["-std=c++20"],
 )
@@ -29,6 +31,7 @@ cc_binary(
 cc_test(
     name="graph_test",
     srcs=[
+        "tests/edge_gen_test.cpp",
         "tests/fraction_test.cpp",
         "tests/grower_test.cpp",
         "tests/permutator_test.cpp",
