@@ -20,9 +20,8 @@ std::string get_log_file_name(const char* exe_path) {
 
 int main(int argc, char* argv[]) {
   EdgeGenerator edge_gen;
-  edge_gen.initialize(2, 4);
+  edge_gen.initialize(4, 5);
   while (edge_gen.next()) {
-    std::cout << "***\n";
     Edge::print_edges(std::cout, edge_gen.edge_count, edge_gen.edges);
   }
   return 0;

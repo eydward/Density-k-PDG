@@ -46,7 +46,7 @@ bool EdgeGenerator::next() {
   // Create the edge set using the binary mask.
   edge_count = 0;
   for (int i = 0; i < edge_candidates.size(); i++) {
-    if ((current_mask & (1 << n)) != 0) {
+    if ((current_mask & (1 << i)) != 0) {
       edges[edge_count].vertex_set = edge_candidates[i];
       edges[edge_count].head_vertex = UNDIRECTED;
       ++edge_count;
