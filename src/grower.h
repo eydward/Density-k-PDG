@@ -18,7 +18,7 @@ class Grower {
   };
 
   // The log file.
-  ofstream* const log;
+  std::ofstream* const log;
 
   // Constructs all non-isomorphic graphs with n vertices that are T_k-free,
   // and add them to the canonicals. Before calling this, all such graphs
@@ -26,7 +26,7 @@ class Grower {
   // Note all edges added in this step contains vertex (n-1).
   void grow_step(int n) {
     // First find all edge candidates through the new vertex.
-    vector<uint8> edge_candidates;
+    std::vector<uint8> edge_candidates;
     for (uint8 mask = 0; mask < (1 << (n - 1)); mask++) {
       if (__builtin_popcount(mask) == K - 1) {
         edge_candidates.push_back(mask | (1 << (n - 1)));
@@ -42,9 +42,9 @@ class Grower {
       // (2) for each graph in current, for each edge candidate, try to add. If can, put in next.
       // (3) Add everything in current to canonicals, and move next to current.
       // Repeat for m times.
-      unordered_set<G, GraphHasher, GraphComparer> current;
+      std::unordered_set<G, GraphHasher, GraphComparer> current;
       current.insert(g);
-      unordered_set<G, GraphHasher, GraphComparer> next;
+      std::unordered_set<G, GraphHasher, GraphComparer> next;
 
       G copy;
       for (int i = 0; i < edge_candidates.size(); i++) {
@@ -84,13 +84,13 @@ class Grower {
     }
   }
 
-  void print_config(ostream& os) {
+  void print_config(std::ostream& os) {
     os << "Searching for all T_k-free k-PDGs\n    K= " << K
        << " (number of vertices in each edge)\n    N= " << N
        << " (total number of vertices in each graph)\n    E= " << G::MAX_EDGES
        << " (maximum possible number of edges in each graph)\n";
   }
-  void print_state_to_stream(bool print_graphs, ostream& os) {
+  void print_state_to_stream(bool print_graphs, std::ostream& os) {
     for (int i = 0; i < N + 1; i++) {
       os << "order=" << i << " : # canonicals=" << canonicals[i].size() << "\n";
       if (print_graphs) {
@@ -102,15 +102,15 @@ class Grower {
   }
 
  public:
-  Grower(ofstream* log_stream = nullptr) : log(log_stream) {}
+  Grower(std::ofstream* log_stream = nullptr) : log(log_stream) {}
 
   // One canonical graphs with n vertices in each isomorphism class is in canonicals[n].
-  unordered_set<G, GraphHasher, GraphComparer> canonicals[N + 1];
+  std::unordered_set<G, GraphHasher, GraphComparer> canonicals[N + 1];
 
   // Find all canonical isomorphism class representations with up to max_n vertices.
   void grow() {
     static_assert(N <= 8);
-    print_config(cout);
+    print_config(std::cout);
     if (log != nullptr) {
       print_config(*log);
     }
@@ -128,7 +128,7 @@ class Grower {
   // Debug print the content of the canonicals after the growth.
   // If print_graphs==true, print stats and all graphs. Otherwise prints stats only.
   void print(bool print_graphs) {
-    print_state_to_stream(print_graphs, cout);
+    print_state_to_stream(print_graphs, std::cout);
     if (log != nullptr) {
       print_state_to_stream(print_graphs, *log);
     }

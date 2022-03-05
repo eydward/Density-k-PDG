@@ -3,7 +3,6 @@
 #include <bits/stdc++.h>
 
 #include "fraction.h"
-using namespace std;
 
 using uint8 = unsigned __int8;
 using uint32 = unsigned __int32;
@@ -153,7 +152,7 @@ struct Graph {
 };
 
 // Helper function for printing vertex list in an edge.
-inline void print_vertices(ostream& os, uint8 vertices, int N) {
+inline void print_vertices(std::ostream& os, uint8 vertices, int N) {
   for (int v = 0; v < N; v++) {
     if ((vertices & 1) != 0) {
       os << v;

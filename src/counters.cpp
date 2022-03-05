@@ -1,7 +1,6 @@
 #include "counters.h"
 
 #include <bits/stdc++.h>
-using namespace std;
 
 Fraction Counters::min_theta(1E8, 1);
 Edge Counters::min_theta_edges[255]{};
@@ -22,7 +21,7 @@ std::chrono::time_point<std::chrono::steady_clock> Counters::start_time;
 std::chrono::time_point<std::chrono::steady_clock> Counters::last_print_time;
 std::ofstream* Counters::log = nullptr;
 
-void Counters::initialize(ofstream* log_stream) {
+void Counters::initialize(std::ofstream* log_stream) {
   min_theta = Fraction(1E8, 1);
   graph_inits = 0;
   graph_copies = 0;
@@ -47,7 +46,7 @@ void Counters::print_at_time_interval() {
 }
 
 void Counters::print_counters() {
-  print_counters_to_stream(cout);
+  print_counters_to_stream(std::cout);
   if (log != nullptr) {
     print_counters_to_stream(*log);
     log->flush();

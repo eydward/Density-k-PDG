@@ -3,7 +3,6 @@
 
 #include "fraction.h"
 #include "graph.h"
-using uint64 = unsigned __int64;
 
 // Holds all statistical counters to keep track of number of operations during the search.
 struct Counters {

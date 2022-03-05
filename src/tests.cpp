@@ -109,7 +109,7 @@ TEST(GraphTest, PermuteIsomorphic) {
     EXPECT_TRUE(h.is_isomorphic(g));
     EXPECT_EQ(g.edge_count, 4);
     EXPECT_EQ(g.undirected_edge_count, 2);
-  } while (next_permutation(p, p + 5));
+  } while (std::next_permutation(p, p + 5));
 }
 
 TEST(GraphTest, PermuteCanonical) {
@@ -230,7 +230,7 @@ TEST(GraphTest, ContainsT3) {
     EXPECT_TRUE(h.contains_Tk(p[2]));
     EXPECT_TRUE(h.contains_Tk(p[3]));
     EXPECT_FALSE(h.contains_Tk(p[4]));
-  } while (next_permutation(p, p + 5));
+  } while (std::next_permutation(p, p + 5));
 }
 
 TEST(GraphTest, NotContainsT3) {
@@ -246,7 +246,7 @@ TEST(GraphTest, NotContainsT3) {
     for (int i = 0; i < 5; i++) {
       EXPECT_FALSE(h.contains_Tk(i));
     }
-  } while (next_permutation(p, p + 5));
+  } while (std::next_permutation(p, p + 5));
 }
 
 TEST(GraphTest, Binom) {
@@ -297,16 +297,16 @@ TEST(GrowerTest, G43) {
 }
 
 TEST(PermutatorTest, Permutate) {
-  vector<pair<int, int>> sets{make_pair(0, 2)};
-  Permutator<3> perm(move(sets));
+  std::vector<std::pair<int, int>> sets{std::make_pair(0, 2)};
+  Permutator<3> perm(std::move(sets));
   EXPECT_TRUE(perm.next());
   ASSERT_THAT(perm.p, ElementsAre(1, 0, 2));
   EXPECT_FALSE(perm.next());
 }
 
 TEST(PermutatorTest, Permutate2) {
-  vector<pair<int, int>> sets{make_pair(0, 2), make_pair(3, 5)};
-  Permutator<6> perm(move(sets));
+  std::vector<std::pair<int, int>> sets{std::make_pair(0, 2), std::make_pair(3, 5)};
+  Permutator<6> perm(std::move(sets));
   EXPECT_TRUE(perm.next());
   ASSERT_THAT(perm.p, ElementsAre(1, 0, 2, 3, 4, 5));
   EXPECT_TRUE(perm.next());
@@ -317,7 +317,7 @@ TEST(PermutatorTest, Permutate2) {
 }
 
 TEST(PermutatorTest, Permutate3) {
-  vector<pair<int, int>> sets{make_pair(0, 3), make_pair(3, 5)};
+  std::vector<std::pair<int, int>> sets{std::make_pair(0, 3), std::make_pair(3, 5)};
   Permutator<5> perm(move(sets));
   EXPECT_TRUE(perm.next());
   ASSERT_THAT(perm.p, ElementsAre(0, 1, 2, 4, 3));

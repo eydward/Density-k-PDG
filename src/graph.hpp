@@ -74,8 +74,8 @@ void Graph<K, N>::init() {
   }
 
   // Sort edges
-  sort(edges, edges + edge_count,
-       [](const Edge& a, const Edge& b) { return a.vertex_set < b.vertex_set; });
+  std::sort(edges, edges + edge_count,
+            [](const Edge& a, const Edge& b) { return a.vertex_set < b.vertex_set; });
 
   // Compute signatures of vertices, first pass (degrees, but not hash code).
   // As a side product, also gather the neighbor vertex sets of each vertex.
@@ -137,7 +137,7 @@ void Graph<K, N>::init() {
     signatures[v] = vertices[v].get_hash();
   }
   // Note we sort by descreasing order, to put heavily used vertices at the beginning.
-  sort(signatures, signatures + N, greater<uint64>());
+  std::sort(signatures, signatures + N, std::greater<uint64>());
   // Stop the hash combination once we reach vertices with 0 degrees.
   for (int v = 0; v < N && (signatures[v] >> 32 != 0); v++) {
     hash = hash_combine64(hash, signatures[v]);
@@ -161,7 +161,7 @@ void Graph<K, N>::hash_neighbors(uint8 neighbors, uint32& hash) {
 
     // Sort to make hash combination process invariant to isomorphisms.
     if (neighbor_count > 1) {
-      sort(signatures, signatures + neighbor_count);
+      std::sort(signatures, signatures + neighbor_count);
     }
     for (int i = 0; i < neighbor_count; i++) {
       hash = hash_combine32(hash, signatures[i]);
@@ -226,8 +226,8 @@ void Graph<K, N>::permute_canonical(int p[N], Graph& g) const {
       }
     }
   }
-  sort(g.edges, g.edges + edge_count,
-       [](const Edge& a, const Edge& b) { return a.vertex_set < b.vertex_set; });
+  std::sort(g.edges, g.edges + edge_count,
+            [](const Edge& a, const Edge& b) { return a.vertex_set < b.vertex_set; });
 
   g.hash = hash;
   g.is_init = is_init;
@@ -249,7 +249,8 @@ void Graph<K, N>::canonicalize() {
   // Note we sort by descreasing order, to push vertices to lower indices.
   int s[N];
   for (int v = 0; v < N; v++) s[v] = v;
-  sort(s, s + N, [this](int a, int b) { return vertices[a].get_hash() > vertices[b].get_hash(); });
+  std::sort(s, s + N,
+            [this](int a, int b) { return vertices[a].get_hash() > vertices[b].get_hash(); });
   // Now compute the inverse, which gives the permutation used to canonicalize.
   int p[N];
   for (int v = 0; v < N; v++) {
@@ -356,14 +357,14 @@ bool Graph<K, N>::is_isomorphic(const Graph& other) const {
   // If the two graphs are identical, then we've found isomorphism. Otherwise after
   // all permutations are tried, we declare the two graphs as non-isomorphic.
 
-  vector<pair<int, int>> perm_sets;
+  std::vector<std::pair<int, int>> perm_sets;
   for (int v = 0; v < N - 1 && vertices[v].get_degrees() > 0; v++) {
     if (vertices[v + 1].get_hash() == vertices[v].get_hash()) {
       int t = v;
       while (t < N && vertices[t].get_hash() == vertices[v].get_hash()) {
         t++;
       }
-      perm_sets.push_back(make_pair(v, t));
+      perm_sets.push_back(std::make_pair(v, t));
       v = t;
     }
   }

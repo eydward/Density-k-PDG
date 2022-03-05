@@ -2,8 +2,8 @@
 #include "graph.hpp"
 #include "grower.h"
 
-string get_log_file_name(const char* exe_path) {
-  string path(exe_path);
+std::string get_log_file_name(const char* exe_path) {
+  std::string path(exe_path);
   auto pos = path.rfind('/');
   if (pos == path.npos) {
     pos = path.rfind('\\');
@@ -17,9 +17,9 @@ string get_log_file_name(const char* exe_path) {
 int main(int argc, char* argv[]) {
   std::filesystem::path log = std::filesystem::current_path();
   log.append(get_log_file_name(argv[0]));
-  cout << "Log file path: " << log << "\n";
+  std::cout << "Log file path: " << log << "\n";
 
-  ofstream log_stream(log);
+  std::ofstream log_stream(log);
   Counters::initialize(&log_stream);
 
   Grower<6, 8> s(&log_stream);
