@@ -8,15 +8,15 @@ N = number of vertices in each graph
 
 values in the table : minimum theta value across all graphs with N vertices that are T_K free. Where theta(H) is defined as alpha(H) + theta(H) beta(H) =1, alpha(H) is the undirected edge density in the graph, beta(H) is the directed edge density in the graph.
 
-| N   | K=2 | K=3   | K=4   | K=5   | K=6   |
-| --- | --- | ----- | ----- | ----- | ----- |
-| 2   |   1 |       |       |       |       |
-| 3   | 3/2 |   1   |       |       |       |
-| 4   | 3/2 | 3/2   |     1 |       |       |
-| 5   | 5/3 | 9/5   |   3/2 |     1 |       |
-| 6   | 5/3 | 19/10 |  13/7 |   3/2 |     1 |
-| 7   | 7/4 | ?     | ?     |   9/5 |   3/2 | 
-| 8   |   ? |  ?    | ?     |   ?   |   ?   |
+| N   | K=2 | K=3   | K=4   | K=5   | K=6   | K=7   |
+| --- | --- | ----- | ----- | ----- | ----- | ----- |
+| 2   |   1 |       |       |       |       |       |
+| 3   | 3/2 |   1   |       |       |       |       |
+| 4   | 3/2 | 3/2   |     1 |       |       |       |
+| 5   | 5/3 | 9/5   |   3/2 |     1 |       |       |
+| 6   | 5/3 | 19/10 |  13/7 |   3/2 |     1 |       |
+| 7   | 7/4 | ?     | ?     |   9/5 |   3/2 |     1 |
+| 8   |   ? |  ?    | ?     |   ?   |   ?   |   3/2 |
 
 **Note: K=5, N=7, min_theta=9/5  should give original result, and prove the k-SAT counting conjecture by Bollobás, Brightwell, and Leader, for k=5 and k=6, following the "ENUMERATING k-SAT FUNCTIONS" paper.**
 
