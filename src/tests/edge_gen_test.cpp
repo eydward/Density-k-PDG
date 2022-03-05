@@ -20,6 +20,16 @@ TEST(EdgeGeneratorTest, Generate22) {
   // The enumeration has completed.
   EXPECT_FALSE(edge_gen.next());
 
+  // Make sure reset_enumeration cleans up everything and works again.
+  edge_gen.reset_enumeration();
+  for (int i = -1; i <= 1; i++) {
+    EXPECT_TRUE(edge_gen.next());
+    EXPECT_EQ(edge_gen.edge_count, 1);
+    EXPECT_EQ(edge_gen.edges[0].vertex_set, 0b11);
+    EXPECT_EQ(edge_gen.edges[0].head_vertex, static_cast<uint8>(i));
+  }
+  EXPECT_FALSE(edge_gen.next());
+
   // Make sure initialize cleans up everything and works again.
   edge_gen.initialize(2, 2);
   for (int i = -1; i <= 1; i++) {

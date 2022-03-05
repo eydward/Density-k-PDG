@@ -15,6 +15,11 @@ void EdgeGenerator::initialize(int k, int vertex_count) {
   assert(edge_candidates.size() == compute_binom(n - 1, k - 1));
 }
 
+void EdgeGenerator::reset_enumeration() {
+  current_mask = 0;
+  edge_count = 0;
+}
+
 bool EdgeGenerator::next() {
   if (edge_count > 0) {
     // If we already have a set of edges, and are in the middle of trying all the

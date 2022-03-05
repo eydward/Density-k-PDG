@@ -20,7 +20,11 @@ struct Edge {
   uint8 head_vertex;
 
   Edge() : vertex_set(0), head_vertex(0) {}
-  Edge(uint8 vset, uint8 head) : vertex_set(vset), head_vertex(head) {}
+  Edge(uint8 vset, uint8 head) : vertex_set(vset), head_vertex(head) {
+#if !NDEBUG
+    assert(head_vertex == UNDIRECTED || ((1 << head_vertex) & vertex_set) != 0);
+#endif
+  }
 
   // Utility function to print an edge array to the given output stream.
   // Undirected edge is printed as "013" (for vertex set {0,1,3}),
@@ -101,7 +105,7 @@ struct Graph {
 
   // Adds an edge to the graph. It's caller's responsibility to make sure this is allowed.
   // And the input is consistent (head is inside the vertex set).
-  void add_edge(uint8 vset, uint8 head);
+  void add_edge(Edge edge);
 
   // Initializes everything in this graph from the edge set.
   void init();

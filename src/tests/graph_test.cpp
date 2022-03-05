@@ -8,10 +8,10 @@ using namespace testing;
 
 TEST(GraphTest, Init) {
   Graph<3, 7> g;
-  g.add_edge(0b11100, UNDIRECTED);  // 234
-  g.add_edge(0b1100010, 5);         // 156>5
-  g.add_edge(0b1110, 2);            // 123>2
-  g.add_edge(0b1011, UNDIRECTED);   // 013
+  g.add_edge(Edge(0b11100, UNDIRECTED));  // 234
+  g.add_edge(Edge(0b1100010, 5));         // 156>5
+  g.add_edge(Edge(0b1110, 2));            // 123>2
+  g.add_edge(Edge(0b1011, UNDIRECTED));   // 013
   g.init();
 
   EXPECT_FALSE(g.is_canonical);
@@ -47,10 +47,10 @@ TEST(GraphTest, Init) {
 // Utility function to create and initialize T_3.
 Graph<3, 5> get_T3() {
   Graph<3, 5> g;
-  g.add_edge(0b1011, UNDIRECTED);  // 013
-  g.add_edge(0b1110, 2);           // 123>2
-  g.add_edge(0b1101, UNDIRECTED);  // 023
-  g.add_edge(0b11100, 2);          // 234>2
+  g.add_edge(Edge(0b1011, UNDIRECTED));  // 013
+  g.add_edge(Edge(0b1110, 2));           // 123>2
+  g.add_edge(Edge(0b1101, UNDIRECTED));  // 023
+  g.add_edge(Edge(0b11100, 2));          // 234>2
   g.init();
   return g;
 }
@@ -124,10 +124,10 @@ TEST(GraphTest, PermuteCanonical) {
 
 TEST(GraphTest, PermuteCanonical2) {
   Graph<2, 4> g, h, f;
-  g.add_edge(0b1001, UNDIRECTED);  // 03
-  g.add_edge(0b0110, UNDIRECTED);  // 12
-  g.add_edge(0b0101, 2);           // 02>2
-  g.add_edge(0b1010, 3);           // 13>3
+  g.add_edge(Edge(0b1001, UNDIRECTED));  // 03
+  g.add_edge(Edge(0b0110, UNDIRECTED));  // 12
+  g.add_edge(Edge(0b0101, 2));           // 02>2
+  g.add_edge(Edge(0b1010, 3));           // 13>3
   g.init();
   g.canonicalize();
 
@@ -154,10 +154,10 @@ TEST(GraphTest, Canonicalize) {
 
 TEST(GraphTest, Canonicalize2) {
   Graph<3, 8> g;
-  g.add_edge(0b1011000, UNDIRECTED);  // 346
-  g.add_edge(0b1110000, 5);           // 456>5
-  g.add_edge(0b1101000, UNDIRECTED);  // 356
-  g.add_edge(0b11100000, 5);          // 567>5
+  g.add_edge(Edge(0b1011000, UNDIRECTED));  // 346
+  g.add_edge(Edge(0b1110000, 5));           // 456>5
+  g.add_edge(Edge(0b1101000, UNDIRECTED));  // 356
+  g.add_edge(Edge(0b11100000, 5));          // 567>5
   g.init();
   EXPECT_EQ(g.vertices[0].get_degrees(), 0);
   EXPECT_EQ(g.vertices[1].get_degrees(), 0);
@@ -176,7 +176,7 @@ TEST(GraphTest, Canonicalize2) {
 
 TEST(GraphTest, Canonicalize3) {
   Graph<2, 7> g, h;
-  g.add_edge(0b0101, UNDIRECTED);
+  g.add_edge(Edge(0b0101, UNDIRECTED));
   g.init();
   g.copy(h);
   h.canonicalize();
@@ -186,7 +186,7 @@ TEST(GraphTest, Canonicalize3) {
 
 TEST(GraphTest, Copy) {
   Graph<3, 5> g = get_T3();
-  g.add_edge(0b0111, UNDIRECTED);
+  g.add_edge(Edge(0b0111, UNDIRECTED));
   g.init();
   Graph<3, 5> h;
   g.copy_without_init(h);
@@ -203,12 +203,12 @@ TEST(GraphTest, NonIsomorphic) {
 
   Graph<3, 5> h;
   g.copy_without_init(h);
-  h.add_edge(0b10110, UNDIRECTED);  // 124
+  h.add_edge(Edge(0b10110, UNDIRECTED));  // 124
   h.init();
 
   Graph<3, 5> f;
   g.copy_without_init(f);
-  f.add_edge(0b10110, 1);  // 124
+  f.add_edge(Edge(0b10110, 1));  // 124
   f.init();
 
   EXPECT_NE(g.hash, f.hash);
@@ -234,9 +234,9 @@ TEST(GraphTest, ContainsT3) {
 
 TEST(GraphTest, NotContainsT3) {
   Graph<3, 5> g, h;
-  g.add_edge(0b1011, UNDIRECTED);  // 013
-  g.add_edge(0b1110, UNDIRECTED);  // 123
-  g.add_edge(0b1101, UNDIRECTED);  // 023
+  g.add_edge(Edge(0b1011, UNDIRECTED));  // 013
+  g.add_edge(Edge(0b1110, UNDIRECTED));  // 123
+  g.add_edge(Edge(0b1101, UNDIRECTED));  // 023
   g.init();
 
   int p[5]{0, 1, 2, 3, 4};

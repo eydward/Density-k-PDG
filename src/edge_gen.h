@@ -18,6 +18,9 @@ struct EdgeGenerator {
   // k = number of vertices in each edge.
   void initialize(int k, int vertex_count);
 
+  // Resets the enumeration state. Starts over.
+  void reset_enumeration();
+
   // Generates the next edge set. Returns true if the next edge set is available in `edges`.
   // Returns false if all possibilities have already been enumerated.
   bool next();

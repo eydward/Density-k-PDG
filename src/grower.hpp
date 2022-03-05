@@ -18,7 +18,7 @@ void Grower<K, N>::grow() {
   Counters::observe_theta(g);
 
   for (int n = K; n <= N; n++) {
-    grow_step_impl_alt(n);
+    grow_step(n);
   }
 }
 
@@ -41,14 +41,27 @@ void Grower<K, N>::grow_step(int n) {
   edge_gen.initialize(K, n);
 
   for (const G& g : canonicals[n - 1]) {
+    edge_gen.reset_enumeration();
     assert(n == K || (g.is_canonical && g.vertex_count == n - 1));
     assert(g.vertices[n - 1].get_degrees() == 0);
 
     G copy;
-    // Loop through all (2^\binom{n-1}{k-1} - 1) edge combinations, add them to g, and check
+    // Loop through all ((K+1)^\binom{n-1}{k-1} - 1) edge combinations, add them to g, and check
     // add to canonicals unless it's isomorphic to an existing one.
     while (edge_gen.next()) {
       g.copy_without_init(copy);
+      for (int i = 0; i < edge_gen.edge_count; i++) {
+        copy.add_edge(edge_gen.edges[i]);
+      }
+      if (copy.contains_Tk(n - 1)) continue;
+
+      copy.init();
+      copy.canonicalize();
+
+      if (!canonicals[n].contains(copy)) {
+        canonicals[n].insert(copy);
+        Counters::observe_theta(copy);
+      }
     }
   }
 }
@@ -91,7 +104,7 @@ void Grower<K, N>::grow_step_impl_alt(int n) {
             for (int head = -1; head < n; head++) {
               if (head >= 0 && (edge & (1 << head)) == 0) continue;
               start.copy_without_init(copy);
-              copy.add_edge(edge, head < 0 ? UNDIRECTED : head);
+              copy.add_edge(Edge(edge, head < 0 ? UNDIRECTED : head));
               if (copy.contains_Tk(n - 1)) continue;
 
               copy.init();

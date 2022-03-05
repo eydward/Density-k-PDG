@@ -45,14 +45,13 @@ bool Graph<K, N>::edge_allowed(uint8 vertices) const {
 // Add an edge to the graph. It's caller's responsibility to make sure this is allowed.
 // And the input is consistent (head is inside the vertex set).
 template <int K, int N>
-void Graph<K, N>::add_edge(uint8 vset, uint8 head) {
+void Graph<K, N>::add_edge(Edge edge) {
 #if !NDEBUG
-  assert(head == UNDIRECTED || ((1 << head) & vset) != 0);
-  assert(edge_allowed(vset));
-  assert(__builtin_popcount(vset) == K);
+  assert(edge_allowed(edge.vertex_set));
+  assert(__builtin_popcount(edge.vertex_set) == K);
 #endif
-  edges[edge_count++] = Edge(vset, head);
-  if (head == UNDIRECTED) {
+  edges[edge_count++] = edge;
+  if (edge.head_vertex == UNDIRECTED) {
     ++undirected_edge_count;
   }
 }
