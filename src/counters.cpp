@@ -9,6 +9,7 @@ int Counters::k = 0;
 int Counters::n = 0;
 uint64 Counters::graph_inits = 0;
 uint64 Counters::graph_copies = 0;
+uint64 Counters::graph_accumulated_canonicals = 0;
 uint64 Counters::graph_canonicalize_ops = 0;
 uint64 Counters::graph_isomorphic_tests = 0;
 uint64 Counters::graph_isomorphic_expensive = 0;
@@ -57,6 +58,7 @@ void Counters::print_counters_to_stream(std::ostream& os) {
   const auto end = std::chrono::steady_clock::now();
 
   os << "\n---------- k=" << k << ", n=" << n << "-------------------------------"
+     << "\nAccumulated canonicals\t= " << graph_accumulated_canonicals
      << "\nMinimum theta = " << min_theta.n << " / " << min_theta.d << "\nProduced by graph: {";
 
   bool is_first = true;

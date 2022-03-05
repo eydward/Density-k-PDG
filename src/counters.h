@@ -26,6 +26,7 @@ struct Counters {
 
   static uint64 graph_inits;
   static uint64 graph_copies;
+  static uint64 graph_accumulated_canonicals;
   static uint64 graph_canonicalize_ops;
   static uint64 graph_isomorphic_tests;
   // Number of isomorphic tests that have to use vertex permutations.
@@ -55,6 +56,7 @@ struct Counters {
   static void observe_theta(const Graph<K, N>& g) {
     k = K;
     n = N;
+    ++graph_accumulated_canonicals;
     Fraction theta = g.get_theta();
     if (theta < min_theta) {
       min_theta = theta;

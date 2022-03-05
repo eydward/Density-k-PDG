@@ -2,6 +2,9 @@
 #include "graph.hpp"
 #include "grower.h"
 
+constexpr int K = 2;
+constexpr int N = 7;
+
 std::string get_log_file_name(const char* exe_path) {
   std::string path(exe_path);
   auto pos = path.rfind('/');
@@ -22,7 +25,7 @@ int main(int argc, char* argv[]) {
   std::ofstream log_stream(log);
   Counters::initialize(&log_stream);
 
-  Grower<6, 8> s(&log_stream);
+  Grower<K, N> s(&log_stream);
   s.grow();
   s.print(false);
 

@@ -91,14 +91,17 @@ class Grower {
        << " (maximum possible number of edges in each graph)\n";
   }
   void print_state_to_stream(bool print_graphs, std::ostream& os) {
+    uint64 total_canonicals = 0;
     for (int i = 0; i < N + 1; i++) {
-      os << "order=" << i << " : # canonicals=" << canonicals[i].size() << "\n";
+      os << "order=" << i << " : canonicals= " << canonicals[i].size() << "\n";
+      total_canonicals += canonicals[i].size();
       if (print_graphs) {
         for (const G& g : canonicals[i]) {
           g.print_concise(os);
         }
       }
     }
+    os << "Total canonicals= " << total_canonicals << "\n";
   }
 
  public:
@@ -119,6 +122,7 @@ class Grower {
     G g;
     g.init();
     canonicals[K - 1].insert(g);
+    Counters::observe_theta(g);
 
     for (int n = K; n <= N; n++) {
       grow_step(n);
