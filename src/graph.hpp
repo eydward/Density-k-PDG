@@ -471,7 +471,7 @@ void Graph<K, N>::print_concise(std::ostream& os) const {
       os << ", ";
     }
     is_first = false;
-    print_vertices(edges[i].vertex_set, N);
+    print_vertices(os, edges[i].vertex_set, N);
     if (edges[i].head_vertex != UNDIRECTED) {
       os << ">" << (int)edges[i].head_vertex;
     }

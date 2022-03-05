@@ -153,10 +153,10 @@ struct Graph {
 };
 
 // Helper function for printing vertex list in an edge.
-inline void print_vertices(uint8 vertices, int N) {
+inline void print_vertices(ostream& os, uint8 vertices, int N) {
   for (int v = 0; v < N; v++) {
     if ((vertices & 1) != 0) {
-      cout << v;
+      os << v;
     }
     vertices >>= 1;
   }

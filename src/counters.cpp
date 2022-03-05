@@ -40,7 +40,7 @@ void Counters::initialize(ofstream* log_stream) {
 
 void Counters::print_at_time_interval() {
   const auto now = std::chrono::steady_clock::now();
-  if (std::chrono::duration_cast<std::chrono::minutes>(now - last_print_time).count() >= 1) {
+  if (std::chrono::duration_cast<std::chrono::seconds>(now - last_print_time).count() >= 100) {
     print_counters();
     last_print_time = now;
   }
@@ -50,6 +50,7 @@ void Counters::print_counters() {
   print_counters_to_stream(cout);
   if (log != nullptr) {
     print_counters_to_stream(*log);
+    log->flush();
   }
 }
 
@@ -65,7 +66,7 @@ void Counters::print_counters_to_stream(std::ostream& os) {
       os << ", ";
     }
     is_first = false;
-    print_vertices(min_theta_edges[i].vertex_set, n);
+    print_vertices(os, min_theta_edges[i].vertex_set, n);
     if (min_theta_edges[i].head_vertex != UNDIRECTED) {
       os << ">" << (int)min_theta_edges[i].head_vertex;
     }
