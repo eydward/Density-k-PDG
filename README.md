@@ -40,5 +40,17 @@ Note in order to optimize for speed, we try to avoid dynamic memory allocation a
 
 Note the code currently is single-threaded, doesn't take advantage of multi-core machines and certainly not capable to run in distributed environment. This is TODO. 
 
+## Organization of Code
+All source code are in the `src` directory.
+- `BUILD`: the project that instructs `bazel` how to build, run, and test.
+- `tests.cpp` : unit tests, not part of actual execution.
+- `kPDG.cpp`: entry point. Edit this file to put in the appropriate K and N values before compile and run.
+- `graph.h`: summary declarations of the Graph struct, as well as the definition of `Edge` and `VertexSignature`.
+- `graph.hpp`: the detailed implementation of the Graph struct. Because we use C++ template, the compiler requires the implementation to be in a header file to include, instead of in a cpp file to link. 
+- `grower.h`: the implementation of growing the search tree, see algorithm design below. 
+- `permutator.h`: utility function to generate all permutations with specified ranges.
+- `fraction.h` and `fraction.cpp`: the header and implementation of a fraction. (We store the theta value as a fraction).
+- `counters.h` and `counters.cpp`: the header and implementation of a bunch of counters. The minimum theta value is stored here with the graph producing it. Also contains a bunch of other statistical counters used to track the performance of the algorithm.
+
 ## Algorithm Design Summary
 TODO
