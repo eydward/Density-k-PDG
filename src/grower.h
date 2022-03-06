@@ -9,7 +9,7 @@ class Grower {
  private:
   // Custom hash and compare for the Graph type. Treat isomorphic graphs as being equal.
   struct GraphHasher {
-    size_t operator()(const Graph* g) const { return g->hash; }
+    size_t operator()(const Graph* g) const { return g->graph_hash; }
   };
   struct GraphComparer {
     bool operator()(const Graph* g, const Graph* h) const { return g->is_isomorphic(*h); }

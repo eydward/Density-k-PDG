@@ -36,7 +36,10 @@ int main(int argc, char* argv[]) {
   std::string arguments = "kPDG run arguments: K=" + std::to_string(Graph::K) +
                           ", N=" + std::to_string(Graph::N) +
                           ", TOTAL_EDGES=" + std::to_string(Graph::TOTAL_EDGES) +
-                          ", print_graph=" + std::to_string(print_graph) + "\n\n";
+                          ", print_graph=" + std::to_string(print_graph) +
+                          "\n  sizeof(Edge)=" + std::to_string(sizeof(Edge)) +
+                          ", sizeof(VertexSignature)=" + std::to_string(sizeof(VertexSignature)) +
+                          ", sizeof(Graph)=" + std::to_string(sizeof(Graph)) + "\n\n";
   std::cout << "Log file path: " << log_path << "\n";
   std::ofstream log(log_path);
   std::cout << arguments;

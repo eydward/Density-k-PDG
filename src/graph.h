@@ -5,6 +5,7 @@
 #include "fraction.h"
 
 using uint8 = unsigned __int8;
+using uint16 = unsigned __int16;
 using uint32 = unsigned __int32;
 using uint64 = unsigned __int64;
 
@@ -43,12 +44,11 @@ struct VertexSignature {
   // Let N_u, N_h, N_t be the neighboring vertex sets that correspond to the 3 degree counts above.
   // Within each set, sort by the signature values (without neighbor_hash value) of the vertices.
   // Then combine the hash with this given order.
-  uint32 neighbor_hash;
+  uint8 neighbor_hash;
 
   uint8 degree_undirected;  // Number of undirected edges through this vertex.
   uint8 degree_head;        // Number of directed edges using this vertex as the head.
   uint8 degree_tail;        // Number of directed edges through this vertex but not as head.
-  uint8 reserved;           // Not used, for memory alignment purpose.
 
   // Returns a 32-bit code that represents degree information.
   uint32 get_degrees() const {
@@ -56,8 +56,8 @@ struct VertexSignature {
            static_cast<uint32>(degree_tail);
   }
 
-  // Returns a 64-bit hash code to represent the data.
-  uint64 get_hash() const { return *reinterpret_cast<const uint64*>(this); }
+  // Returns a 32-bit hash code to represent the data.
+  uint32 get_hash() const { return *reinterpret_cast<const uint32*>(this); }
 };
 
 // Represents a k-PDG, with the data structure optimized for computing isomorphisms.
@@ -74,7 +74,7 @@ struct Graph {
   static void set_global_graph_info(int k, int n);
 
   // The hash code is invariant under isomorphisms.
-  uint64 hash;
+  uint32 graph_hash;
 
   // True if the graph is canonicalized (vertex signatures are in descreasing order).
   bool is_canonical;
@@ -113,7 +113,7 @@ struct Graph {
   // Initializes everything in this graph from the edge set.
   void init();
 
-  void hash_neighbors(uint8 neighbors, uint32& hash);
+  void hash_neighbors(uint8 neighbors, uint32& hash_code) const;
 
   // Resets the current graph to no edges.
   void clear();

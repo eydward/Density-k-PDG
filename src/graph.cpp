@@ -4,10 +4,10 @@
 #include "permutator.h"
 
 // Combines value into the hash and returns the combined hash.
-inline uint32 hash_combine32(uint32 hash, uint32 value) {
-  return hash ^= value + 0x9E3779B9ul + (hash << 6) + (hash >> 2);
+uint32 hash_combine32(uint32 hash_code, uint32 value) {
+  return hash_code ^= value + 0x9E3779B9ul + (hash_code << 6) + (hash_code >> 2);
 }
-inline uint64 hash_combine64(uint64 hash, uint64 value) {
+uint64 hash_combine64(uint64 hash, uint64 value) {
   return hash ^= value + 0x9E3779B97F4A7C15ull + (hash << 12) + (hash >> 4);
 }
 
@@ -55,7 +55,7 @@ void Graph::set_global_graph_info(int k, int n) {
 }
 
 Graph::Graph()
-    : hash(0),
+    : graph_hash(0),
       is_canonical(false),
       vertex_count(0),
       edge_count(0),
@@ -99,7 +99,7 @@ void Graph::add_edge(Edge edge) {
 void Graph::init() {
   Counters::increment_graph_inits();
 
-  hash = 0;
+  graph_hash = 0;
   is_canonical = false;
   vertex_count = 0;
   for (int v = 0; v < N; v++) {
@@ -160,28 +160,30 @@ void Graph::init() {
   }
   // Now copy the working values back into the vertex signatures
   for (int v = 0; v < N; v++) {
-    vertices[v].neighbor_hash = neighbor_hash[v];
+    uint16 t = (neighbor_hash[v] >> 16) ^ neighbor_hash[v];
+    vertices[v].neighbor_hash = (t >> 8) ^ t;
   }
 
   // Finally, compute hash for the entire graph.
-  hash = 0;
+  uint64 hash = 0;
   uint64 signatures[MAX_VERTICES];
   for (int v = 0; v < N; v++) {
-    signatures[v] = vertices[v].get_hash();
+    signatures[v] = vertices[v].get_degrees() | (static_cast<uint64>(neighbor_hash[v]) << 32);
   }
   // Note we sort by descreasing order, to put heavily used vertices at the beginning.
-  std::sort(signatures, signatures + N, std::greater<uint64>());
+  std::sort(signatures, signatures + N, std::greater<uint32>());
   // Stop the hash combination once we reach vertices with 0 degrees.
-  for (int v = 0; v < N && (signatures[v] >> 32 != 0); v++) {
-    hash = hash_combine64(hash, signatures[v]);
+  for (int v = 0; v < N; v++) {
+    hash = hash_combine32(hash, signatures[v]);
   }
+  graph_hash = (hash >> 32) ^ hash;
 }
 
-void Graph::hash_neighbors(uint8 neighbors, uint32& hash) {
+void Graph::hash_neighbors(uint8 neighbors, uint32& hash_code) const {
   // The working buffer to compute hash in deterministic order.
   uint32 signatures[MAX_VERTICES];
   if (neighbors == 0) {
-    hash = hash_combine32(hash, 0x12345678);
+    hash_code = hash_combine32(hash_code, 0x12345678);
   } else {
     int neighbor_count = 0;
     for (int i = 0; neighbors != 0; i++) {
@@ -196,14 +198,14 @@ void Graph::hash_neighbors(uint8 neighbors, uint32& hash) {
       std::sort(signatures, signatures + neighbor_count);
     }
     for (int i = 0; i < neighbor_count; i++) {
-      hash = hash_combine32(hash, signatures[i]);
+      hash_code = hash_combine32(hash_code, signatures[i]);
     }
   }
 }
 
 // Resets the current graph to no edges.
 void Graph::clear() {
-  hash = 0;
+  graph_hash = 0;
   is_canonical = false;
   edge_count = undirected_edge_count = vertex_count = 0;
   for (int v = 0; v < N; v++) {
@@ -258,7 +260,7 @@ void Graph::permute_canonical(int p[], Graph& g) const {
   std::sort(g.edges, g.edges + edge_count,
             [](const Edge& a, const Edge& b) { return a.vertex_set < b.vertex_set; });
 
-  g.hash = hash;
+  g.graph_hash = graph_hash;
   g.is_canonical = is_canonical;
   g.vertex_count = vertex_count;
   g.edge_count = edge_count;
@@ -312,7 +314,7 @@ void Graph::canonicalize() {
 void Graph::copy(Graph& g) const {
   Counters::increment_graph_copies();
 
-  g.hash = hash;
+  g.graph_hash = graph_hash;
   for (int v = 0; v < N; v++) {
     *reinterpret_cast<uint64*>(&g.vertices[v]) = *reinterpret_cast<const uint64*>(&vertices[v]);
   }
@@ -342,7 +344,7 @@ bool Graph::is_isomorphic(const Graph& other) const {
   Counters::increment_graph_isomorphic_tests();
 
   if (edge_count != other.edge_count || undirected_edge_count != other.undirected_edge_count ||
-      hash != other.hash)
+      graph_hash != other.graph_hash)
     return false;
 
   // Canonicalize if necessary.

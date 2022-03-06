@@ -93,7 +93,7 @@ TEST(GraphTest, T3) {
 TEST(GraphTest, Clear) {
   Graph g = get_T3();
   g.clear();
-  EXPECT_EQ(g.hash, 0);
+  EXPECT_EQ(g.graph_hash, 0);
   EXPECT_EQ(g.edge_count, 0);
   EXPECT_EQ(g.undirected_edge_count, 0);
   EXPECT_EQ(g.vertices[1].get_hash(), 0);
@@ -105,7 +105,7 @@ TEST(GraphTest, PermuteIsomorphic) {
   int p[5]{0, 1, 2, 3, 4};
   do {
     g.permute(p, h);
-    EXPECT_EQ(g.hash, h.hash);
+    EXPECT_EQ(g.graph_hash, h.graph_hash);
     EXPECT_TRUE(h.is_isomorphic(g));
     EXPECT_EQ(g.edge_count, 4);
     EXPECT_EQ(g.undirected_edge_count, 2);
@@ -147,7 +147,7 @@ TEST(GraphTest, Canonicalize) {
 
   EXPECT_FALSE(g.is_canonical);
   EXPECT_TRUE(h.is_canonical);
-  EXPECT_EQ(g.hash, h.hash);
+  EXPECT_EQ(g.graph_hash, h.graph_hash);
   EXPECT_TRUE(h.is_isomorphic(g));
   for (int v = 0; v < 4; v++) {
     EXPECT_GE(h.vertices[v].get_hash(), h.vertices[v + 1].get_hash());
@@ -168,13 +168,15 @@ TEST(GraphTest, Canonicalize2) {
 
   Graph h = g;
   h.canonicalize();
-  EXPECT_EQ(g.hash, h.hash);
+  EXPECT_EQ(g.graph_hash, h.graph_hash);
   EXPECT_TRUE(h.is_isomorphic(g));
   EXPECT_TRUE(h.is_canonical);
   EXPECT_EQ(h.vertex_count, 5);
 
   Graph f = get_T3();
-  EXPECT_EQ(h.hash, f.hash);
+  Graph::set_global_graph_info(3, 7);
+  f.canonicalize();
+  EXPECT_EQ(h.graph_hash, f.graph_hash);
 }
 
 TEST(GraphTest, Canonicalize3) {
@@ -195,7 +197,7 @@ TEST(GraphTest, Copy) {
   Graph h;
   g.copy_without_init(&h);
   h.init();
-  EXPECT_EQ(g.hash, h.hash);
+  EXPECT_EQ(g.graph_hash, h.graph_hash);
   EXPECT_TRUE(h.is_isomorphic(g));
   EXPECT_EQ(g.edge_count, h.edge_count);
   EXPECT_EQ(g.undirected_edge_count, 3);
@@ -215,9 +217,9 @@ TEST(GraphTest, NonIsomorphic) {
   f.add_edge(Edge(0b10110, 1));  // 124
   f.init();
 
-  EXPECT_NE(g.hash, f.hash);
+  EXPECT_NE(g.graph_hash, f.graph_hash);
   EXPECT_FALSE(f.is_isomorphic(g));
-  EXPECT_NE(h.hash, f.hash);
+  EXPECT_NE(h.graph_hash, f.graph_hash);
   EXPECT_FALSE(f.is_isomorphic(h));
 }
 
