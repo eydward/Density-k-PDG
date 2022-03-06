@@ -5,8 +5,6 @@
 Fraction Counters::min_theta(1E8, 1);
 Edge Counters::min_theta_edges[255]{};
 int Counters::min_theta_edge_count = 0;
-int Counters::k = 0;
-int Counters::n = 0;
 uint64 Counters::graph_inits = 0;
 uint64 Counters::graph_allocations = 0;
 uint64 Counters::chunk_allocations = 0;
@@ -59,7 +57,7 @@ void Counters::print_counters() {
 void Counters::print_counters_to_stream(std::ostream& os) {
   const auto end = std::chrono::steady_clock::now();
 
-  os << "\n---------- k=" << k << ", n=" << n << "-------------------------------"
+  os << "\n---------- k=" << Graph::K << ", n=" << Graph::N << "-------------------------------"
      << "\nAccumulated canonicals\t= " << graph_accumulated_canonicals
      << "\nMinimum theta = " << min_theta.n << " / " << min_theta.d << "\nProduced by graph: ";
   Edge::print_edges(os, min_theta_edge_count, min_theta_edges);

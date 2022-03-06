@@ -1,13 +1,13 @@
 #include "../graph.h"
 
-#include "../graph.hpp"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
 using namespace testing;
 
 TEST(GraphTest, Init) {
-  Graph<3, 7> g;
+  Graph::set_global_graph_info(3, 7);
+  Graph g;
   g.add_edge(Edge(0b11100, UNDIRECTED));  // 234
   g.add_edge(Edge(0b1100010, 5));         // 156>5
   g.add_edge(Edge(0b1110, 2));            // 123>2
@@ -45,8 +45,9 @@ TEST(GraphTest, Init) {
 }
 
 // Utility function to create and initialize T_3.
-Graph<3, 5> get_T3() {
-  Graph<3, 5> g;
+Graph get_T3() {
+  Graph::set_global_graph_info(3, 5);
+  Graph g;
   g.add_edge(Edge(0b1011, UNDIRECTED));  // 013
   g.add_edge(Edge(0b1110, 2));           // 123>2
   g.add_edge(Edge(0b1101, UNDIRECTED));  // 023
@@ -56,7 +57,7 @@ Graph<3, 5> get_T3() {
 }
 
 TEST(GraphTest, T3) {
-  Graph<3, 5> g = get_T3();
+  Graph g = get_T3();
 
   EXPECT_EQ(4, g.edge_count);
   EXPECT_EQ(g.edges[0].vertex_set, 0b1011);
@@ -90,7 +91,7 @@ TEST(GraphTest, T3) {
 }
 
 TEST(GraphTest, Clear) {
-  Graph<3, 5> g = get_T3();
+  Graph g = get_T3();
   g.clear();
   EXPECT_EQ(g.hash, 0);
   EXPECT_EQ(g.edge_count, 0);
@@ -99,8 +100,8 @@ TEST(GraphTest, Clear) {
 }
 
 TEST(GraphTest, PermuteIsomorphic) {
-  Graph<3, 5> g = get_T3();
-  Graph<3, 5> h;
+  Graph g = get_T3();
+  Graph h;
   int p[5]{0, 1, 2, 3, 4};
   do {
     g.permute(p, h);
@@ -112,9 +113,9 @@ TEST(GraphTest, PermuteIsomorphic) {
 }
 
 TEST(GraphTest, PermuteCanonical) {
-  Graph<3, 5> g = get_T3();
+  Graph g = get_T3();
   g.canonicalize();
-  Graph<3, 5> h;
+  Graph h;
   int p[5]{0, 1, 2, 3, 4};
   g.permute_canonical(p, h);
   EXPECT_TRUE(g.is_identical(h));
@@ -123,7 +124,8 @@ TEST(GraphTest, PermuteCanonical) {
 }
 
 TEST(GraphTest, PermuteCanonical2) {
-  Graph<2, 4> g, h, f;
+  Graph::set_global_graph_info(2, 4);
+  Graph g, h, f;
   g.add_edge(Edge(0b1001, UNDIRECTED));  // 03
   g.add_edge(Edge(0b0110, UNDIRECTED));  // 12
   g.add_edge(Edge(0b0101, 2));           // 02>2
@@ -139,8 +141,8 @@ TEST(GraphTest, PermuteCanonical2) {
 }
 
 TEST(GraphTest, Canonicalize) {
-  Graph<3, 5> g = get_T3();
-  Graph<3, 5> h = get_T3();
+  Graph g = get_T3();
+  Graph h = get_T3();
   h.canonicalize();
 
   EXPECT_FALSE(g.is_canonical);
@@ -153,29 +155,31 @@ TEST(GraphTest, Canonicalize) {
 }
 
 TEST(GraphTest, Canonicalize2) {
-  Graph<3, 8> g;
-  g.add_edge(Edge(0b1011000, UNDIRECTED));  // 346
-  g.add_edge(Edge(0b1110000, 5));           // 456>5
-  g.add_edge(Edge(0b1101000, UNDIRECTED));  // 356
-  g.add_edge(Edge(0b11100000, 5));          // 567>5
+  Graph::set_global_graph_info(3, 7);
+  Graph g;
+  g.add_edge(Edge(0b0101100, UNDIRECTED));  // 235
+  g.add_edge(Edge(0b0111000, 4));           // 345>4
+  g.add_edge(Edge(0b0110100, UNDIRECTED));  // 245
+  g.add_edge(Edge(0b1110000, 4));           // 456>4
   g.init();
   EXPECT_EQ(g.vertices[0].get_degrees(), 0);
   EXPECT_EQ(g.vertices[1].get_degrees(), 0);
-  EXPECT_EQ(g.vertices[2].get_degrees(), 0);
+  EXPECT_EQ(g.vertices[2].get_degrees(), 0x020000);
 
-  Graph<3, 8> h = g;
+  Graph h = g;
   h.canonicalize();
   EXPECT_EQ(g.hash, h.hash);
   EXPECT_TRUE(h.is_isomorphic(g));
   EXPECT_TRUE(h.is_canonical);
   EXPECT_EQ(h.vertex_count, 5);
 
-  Graph<3, 5> f = get_T3();
+  Graph f = get_T3();
   EXPECT_EQ(h.hash, f.hash);
 }
 
 TEST(GraphTest, Canonicalize3) {
-  Graph<2, 7> g, h;
+  Graph::set_global_graph_info(2, 7);
+  Graph g, h;
   g.add_edge(Edge(0b0101, UNDIRECTED));
   g.init();
   g.copy(h);
@@ -185,10 +189,10 @@ TEST(GraphTest, Canonicalize3) {
 }
 
 TEST(GraphTest, Copy) {
-  Graph<3, 5> g = get_T3();
+  Graph g = get_T3();
   g.add_edge(Edge(0b0111, UNDIRECTED));
   g.init();
-  Graph<3, 5> h;
+  Graph h;
   g.copy_without_init(&h);
   h.init();
   EXPECT_EQ(g.hash, h.hash);
@@ -199,14 +203,14 @@ TEST(GraphTest, Copy) {
 }
 
 TEST(GraphTest, NonIsomorphic) {
-  Graph<3, 5> g = get_T3();
+  Graph g = get_T3();
 
-  Graph<3, 5> h;
+  Graph h;
   g.copy_without_init(&h);
   h.add_edge(Edge(0b10110, UNDIRECTED));  // 124
   h.init();
 
-  Graph<3, 5> f;
+  Graph f;
   g.copy_without_init(&f);
   f.add_edge(Edge(0b10110, 1));  // 124
   f.init();
@@ -218,8 +222,8 @@ TEST(GraphTest, NonIsomorphic) {
 }
 
 TEST(GraphTest, ContainsT3) {
-  Graph<3, 5> g = get_T3();
-  Graph<3, 5> h;
+  Graph g = get_T3();
+  Graph h;
 
   int p[5]{0, 1, 2, 3, 4};
   do {
@@ -233,7 +237,7 @@ TEST(GraphTest, ContainsT3) {
 }
 
 TEST(GraphTest, NotContainsT3) {
-  Graph<3, 5> g, h;
+  Graph g, h;
   g.add_edge(Edge(0b1011, UNDIRECTED));  // 013
   g.add_edge(Edge(0b1110, UNDIRECTED));  // 123
   g.add_edge(Edge(0b1101, UNDIRECTED));  // 023
@@ -249,7 +253,8 @@ TEST(GraphTest, NotContainsT3) {
 }
 
 TEST(GraphTest, ContainsT2) {
-  Graph<2, 5> g;
+  Graph::set_global_graph_info(2, 5);
+  Graph g;
   g.add_edge(Edge(0b11, 0));     // 01>0
   g.add_edge(Edge(0b110, 1));    // 12>1
   g.add_edge(Edge(0b1001, 3));   // 03>3
@@ -264,15 +269,7 @@ TEST(GraphTest, ContainsT2) {
   EXPECT_FALSE(g.contains_Tk(2));
 }
 
-TEST(GraphTest, Binom) {
-  int binom = Graph<3, 5>::MAX_EDGES;
-  EXPECT_EQ(binom, 10);
-
-  binom = Graph<4, 8>::MAX_EDGES;
-  EXPECT_EQ(binom, 70);
-}
-
 TEST(GraphTest, Theta) {
-  Graph<3, 5> g = get_T3();
+  Graph g = get_T3();
   EXPECT_EQ(g.get_theta(), Fraction(4, 1));
 }

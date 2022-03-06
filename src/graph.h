@@ -8,6 +8,11 @@ using uint8 = unsigned __int8;
 using uint32 = unsigned __int32;
 using uint64 = unsigned __int64;
 
+// Maximum number of vertex allowed in a graph.
+constexpr int MAX_VERTICES = 7;
+// Maximum number of edges allowed in a graph. Note $35=\binom73=\binom74$.
+constexpr int MAX_EDGES = 35;
+
 // Special value to indicate an edge is undirected.
 constexpr uint8 UNDIRECTED = 0xFF;
 
@@ -56,17 +61,17 @@ struct VertexSignature {
 };
 
 // Represents a k-PDG, with the data structure optimized for computing isomorphisms.
-// Template parameters:
-//   K = number of vertices in each edge.
-//   N = Maximum number of vertices in any graph. Note the code makes assumptions
-//       that N<=8 by using 8-bit bitmasks. If N>8 the data type must change.
-//   MAX_EDGES = Maximum number of possible edges in a graph.
-//               We use static allocation to minimize overhead.
 // The n vertices in this graph: 0, 1, ..., n-1.
-template <int K, int N>
 struct Graph {
-  // The constant n choose k. Used to compute theta.
-  static constexpr int MAX_EDGES = compute_binom(N, K);
+  // Global to all graph instances: number of vertices in each edge.
+  static int K;
+  // Global to all graph instances: total number of vertices in each graph.
+  static int N;
+  // Global to all graph instances: number of edges in a complete graph.
+  static int TOTAL_EDGES;
+
+  // Set the values of K, N, and TOTAL_EDGES.
+  static void set_global_graph_info(int k, int n);
 
   // The hash code is invariant under isomorphisms.
   uint64 hash;
@@ -89,7 +94,7 @@ struct Graph {
   Edge edges[MAX_EDGES];
 
   // The signatures of each vertex
-  VertexSignature vertices[N];
+  VertexSignature vertices[MAX_VERTICES];
 
   Graph();
 
@@ -117,11 +122,11 @@ struct Graph {
   // The first parameter specifies the permutation. For example p={1,2,0,3} means
   //  0->1, 1->2, 2->0, 3->3.
   // The second parameter is the resulting graph.
-  void permute(int p[N], Graph& g) const;
+  void permute(int p[], Graph& g) const;
 
   // Similar to permute(), except the current graph must be canonicalized, and the permutation
   // is guaranteed to perserve that.
-  void permute_canonical(int p[N], Graph& g) const;
+  void permute_canonical(int p[], Graph& g) const;
 
   // Canonicalized this graph, so that the vertices are ordered by their signatures.
   void canonicalize();

@@ -18,6 +18,7 @@ cc_library(
         "edge_gen.cpp",
         "fraction.cpp",
         "graph.cpp",
+        "graph.hpp",
     ],
     copts=["-std=c++20"],
 )

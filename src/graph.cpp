@@ -29,3 +29,16 @@ void Edge::print_edges(std::ostream& os, uint8 edge_count, const Edge edges[]) {
   }
   os << "}\n";
 }
+
+// Global to all graph instances: number of vertices in each edge.
+int Graph::K = 0;
+// Global to all graph instances: total number of vertices in each graph.
+int Graph::N = 0;
+// Global to all graph instances: number of edges in a complete graph.
+int Graph::TOTAL_EDGES = 0;
+
+void Graph::set_global_graph_info(int k, int n) {
+  K = k;
+  N = n;
+  TOTAL_EDGES = compute_binom(n, k);
+}

@@ -5,18 +5,14 @@
 #include "graph.h"
 
 // Grow set of non-isomorphic graphs from empty graph, by adding one vertex at a time.
-template <int K, int N>
 class Grower {
  private:
-  // Alias of the Graph type
-  typedef Graph<K, N> G;
-
   // Custom hash and compare for the Graph type. Treat isomorphic graphs as being equal.
   struct GraphHasher {
-    size_t operator()(const G* g) const { return g->hash; }
+    size_t operator()(const Graph* g) const { return g->hash; }
   };
   struct GraphComparer {
-    bool operator()(const G* g, const G* h) const { return g->is_isomorphic(*h); }
+    bool operator()(const Graph* g, const Graph* h) const { return g->is_isomorphic(*h); }
   };
 
   // The log file.
@@ -24,7 +20,7 @@ class Grower {
   // Utility used to enumerate all edge sets to add.
   EdgeGenerator edge_gen;
   // Utility used to allocate memory for Graph objects.
-  GraphAllocator<K, N> allocator;
+  GraphAllocator allocator;
 
   // Constructs all non-isomorphic graphs with n vertices that are T_k-free,
   // and add them to the canonicals. Before calling this, all such graphs
@@ -39,7 +35,7 @@ class Grower {
   Grower(std::ostream* log_stream = nullptr) : log(log_stream) {}
 
   // One canonical graphs with n vertices in each isomorphism class is in canonicals[n].
-  std::unordered_set<const G*, GraphHasher, GraphComparer> canonicals[N + 1];
+  std::unordered_set<const Graph*, GraphHasher, GraphComparer> canonicals[MAX_VERTICES + 1];
 
   // Find all canonical isomorphism class representations with up to max_n vertices.
   void grow();

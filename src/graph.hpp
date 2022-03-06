@@ -10,8 +10,7 @@ inline uint64 hash_combine64(uint64 hash, uint64 value) {
   return hash ^= value + 0x9E3779B97F4A7C15ull + (hash << 12) + (hash >> 4);
 }
 
-template <int K, int N>
-Graph<K, N>::Graph()
+Graph::Graph()
     : hash(0),
       is_canonical(false),
       vertex_count(0),
@@ -21,11 +20,10 @@ Graph<K, N>::Graph()
 
 // Returns theta such that (undirected edge density) + theta (directed edge density) = 1.
 // Namely, returns theta = (binom_nk - (undirected edge count)) / (directed edge count).
-template <int K, int N>
-Fraction Graph<K, N>::get_theta() const {
+Fraction Graph::get_theta() const {
   uint8 directed = edge_count - undirected_edge_count;
   if (directed > 0) {
-    return Fraction(MAX_EDGES - undirected_edge_count, directed);
+    return Fraction(TOTAL_EDGES - undirected_edge_count, directed);
   } else {
     return Fraction(1E8, 1);
   }
@@ -33,8 +31,7 @@ Fraction Graph<K, N>::get_theta() const {
 
 // Returns true if the edge specified by the bitmask of the vertices in the edge is allowed
 // to be added to the graph (this vertex set does not yet exist in the edges).
-template <int K, int N>
-bool Graph<K, N>::edge_allowed(uint8 vertices) const {
+bool Graph::edge_allowed(uint8 vertices) const {
   for (int i = 0; i < edge_count; i++) {
     if (vertices == edges[i].vertex_set) return false;
   }
@@ -43,8 +40,7 @@ bool Graph<K, N>::edge_allowed(uint8 vertices) const {
 
 // Add an edge to the graph. It's caller's responsibility to make sure this is allowed.
 // And the input is consistent (head is inside the vertex set).
-template <int K, int N>
-void Graph<K, N>::add_edge(Edge edge) {
+void Graph::add_edge(Edge edge) {
 #if !NDEBUG
   assert(edge_allowed(edge.vertex_set));
   assert(__builtin_popcount(edge.vertex_set) == K);
@@ -56,8 +52,7 @@ void Graph<K, N>::add_edge(Edge edge) {
 }
 
 // Initializes everything in this graph from the edge set.
-template <int K, int N>
-void Graph<K, N>::init() {
+void Graph::init() {
   Counters::increment_graph_inits();
 
   hash = 0;
@@ -73,9 +68,9 @@ void Graph<K, N>::init() {
 
   // Compute signatures of vertices, first pass (degrees, but not hash code).
   // As a side product, also gather the neighbor vertex sets of each vertex.
-  uint8 neighbors_undirected[N]{0};
-  uint8 neighbors_head[N]{0};  // neighbors_head[i]: head vertex is i.
-  uint8 neighbors_tail[N]{0};
+  uint8 neighbors_undirected[MAX_VERTICES]{0};
+  uint8 neighbors_head[MAX_VERTICES]{0};  // neighbors_head[i]: head vertex is i.
+  uint8 neighbors_tail[MAX_VERTICES]{0};
 
   for (int i = 0; i < edge_count; i++) {
     uint8 head = edges[i].head_vertex;
@@ -112,7 +107,7 @@ void Graph<K, N>::init() {
   // Compute signature of vertices, second pass (neighbor hash).
   // Note we can't update the signatures in the structure during the computation, so use
   // a working copy first.
-  uint32 neighbor_hash[N]{0};
+  uint32 neighbor_hash[MAX_VERTICES]{0};
   for (int v = 0; v < N; v++) {
     int neighbor_count = 0;
     hash_neighbors(neighbors_undirected[v], neighbor_hash[v]);
@@ -126,7 +121,7 @@ void Graph<K, N>::init() {
 
   // Finally, compute hash for the entire graph.
   hash = 0;
-  uint64 signatures[N];
+  uint64 signatures[MAX_VERTICES];
   for (int v = 0; v < N; v++) {
     signatures[v] = vertices[v].get_hash();
   }
@@ -138,10 +133,9 @@ void Graph<K, N>::init() {
   }
 }
 
-template <int K, int N>
-void Graph<K, N>::hash_neighbors(uint8 neighbors, uint32& hash) {
+void Graph::hash_neighbors(uint8 neighbors, uint32& hash) {
   // The working buffer to compute hash in deterministic order.
-  uint32 signatures[N];
+  uint32 signatures[MAX_VERTICES];
   if (neighbors == 0) {
     hash = hash_combine32(hash, 0x12345678);
   } else {
@@ -164,8 +158,7 @@ void Graph<K, N>::hash_neighbors(uint8 neighbors, uint32& hash) {
 }
 
 // Resets the current graph to no edges.
-template <int K, int N>
-void Graph<K, N>::clear() {
+void Graph::clear() {
   hash = 0;
   is_canonical = false;
   edge_count = undirected_edge_count = vertex_count = 0;
@@ -178,8 +171,7 @@ void Graph<K, N>::clear() {
 // The first parameter specifies the permutation. For example p={1,2,0,3} means
 //  0->1, 1->2, 2->0, 3->3.
 // The second parameter is the resulting graph.
-template <int K, int N>
-void Graph<K, N>::permute(int p[N], Graph& g) const {
+void Graph::permute(int p[], Graph& g) const {
   Counters::increment_graph_permute_ops();
 
   // Copy the edges with permutation.
@@ -201,8 +193,7 @@ void Graph<K, N>::permute(int p[N], Graph& g) const {
   g.init();
 }
 
-template <int K, int N>
-void Graph<K, N>::permute_canonical(int p[N], Graph& g) const {
+void Graph::permute_canonical(int p[], Graph& g) const {
   Counters::increment_graph_permute_canonical_ops();
 
   assert(is_canonical);
@@ -234,18 +225,17 @@ void Graph<K, N>::permute_canonical(int p[N], Graph& g) const {
 }
 
 // Returns the canonicalized graph in g, where the vertices are ordered by their signatures.
-template <int K, int N>
-void Graph<K, N>::canonicalize() {
+void Graph::canonicalize() {
   Counters::increment_graph_canonicalize_ops();
 
   // First get sorted vertex indices by the vertex signatures.
   // Note we sort by descreasing order, to push vertices to lower indices.
-  int s[N];
+  int s[MAX_VERTICES];
   for (int v = 0; v < N; v++) s[v] = v;
   std::sort(s, s + N,
             [this](int a, int b) { return vertices[a].get_hash() > vertices[b].get_hash(); });
   // Now compute the inverse, which gives the permutation used to canonicalize.
-  int p[N];
+  int p[MAX_VERTICES];
   for (int v = 0; v < N; v++) {
     p[s[v]] = v;
   }
@@ -275,8 +265,7 @@ void Graph<K, N>::canonicalize() {
 }
 
 // Makes a copy of this graph to g.
-template <int K, int N>
-void Graph<K, N>::copy(Graph& g) const {
+void Graph::copy(Graph& g) const {
   Counters::increment_graph_copies();
 
   g.hash = hash;
@@ -294,8 +283,7 @@ void Graph<K, N>::copy(Graph& g) const {
 
 // Makes a copy of this graph to g, without calling init. The caller can add/remove edges,
 // and must call init() before using g.
-template <int K, int N>
-void Graph<K, N>::copy_without_init(Graph* g) const {
+void Graph::copy_without_init(Graph* g) const {
   Counters::increment_graph_copies();
 
   for (int i = 0; i < edge_count; i++) {
@@ -306,8 +294,7 @@ void Graph<K, N>::copy_without_init(Graph* g) const {
 }
 
 // Returns true if this graph is isomorphic to the other.
-template <int K, int N>
-bool Graph<K, N>::is_isomorphic(const Graph& other) const {
+bool Graph::is_isomorphic(const Graph& other) const {
   Counters::increment_graph_isomorphic_tests();
 
   if (edge_count != other.edge_count || undirected_edge_count != other.undirected_edge_count ||
@@ -361,7 +348,7 @@ bool Graph<K, N>::is_isomorphic(const Graph& other) const {
     }
   }
   if (perm_sets.size() > 0) {
-    Permutator<N> perm(move(perm_sets));
+    Permutator perm(move(perm_sets));
     Graph h;
     while (perm.next()) {
       pa->permute_canonical(perm.p, h);
@@ -380,8 +367,7 @@ bool Graph<K, N>::is_isomorphic(const Graph& other) const {
 }
 
 // Returns true if the two graphs are identical (exactly same edge sets).
-template <int K, int N>
-bool Graph<K, N>::is_identical(const Graph& other) const {
+bool Graph::is_identical(const Graph& other) const {
   Counters::increment_graph_identical_tests();
 
   if (edge_count != other.edge_count) return false;
@@ -402,8 +388,7 @@ bool Graph<K, N>::is_identical(const Graph& other) const {
 // Note that in k-PDG, subgraph definition is subtle: A is a subgraph of B iff A can be obtained
 // from B, by repeatedly (1) delete a vertex (2) delete an edge (3) forget the direction of
 // an edge.
-template <int K, int N>
-bool Graph<K, N>::contains_Tk(int v) const {
+bool Graph::contains_Tk(int v) const {
   Counters::increment_graph_contains_Tk_tests();
 
   // There are two possibilities that $v \in T_k \subseteq H$.
@@ -455,16 +440,14 @@ bool Graph<K, N>::contains_Tk(int v) const {
   return false;
 }
 
-template <int K, int N>
-void Graph<K, N>::print_concise(std::ostream& os) const {
+void Graph::print_concise(std::ostream& os) const {
   os << "  ";
   Edge::print_edges(os, edge_count, edges);
 }
 
 #if false
 // Print the graph to the console for debugging purpose.
-template <int K, int N>
-void Graph<K, N>::print() const {
+void Graph::print() const {
   cout << "Graph[" << hex << hash << ", init=" << is_init << ", canonical=" << is_canonical
        << ", vcnt=" << (int)vertex_count << ", \n";
 

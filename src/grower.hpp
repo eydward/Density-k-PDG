@@ -3,30 +3,28 @@
 #include "grower.h"
 
 // Find all canonical isomorphism class representations with up to max_n vertices.
-template <int K, int N>
-void Grower<K, N>::grow() {
-  static_assert(N <= 8);
+void Grower::grow() {
+  assert(Graph::N <= 7);
   print_config(std::cout);
   if (log != nullptr) {
     print_config(*log);
   }
 
   // Initialize empty graph with k-1 vertices.
-  G* g = allocator.get_current_graph_from_allocator();
+  Graph* g = allocator.get_current_graph_from_allocator();
   g->init();
-  canonicals[K - 1].insert(g);
+  canonicals[Graph::K - 1].insert(g);
   Counters::observe_theta(*g);
   allocator.mark_current_graph_used();
 
-  for (int n = K; n <= N; n++) {
+  for (int n = Graph::K; n <= Graph::N; n++) {
     grow_step(n);
   }
 }
 
 // Debug print the content of the canonicals after the growth.
 // If print_graphs==true, print stats and all graphs. Otherwise prints stats only.
-template <int K, int N>
-void Grower<K, N>::print(bool print_graphs) {
+void Grower::print(bool print_graphs) {
   print_state_to_stream(print_graphs, std::cout);
   if (log != nullptr) {
     print_state_to_stream(print_graphs, *log);
@@ -37,16 +35,15 @@ void Grower<K, N>::print(bool print_graphs) {
 // and add them to the canonicals. Before calling this, all such graphs
 // with <n vertices must already be in the canonicals.
 // Note all edges added in this step contains vertex (n-1).
-template <int K, int N>
-void Grower<K, N>::grow_step(int n) {
-  edge_gen.initialize(K, n);
+void Grower::grow_step(int n) {
+  edge_gen.initialize(Graph::K, n);
 
-  for (const G* g : canonicals[n - 1]) {
+  for (const Graph* g : canonicals[n - 1]) {
     edge_gen.reset_enumeration();
-    assert(n == K || (g->is_canonical && g->vertex_count == n - 1));
+    assert(n == Graph::K || (g->is_canonical && g->vertex_count == n - 1));
     assert(g->vertices[n - 1].get_degrees() == 0);
 
-    G* copy = allocator.get_current_graph_from_allocator();
+    Graph* copy = allocator.get_current_graph_from_allocator();
     // Loop through all ((K+1)^\binom{n-1}{k-1} - 1) edge combinations, add them to g, and check
     // add to canonicals unless it's isomorphic to an existing one.
     while (edge_gen.next()) {
@@ -72,21 +69,19 @@ void Grower<K, N>::grow_step(int n) {
   }
 }
 
-template <int K, int N>
-void Grower<K, N>::print_config(std::ostream& os) {
-  os << "Searching for all T_k-free k-PDGs\n    K= " << K
-     << " (number of vertices in each edge)\n    N= " << N
-     << " (total number of vertices in each graph)\n    E= " << G::MAX_EDGES
+void Grower::print_config(std::ostream& os) {
+  os << "Searching for all T_k-free k-PDGs\n    K= " << Graph::K
+     << " (number of vertices in each edge)\n    N= " << Graph::N
+     << " (total number of vertices in each graph)\n    E= " << MAX_EDGES
      << " (maximum possible number of edges in each graph)\n";
 }
-template <int K, int N>
-void Grower<K, N>::print_state_to_stream(bool print_graphs, std::ostream& os) {
+void Grower::print_state_to_stream(bool print_graphs, std::ostream& os) {
   uint64 total_canonicals = 0;
-  for (int i = 0; i < N + 1; i++) {
+  for (int i = 0; i < Graph::N + 1; i++) {
     os << "order=" << i << " : canonicals= " << canonicals[i].size() << "\n";
     total_canonicals += canonicals[i].size();
     if (print_graphs) {
-      for (const G* g : canonicals[i]) {
+      for (const Graph* g : canonicals[i]) {
         g->print_concise(os);
       }
     }

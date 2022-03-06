@@ -13,10 +13,6 @@ struct Counters {
   static Edge min_theta_edges[255];
   // Number of edges in the graph that produces the min_theta.
   static int min_theta_edge_count;
-  // Number of vertices in each edge.
-  static int k;
-  // Total number of vertices in the graph.
-  static int n;
   // The start time of the computation.
   static std::chrono::time_point<std::chrono::steady_clock> start_time;
   // The time of the last status print.
@@ -56,10 +52,7 @@ struct Counters {
   static void increment_graph_contains_Tk_tests() { ++graph_contains_Tk_tests; }
 
   // If the given graph's theta is less than min_theta, assign it to min_theta.
-  template <int K, int N>
-  static void observe_theta(const Graph<K, N>& g) {
-    k = K;
-    n = N;
+  static void observe_theta(const Graph& g) {
     ++graph_accumulated_canonicals;
     Fraction theta = g.get_theta();
     if (theta < min_theta) {

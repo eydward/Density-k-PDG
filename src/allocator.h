@@ -10,14 +10,13 @@
 // objects (instead of Graph pointers), is because of the bad rebalancing behavior
 // observed in std::unordered_set<G> when running large compute (K=4, N=7), when
 // std::unordered_set<G> have to hold >100 million items and many GB of memory.
-template <int K, int N>
 class GraphAllocator {
   class AllocationChunk {
    private:
     // Max number of items this allocator can hold. Use 4MB chunks. The "-128" part is to
     // allow bookkeeping overhead of C++ runtime heap, to stay below 4MB.
-    static constexpr int MAX_ITEMS = ((1 << 22) - 128) / sizeof(Graph<K, N>);
-    Graph<K, N> array[MAX_ITEMS];
+    static constexpr int MAX_ITEMS = ((1 << 22) - 128) / sizeof(Graph);
+    Graph array[MAX_ITEMS];
     int current_index;
 
    public:
@@ -31,7 +30,7 @@ class GraphAllocator {
       ++current_index;
     }
     // Returns the current graph object. Caller must make sure it's not full before calling.
-    Graph<K, N>* get_current_graph() {
+    Graph* get_current_graph() {
       assert(!is_full());
       array[current_index].clear();
       return array + current_index;
@@ -44,7 +43,7 @@ class GraphAllocator {
  public:
   GraphAllocator() : chunk(nullptr) {}
 
-  Graph<K, N>* get_current_graph_from_allocator() {
+  Graph* get_current_graph_from_allocator() {
     if (chunk == nullptr || chunk->is_full()) {
       chunk = new AllocationChunk();
       Counters::increment_chunk_allocations();
