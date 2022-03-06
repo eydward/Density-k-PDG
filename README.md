@@ -31,11 +31,9 @@ test --test_output=errors
 ## Usage
 Run all commands in the project root directory. 
 * To execute all unit tests: `bazel test ...`
-* To run the program in DEBUG mode (slow, for debugging only): `bazel run -c dbg src:kPDG`
-* To run the program in OPTIMIZED mode (fast): `bazel run -c opt src:kPDG`
-* Alternatively, run `bazel build -c opt ...` and then find the executable in `bazel-out\src\` and execute it manually.
-
-Note in order to optimize for speed, we try to avoid dynamic memory allocation as much as possible, so it uses C++ template and fixed arrays. Unfortunately it makes it a bit less friendly. To change configuration (k and n), you have to edit the kPDG.cpp file in the source directory, and re-compile. There is no command-line arguments for this purpose.
+* To run the program in DEBUG mode (slow, for debugging only): `bazel run -c dbg src:kPDG <K> <N>` 
+* To run the program in OPTIMIZED mode (fast): `bazel run -c opt src:kPDG <K> <N>`
+* Alternatively, run `bazel build -c opt ...` and then find the executable in `bazel-out\src\` and execute it manually with `kPDG <K> <N>`.
 
 Note the code currently is single-threaded, doesn't take advantage of multi-core machines and certainly not capable to run in distributed environment. This is TODO. 
 
