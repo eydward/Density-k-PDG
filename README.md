@@ -40,14 +40,15 @@ Note the code currently is single-threaded, doesn't take advantage of multi-core
 ## Organization of Code
 All source code are in the `src` directory.
 - `BUILD`: the project that instructs `bazel` how to build, run, and test.
-- `tests.cpp` : unit tests, not part of actual execution.
-- `kPDG.cpp`: entry point. Edit this file to put in the appropriate K and N values before compile and run.
-- `graph.h`: summary declarations of the Graph struct, as well as the definition of `Edge` and `VertexSignature`.
-- `graph.hpp`: the detailed implementation of the Graph struct. Because we use C++ template, the compiler requires the implementation to be in a header file to include, instead of in a cpp file to link. 
-- `grower.h`: the implementation of growing the search tree, see algorithm design below. 
-- `permutator.h`: utility function to generate all permutations with specified ranges.
-- `fraction.h` and `fraction.cpp`: the header and implementation of a fraction. (We store the theta value as a fraction).
-- `counters.h` and `counters.cpp`: the header and implementation of a bunch of counters. The minimum theta value is stored here with the graph producing it. Also contains a bunch of other statistical counters used to track the performance of the algorithm.
+- `tests/*cpp` : unit tests, not part of actual execution.
+- `kPDG.cpp`: entry point of the command line program.
+- `graph.h, .cpp`: declaration and implementation of the Graph struct, as well as the definition of `Edge` and `VertexSignature`. This is where isomorphism check, hashing, canonicalization, and T_k-free checks are implemented.
+- `grower.h, .cpp`: declaration and implementation of growing the search tree, see algorithm design below. 
+- `permutator.h, .cpp`: utility function to generate all permutations with specified ranges.
+- `fraction.h, .cpp`: simple implementation of a fraction. (We store the theta value as a fraction).
+- `counters.h, .cpp`: the header and implementation of a bunch of statistical counters. The minimum theta value is stored here with the graph producing it. Also a bunch of data used to track the performance of the algorithm.
+- `allocator.h, .cpp`: a simple memory allocator to create Graph objects. We used to store the Graph object inline inside `std::unordered_set` but when it grows hundreds of millions of entries and many GB of data, the performance becomes really bad, so we use this allocator and only put pointers in `std::unordered_set` in the Grower implementation.
+- `edge_gen.h, cpp`: utility to generate edge sets to be added to an existing graph, in order to grow the search tree. 
 
 ## Algorithm Design Summary
 ### Growing the Search Tree
