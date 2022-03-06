@@ -16,7 +16,7 @@ values in the table : minimum theta value across all graphs with N vertices that
 | 5   | 5/3 | 5/3   |   5/4 |     1 |       |       |
 | 6   | 5/3 | 5/3   |   3/2 |   6/5 |     1 |       |
 | 7   | 7/4 | ?     | ?     |   7/5 |   7/6 |     1 |
-| 8   |   ? |  ?    | ?     |   ?   |   ?   |   8/7 |
+| 8   | 7/4 |  ?    | ?     |   ?   |   ?   |   8/7 |
 
 
 ## Setup
