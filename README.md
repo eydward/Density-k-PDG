@@ -12,13 +12,12 @@ values in the table : minimum theta value across all graphs with N vertices that
 | --- | --- | ----- | ----- | ----- | ----- | ----- |
 | 2   |   1 |       |       |       |       |       |
 | 3   | 3/2 |   1   |       |       |       |       |
-| 4   | 3/2 | 3/2   |     1 |       |       |       |
-| 5   | 5/3 | 9/5   |   3/2 |     1 |       |       |
-| 6   | 5/3 | 19/10 |  13/7 |   3/2 |     1 |       |
-| 7   | 7/4 | ?     | ?     |   9/5 |   3/2 |     1 |
-| 8   |   ? |  ?    | ?     |   ?   |   ?   |   3/2 |
+| 4   | 3/2 | 4/3   |     1 |       |       |       |
+| 5   | 5/3 | 5/3   |   5/4 |     1 |       |       |
+| 6   | 5/3 | ?     |   3/2 |   6/5 |     1 |       |
+| 7   | 7/4 | ?     | ?     |   ?   |   7/6 |     1 |
+| 8   |   ? |  ?    | ?     |   ?   |   ?   |   8/7 |
 
-**Note: K=5, N=7, min_theta=9/5  should give original result, and prove the k-SAT counting conjecture by Bollobás, Brightwell, and Leader, for k=5 and k=6, following the "ENUMERATING k-SAT FUNCTIONS" paper.**
 
 ## Setup
 * In order to build and run the code, c++ 20 compatible compiler is required. My environment uses `gcc (Rev8, Built by MSYS2 project) 11.2.0`, but any recent release of gcc should work. 
