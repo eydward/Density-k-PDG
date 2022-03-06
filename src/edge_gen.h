@@ -6,9 +6,20 @@
 struct EdgeGenerator {
  private:
   static constexpr int MAX_EDGES = 35;  // This is the highest number we'll encounter, $\binom73$.
-  int n;                                // Number of vertices after adding the new vertex.
-  uint32 current_mask;                  // The binary mask indicating the current edge set.
-  std::vector<uint8> edge_candidates;   // All possible edges going through the new vertex.
+  uint8 k;                              // Number of vertices in each edge.
+  uint8 n;                              // Number of vertices after adding the new vertex.
+  uint8 high_idx_non_zero_enum_state;   // The highest index of the non-zero element in enum_state.
+  uint8 edge_candidate_count;           // Number of edge candidates in the next array.
+  uint8 edge_candidates[MAX_EDGES];     // All possible edges going through the new vertex.
+
+  // The vertex indices in the corresponding edge candidate.
+  // [0] is always NOT_IN_SET, [1] is always UNDIRECTED,
+  // [2] to [k+1] are the vertices in the corresponding edge.
+  uint8 edge_candidates_vidx[MAX_EDGES][10];
+
+  // This array represents the current enumeration state.
+  // The values are indices into the edge_candidates_vidx arrays.
+  uint8 enum_state[MAX_EDGES];
 
  public:
   uint8 edge_count;
@@ -24,4 +35,8 @@ struct EdgeGenerator {
   // Generates the next edge set. Returns true if the next edge set is available in `edges`.
   // Returns false if all possibilities have already been enumerated.
   bool next();
+
+  // Notify the generator about the fact that adding the current edge set to the graph
+  // makes it contain T_k, and therefore we can skip edge sets that are supersets of the current.
+  void notify_contain_tk_skip();
 };

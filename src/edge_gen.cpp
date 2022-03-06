@@ -1,61 +1,61 @@
 #include "edge_gen.h"
 
+constexpr uint8 NOT_IN_SET = 0xEE;
+
 // Initializes the generator for the given new vertex count.
-// k = number of vertices in each edge.
-void EdgeGenerator::initialize(int k, int vertex_count) {
+// k_value = number of vertices in each edge.
+void EdgeGenerator::initialize(int k_value, int vertex_count) {
+  k = k_value;
   n = vertex_count;
-  current_mask = 0;
-  edge_count = 0;
-  edge_candidates.clear();
+  edge_count = edge_candidate_count = 0;
   for (uint8 mask = 0; mask < (1 << (n - 1)); mask++) {
     if (__builtin_popcount(mask) == k - 1) {
-      edge_candidates.push_back(mask | (1 << (n - 1)));
+      edge_candidates[edge_candidate_count] = (mask | (1 << (n - 1)));
+      int vidx = 0;
+      edge_candidates_vidx[edge_candidate_count][vidx++] = NOT_IN_SET;
+      edge_candidates_vidx[edge_candidate_count][vidx++] = UNDIRECTED;
+      for (uint8 i = 0; i <= n - 1; i++) {
+        if ((edge_candidates[edge_candidate_count] & (1 << i)) != 0) {
+          edge_candidates_vidx[edge_candidate_count][vidx++] = i;
+        }
+      }
+      assert(vidx == k + 2);
+      ++edge_candidate_count;
     }
   }
-  assert(edge_candidates.size() == compute_binom(n - 1, k - 1));
+  assert(edge_candidate_count == compute_binom(n - 1, k - 1));
+  reset_enumeration();
 }
 
 void EdgeGenerator::reset_enumeration() {
-  current_mask = 0;
   edge_count = 0;
+  high_idx_non_zero_enum_state = 0;
+  for (uint8 i = 0; i < edge_candidate_count; i++) {
+    enum_state[i] = 0;
+  }
 }
 
 bool EdgeGenerator::next() {
-  if (edge_count > 0) {
-    // If we already have a set of edges, and are in the middle of trying all the
-    // combinations of directions in that set of edges, we'll just continue to do so here.
-    for (int i = 0; i < edge_count; i++) {
-      // Find the next head vertex to try, for this edge.
-      do {
-        ++edges[i].head_vertex;
-      } while (edges[i].head_vertex < n &&
-               ((1 << edges[i].head_vertex) & edges[i].vertex_set) == 0);
-
-      // If we've found a head vertex to try, just return. Otherwise, set the head to
-      // UNDIRECTED and let the loop continue to the next edge.
-      if (edges[i].head_vertex < n) {
-        return true;
-      } else {
-        edges[i].head_vertex = UNDIRECTED;
+  for (uint8 i = 0; i < edge_candidate_count; i++) {
+    ++enum_state[i];
+    high_idx_non_zero_enum_state = std::max(high_idx_non_zero_enum_state, i);
+    if (enum_state[i] != k + 2) {
+      // We found a new valid enumeration state. Collect info into edges array.
+      edge_count = 0;
+      for (uint8 j = 0; j <= high_idx_non_zero_enum_state; j++) {
+        if (enum_state[j] != 0) {
+          edges[edge_count].vertex_set = edge_candidates[j];
+          edges[edge_count].head_vertex = edge_candidates_vidx[j][enum_state[j]];
+          ++edge_count;
+        }
       }
+      return true;
     }
+    enum_state[i] = 0;
   }
-
-  // If it reaches here, either we just started the enumeration process, or we are done
-  // with the previous set of edges. So generate another set of edges to try.
-  ++current_mask;
-  if (current_mask == (1 << edge_candidates.size())) {
-    // We've exhausted all edge set combinations, return false to stop the process.
-    return false;
-  }
-  // Create the edge set using the binary mask.
-  edge_count = 0;
-  for (int i = 0; i < edge_candidates.size(); i++) {
-    if ((current_mask & (1 << i)) != 0) {
-      edges[edge_count].vertex_set = edge_candidates[i];
-      edges[edge_count].head_vertex = UNDIRECTED;
-      ++edge_count;
-    }
-  }
-  return true;
+  return false;
 }
+
+// Notify the generator about the fact that adding the current edge set to the graph
+// makes it contain T_k, and therefore we can skip edge sets that are supersets of the current.
+void EdgeGenerator::notify_contain_tk_skip() {}
