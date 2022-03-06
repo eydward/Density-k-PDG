@@ -29,9 +29,6 @@ class Grower {
   // Note all edges added in this step contains vertex (n-1).
   void grow_step(int n);
 
-  // This is an alternative implementation of grow_step() that uses a different growth strategy.
-  void grow_step_impl_alt(int n);
-
   void print_config(std::ostream& os);
   void print_state_to_stream(bool print_graphs, std::ostream& os);
 
@@ -42,7 +39,7 @@ class Grower {
   std::unordered_set<G, GraphHasher, GraphComparer> canonicals[N + 1];
 
   // Find all canonical isomorphism class representations with up to max_n vertices.
-  void grow(bool alt_growth_strategy);
+  void grow();
 
   // Debug print the content of the canonicals after the growth.
   // If print_graphs==true, print stats and all graphs. Otherwise prints stats only.

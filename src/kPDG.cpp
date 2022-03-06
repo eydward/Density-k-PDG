@@ -4,18 +4,17 @@
 #include "grower.hpp"
 
 void print_usage() {
-  std::cout << "Usage: kPDG K N [growth_strategy print_graphs]\n"
+  std::cout << "Usage: kPDG K N [print_graphs]\n"
             << "  Each argument is an integer, K and N are required, others optional.\n"
             << "  K = Number of vertices in each edge.\n"
             << "  N = Total number of vertices in a graph.  2 <= K <= N <= 8.\n"
-            << "  growth_implementation: 0 (default) or 1 (alternative).\n"
-            << "  print_graphs: 0 (default) or 1. 1 = print the accumulated graphs.\n";
+            << "  (optional) print_graphs: 0 (default) or 1. 1 = print the accumulated graphs.\n";
 }
 
 template <int K, int N>
-void run(std::ostream* log, bool alt_growth_impl, bool print_graph) {
+void run(std::ostream* log, bool print_graph) {
   Grower<K, N> s(log);
-  s.grow(alt_growth_impl);
+  s.grow();
   s.print(print_graph);
 }
 
@@ -26,13 +25,9 @@ int main(int argc, char* argv[]) {
   }
   int K = atoi(argv[1]);
   int N = atoi(argv[2]);
-  bool alt_growth_impl = false;
-  if (argc >= 4) {
-    alt_growth_impl = atoi(argv[3]) != 0;
-  }
   bool print_graph = false;
-  if (argc >= 5) {
-    print_graph = atoi(argv[4]) != 0;
+  if (argc >= 4) {
+    print_graph = atoi(argv[3]) != 0;
   }
   if (K < 2 || N > 8 || K > N) {
     std::cout << "Invalid command line arguments. See usage for details.\n";
@@ -40,11 +35,9 @@ int main(int argc, char* argv[]) {
     return -1;
   }
 
-  std::string log_path = "kPDG_run_" + std::to_string(K) + "_" + std::to_string(N) + "_" +
-                         std::to_string(alt_growth_impl) + ".log";
+  std::string log_path = "kPDG_run_" + std::to_string(K) + "_" + std::to_string(N) + ".log";
   std::string arguments = "kPDG run arguments: K=" + std::to_string(K) +
                           ", N=" + std::to_string(N) +
-                          ", use alternative growth impl=" + std::to_string(alt_growth_impl) +
                           ", print_graph=" + std::to_string(print_graph) + "\n\n";
   std::cout << "Log file path: " << log_path << "\n";
   std::ofstream log(log_path);
@@ -53,10 +46,10 @@ int main(int argc, char* argv[]) {
 
   Counters::initialize(&log);
 
-#define RUN(k, n)                                  \
-  if (K == k && N == n) {                          \
-    run<k, n>(&log, alt_growth_impl, print_graph); \
-    break;                                         \
+#define RUN(k, n)                 \
+  if (K == k && N == n) {         \
+    run<k, n>(&log, print_graph); \
+    break;                        \
   }
 
   // This code block is a bit unfortunate. In order to minimize dynamic heap allocation,
