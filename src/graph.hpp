@@ -13,7 +13,6 @@ inline uint64 hash_combine64(uint64 hash, uint64 value) {
 template <int K, int N>
 Graph<K, N>::Graph()
     : hash(0),
-      is_init(false),
       is_canonical(false),
       vertex_count(0),
       edge_count(0),
@@ -61,15 +60,11 @@ template <int K, int N>
 void Graph<K, N>::init() {
   Counters::increment_graph_inits();
 
-  if (is_init) {
-    hash = 0;
-    is_canonical = false;
-    vertex_count = 0;
-    for (int v = 0; v < N; v++) {
-      *reinterpret_cast<uint64*>(&vertices[v]) = 0;
-    }
-  } else {
-    is_init = true;
+  hash = 0;
+  is_canonical = false;
+  vertex_count = 0;
+  for (int v = 0; v < N; v++) {
+    *reinterpret_cast<uint64*>(&vertices[v]) = 0;
   }
 
   // Sort edges
@@ -172,7 +167,7 @@ void Graph<K, N>::hash_neighbors(uint8 neighbors, uint32& hash) {
 template <int K, int N>
 void Graph<K, N>::clear() {
   hash = 0;
-  is_init = is_canonical = false;
+  is_canonical = false;
   edge_count = undirected_edge_count = vertex_count = 0;
   for (int v = 0; v < N; v++) {
     *reinterpret_cast<uint64*>(&vertices[v]) = 0;
@@ -229,7 +224,6 @@ void Graph<K, N>::permute_canonical(int p[N], Graph& g) const {
             [](const Edge& a, const Edge& b) { return a.vertex_set < b.vertex_set; });
 
   g.hash = hash;
-  g.is_init = is_init;
   g.is_canonical = is_canonical;
   g.vertex_count = vertex_count;
   g.edge_count = edge_count;
@@ -289,7 +283,6 @@ void Graph<K, N>::copy(Graph& g) const {
   for (int v = 0; v < N; v++) {
     *reinterpret_cast<uint64*>(&g.vertices[v]) = *reinterpret_cast<const uint64*>(&vertices[v]);
   }
-  g.is_init = is_init;
   g.is_canonical = is_canonical;
   g.vertex_count = vertex_count;
   g.edge_count = edge_count;
@@ -302,14 +295,14 @@ void Graph<K, N>::copy(Graph& g) const {
 // Makes a copy of this graph to g, without calling init. The caller can add/remove edges,
 // and must call init() before using g.
 template <int K, int N>
-void Graph<K, N>::copy_without_init(Graph& g) const {
+void Graph<K, N>::copy_without_init(Graph* g) const {
   Counters::increment_graph_copies();
 
   for (int i = 0; i < edge_count; i++) {
-    g.edges[i] = edges[i];
+    g->edges[i] = edges[i];
   }
-  g.edge_count = edge_count;
-  g.undirected_edge_count = undirected_edge_count;
+  g->edge_count = edge_count;
+  g->undirected_edge_count = undirected_edge_count;
 }
 
 // Returns true if this graph is isomorphic to the other.

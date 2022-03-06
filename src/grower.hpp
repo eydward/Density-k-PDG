@@ -12,10 +12,11 @@ void Grower<K, N>::grow() {
   }
 
   // Initialize empty graph with k-1 vertices.
-  G g;
-  g.init();
+  G* g = allocator.get_current_graph_from_allocator();
+  g->init();
   canonicals[K - 1].insert(g);
-  Counters::observe_theta(g);
+  Counters::observe_theta(*g);
+  allocator.mark_current_graph_used();
 
   for (int n = K; n <= N; n++) {
     grow_step(n);
@@ -40,30 +41,32 @@ template <int K, int N>
 void Grower<K, N>::grow_step(int n) {
   edge_gen.initialize(K, n);
 
-  for (const G& g : canonicals[n - 1]) {
+  for (const G* g : canonicals[n - 1]) {
     edge_gen.reset_enumeration();
-    assert(n == K || (g.is_canonical && g.vertex_count == n - 1));
-    assert(g.vertices[n - 1].get_degrees() == 0);
+    assert(n == K || (g->is_canonical && g->vertex_count == n - 1));
+    assert(g->vertices[n - 1].get_degrees() == 0);
 
-    G copy;
+    G* copy = allocator.get_current_graph_from_allocator();
     // Loop through all ((K+1)^\binom{n-1}{k-1} - 1) edge combinations, add them to g, and check
     // add to canonicals unless it's isomorphic to an existing one.
     while (edge_gen.next()) {
-      g.copy_without_init(copy);
+      g->copy_without_init(copy);
       for (int i = 0; i < edge_gen.edge_count; i++) {
-        copy.add_edge(edge_gen.edges[i]);
+        copy->add_edge(edge_gen.edges[i]);
       }
-      if (copy.contains_Tk(n - 1)) {
+      if (copy->contains_Tk(n - 1)) {
         edge_gen.notify_contain_tk_skip();
         continue;
       }
 
-      copy.init();
-      copy.canonicalize();
+      copy->init();
+      copy->canonicalize();
 
       if (!canonicals[n].contains(copy)) {
         canonicals[n].insert(copy);
-        Counters::observe_theta(copy);
+        Counters::observe_theta(*copy);
+        allocator.mark_current_graph_used();
+        copy = allocator.get_current_graph_from_allocator();
       }
     }
   }
@@ -83,8 +86,8 @@ void Grower<K, N>::print_state_to_stream(bool print_graphs, std::ostream& os) {
     os << "order=" << i << " : canonicals= " << canonicals[i].size() << "\n";
     total_canonicals += canonicals[i].size();
     if (print_graphs) {
-      for (const G& g : canonicals[i]) {
-        g.print_concise(os);
+      for (const G* g : canonicals[i]) {
+        g->print_concise(os);
       }
     }
   }

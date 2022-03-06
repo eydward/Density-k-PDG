@@ -189,7 +189,7 @@ TEST(GraphTest, Copy) {
   g.add_edge(Edge(0b0111, UNDIRECTED));
   g.init();
   Graph<3, 5> h;
-  g.copy_without_init(h);
+  g.copy_without_init(&h);
   h.init();
   EXPECT_EQ(g.hash, h.hash);
   EXPECT_TRUE(h.is_isomorphic(g));
@@ -202,12 +202,12 @@ TEST(GraphTest, NonIsomorphic) {
   Graph<3, 5> g = get_T3();
 
   Graph<3, 5> h;
-  g.copy_without_init(h);
+  g.copy_without_init(&h);
   h.add_edge(Edge(0b10110, UNDIRECTED));  // 124
   h.init();
 
   Graph<3, 5> f;
-  g.copy_without_init(f);
+  g.copy_without_init(&f);
   f.add_edge(Edge(0b10110, 1));  // 124
   f.init();
 
@@ -246,6 +246,22 @@ TEST(GraphTest, NotContainsT3) {
       EXPECT_FALSE(h.contains_Tk(i));
     }
   } while (std::next_permutation(p, p + 5));
+}
+
+TEST(GraphTest, ContainsT2) {
+  Graph<2, 5> g;
+  g.add_edge(Edge(0b11, 0));     // 01>0
+  g.add_edge(Edge(0b110, 1));    // 12>1
+  g.add_edge(Edge(0b1001, 3));   // 03>3
+  g.add_edge(Edge(0b1010, 3));   // 13>3
+  g.add_edge(Edge(0b10001, 4));  // 04>4
+  g.add_edge(Edge(0b10100, 4));  // 24>4
+  g.add_edge(Edge(0b11000, 4));  // 34>4
+  EXPECT_TRUE(g.contains_Tk(4));
+  EXPECT_TRUE(g.contains_Tk(3));
+  EXPECT_TRUE(g.contains_Tk(0));
+  EXPECT_TRUE(g.contains_Tk(1));
+  EXPECT_FALSE(g.contains_Tk(2));
 }
 
 TEST(GraphTest, Binom) {

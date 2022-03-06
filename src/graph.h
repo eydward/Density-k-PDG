@@ -71,8 +71,6 @@ struct Graph {
   // The hash code is invariant under isomorphisms.
   uint64 hash;
 
-  // True if the graph is initialized (hash, vertices have content).
-  bool is_init;
   // True if the graph is canonicalized (vertex signatures are in descreasing order).
   bool is_canonical;
 
@@ -133,7 +131,7 @@ struct Graph {
 
   // Makes a copy of this graph to g, without calling init. The caller can add/remove edges,
   // and must call init() before using g.
-  void copy_without_init(Graph& g) const;
+  void copy_without_init(Graph* g) const;
 
   // Returns true if this graph is isomorphic to the other.
   bool is_isomorphic(const Graph& other) const;

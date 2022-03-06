@@ -25,6 +25,8 @@ struct Counters {
   static std::ofstream* log;
 
   static uint64 graph_inits;
+  static uint64 graph_allocations;
+  static uint64 chunk_allocations;
   static uint64 graph_copies;
   static uint64 graph_accumulated_canonicals;
   static uint64 graph_canonicalize_ops;
@@ -41,6 +43,8 @@ struct Counters {
  public:
   static Fraction get_min_theta() { return min_theta; }
   static void increment_graph_inits() { ++graph_inits; }
+  static void increment_graph_allocations() { ++graph_allocations; }
+  static void increment_chunk_allocations() { ++chunk_allocations; }
   static void increment_graph_copies() { ++graph_copies; }
   static void increment_graph_canonicalize_ops() { ++graph_canonicalize_ops; }
   static void increment_graph_isomorphic_tests() { ++graph_isomorphic_tests; }

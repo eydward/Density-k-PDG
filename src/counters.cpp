@@ -8,6 +8,8 @@ int Counters::min_theta_edge_count = 0;
 int Counters::k = 0;
 int Counters::n = 0;
 uint64 Counters::graph_inits = 0;
+uint64 Counters::graph_allocations = 0;
+uint64 Counters::chunk_allocations = 0;
 uint64 Counters::graph_copies = 0;
 uint64 Counters::graph_accumulated_canonicals = 0;
 uint64 Counters::graph_canonicalize_ops = 0;
@@ -64,6 +66,7 @@ void Counters::print_counters_to_stream(std::ostream& os) {
 
   os << "\nWall clock time:  "
      << std::chrono::duration_cast<std::chrono::milliseconds>(end - start_time).count() << "ms"
+     << "\nGraph allocs\t\t= " << graph_allocations << "\nChunk allocs\t\t= " << chunk_allocations
      << "\nGraph inits\t\t= " << graph_inits << "\nGraph copies\t\t= " << graph_copies
      << "\nGraph canonicalize ops\t= " << graph_canonicalize_ops
      << "\nGraph permute ops\t= " << graph_permute_ops
