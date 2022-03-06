@@ -3,14 +3,13 @@
 
 // A helper struct to generate all edge sets to add, when a new vertex is added to an existing
 // graph.
-struct EdgeGenerator {
+class EdgeGenerator {
  private:
-  static constexpr int MAX_EDGES = 35;  // This is the highest number we'll encounter, $\binom73$.
-  uint8 k;                              // Number of vertices in each edge.
-  uint8 n;                              // Number of vertices after adding the new vertex.
-  uint8 high_idx_non_zero_enum_state;   // The highest index of the non-zero element in enum_state.
-  uint8 edge_candidate_count;           // Number of edge candidates in the next array.
-  uint8 edge_candidates[MAX_EDGES];     // All possible edges going through the new vertex.
+  uint8 k;                             // Number of vertices in each edge.
+  uint8 n;                             // Number of vertices after adding the new vertex.
+  uint8 high_idx_non_zero_enum_state;  // The highest index of the non-zero element in enum_state.
+  uint8 edge_candidate_count;          // Number of edge candidates in the next array.
+  uint8 edge_candidates[MAX_EDGES];    // All possible edges going through the new vertex.
 
   // The vertex indices in the corresponding edge candidate.
   // [0] is always NOT_IN_SET, [1] is always UNDIRECTED,

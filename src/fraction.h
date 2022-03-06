@@ -3,6 +3,7 @@
 
 // Represents a simplified fraction n/d.
 struct Fraction {
+ public:
   int n, d;
 
   Fraction(int n_, int d_);

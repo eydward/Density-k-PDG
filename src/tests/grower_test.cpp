@@ -1,6 +1,6 @@
-#include "../grower.hpp"
+#include "../grower.h"
 
-#include "../graph.hpp"
+#include "../graph.h"
 #include "gtest/gtest.h"
 
 using namespace testing;

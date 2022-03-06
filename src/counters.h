@@ -5,7 +5,7 @@
 #include "graph.h"
 
 // Holds all statistical counters to keep track of number of operations during the search.
-struct Counters {
+class Counters {
  private:
   // The smallest theta value observed so far.
   static Fraction min_theta;
@@ -36,6 +36,11 @@ struct Counters {
   static uint64 graph_permute_canonical_ops;
   static uint64 graph_contains_Tk_tests;
 
+  // Prints the counter values the given output stream.
+  static void print_counters_to_stream(std::ostream& os);
+  // Print status if sufficient time has elapsed since the last print.
+  static void print_at_time_interval();
+
  public:
   static Fraction get_min_theta() { return min_theta; }
   static void increment_graph_inits() { ++graph_inits; }
@@ -52,28 +57,11 @@ struct Counters {
   static void increment_graph_contains_Tk_tests() { ++graph_contains_Tk_tests; }
 
   // If the given graph's theta is less than min_theta, assign it to min_theta.
-  static void observe_theta(const Graph& g) {
-    ++graph_accumulated_canonicals;
-    Fraction theta = g.get_theta();
-    if (theta < min_theta) {
-      min_theta = theta;
-      min_theta_edge_count = g.edge_count;
-      for (int i = 0; i < g.edge_count; i++) {
-        min_theta_edges[i] = g.edges[i];
-      }
-    }
-    print_at_time_interval();
-  }
+  static void observe_theta(const Graph& g);
 
   // Resets all values to 0, and starts the stopwatch, which will be used
   // by print_counters to calculate elapsed time.
   static void initialize(std::ofstream* log_stream = nullptr);
   // Prints the counter values to console and log file.
   static void print_counters();
-
- private:
-  // Prints the counter values the given output stream.
-  static void print_counters_to_stream(std::ostream& os);
-  // Print status if sufficient time has elapsed since the last print.
-  static void print_at_time_interval();
 };

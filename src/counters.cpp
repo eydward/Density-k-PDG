@@ -38,6 +38,20 @@ void Counters::initialize(std::ofstream* log_stream) {
   log = log_stream;
 }
 
+// If the given graph's theta is less than min_theta, assign it to min_theta.
+void Counters::observe_theta(const Graph& g) {
+  ++graph_accumulated_canonicals;
+  Fraction theta = g.get_theta();
+  if (theta < min_theta) {
+    min_theta = theta;
+    min_theta_edge_count = g.edge_count;
+    for (int i = 0; i < g.edge_count; i++) {
+      min_theta_edges[i] = g.edges[i];
+    }
+  }
+  print_at_time_interval();
+}
+
 void Counters::print_at_time_interval() {
   const auto now = std::chrono::steady_clock::now();
   if (std::chrono::duration_cast<std::chrono::seconds>(now - last_print_time).count() >= 100) {

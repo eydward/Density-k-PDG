@@ -1,7 +1,5 @@
 #include "graph.h"
-#include "graph.hpp"
 #include "grower.h"
-#include "grower.hpp"
 
 void print_usage() {
   std::cout << "Usage: kPDG K N [print_graphs]\n"

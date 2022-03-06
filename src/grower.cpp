@@ -1,6 +1,6 @@
-#pragma once
-#include "counters.h"
 #include "grower.h"
+
+#include "counters.h"
 
 // Find all canonical isomorphism class representations with up to max_n vertices.
 void Grower::grow() {
