@@ -58,4 +58,13 @@ bool EdgeGenerator::next() {
 
 // Notify the generator about the fact that adding the current edge set to the graph
 // makes it contain T_k, and therefore we can skip edge sets that are supersets of the current.
-void EdgeGenerator::notify_contain_tk_skip() {}
+void EdgeGenerator::notify_contain_tk_skip() {
+  // Find the lowest non-zero enum state, and change everything below
+  // it to the final state. Then the next() call will bump the lowest non-zero enum state.
+  // For example, if the enum state is [3,0,0,1,0,0,0], update it to [3,0,0,1,k+1,k+1,k+1]
+  // then the next call will get to [3,0,0,2,0,0,0].
+  for (uint8 i = 0; i < edge_candidate_count; i++) {
+    if (enum_state[i] != 0) return;
+    enum_state[i] = k + 1;
+  }
+}

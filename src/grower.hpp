@@ -57,7 +57,10 @@ void Grower<K, N>::grow_step(int n) {
       for (int i = 0; i < edge_gen.edge_count; i++) {
         copy.add_edge(edge_gen.edges[i]);
       }
-      if (copy.contains_Tk(n - 1)) continue;
+      if (copy.contains_Tk(n - 1)) {
+        edge_gen.notify_contain_tk_skip();
+        continue;
+      }
 
       copy.init();
       copy.canonicalize();

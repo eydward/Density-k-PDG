@@ -75,6 +75,54 @@ TEST(EdgeGeneratorTest, Generate23) {
   EXPECT_FALSE(edge_gen.next());
 }
 
+TEST(EdgeGeneratorTest, Generate23WithSkip) {
+  EdgeGenerator edge_gen;
+  edge_gen.initialize(2, 3);
+
+  // First 3: {02} {02>0} {02>2}
+  for (int i = -1; i <= 1; i++) {
+    EXPECT_TRUE(edge_gen.next());
+    EXPECT_EQ(edge_gen.edge_count, 1);
+    EXPECT_EQ(edge_gen.edges[0].vertex_set, 0b101);
+    EXPECT_EQ(edge_gen.edges[0].head_vertex, static_cast<uint8>(i == 1 ? 2 : i));
+  }
+
+  // Next: {12}
+  EXPECT_TRUE(edge_gen.next());
+  EXPECT_EQ(edge_gen.edge_count, 1);
+  EXPECT_EQ(edge_gen.edges[0].vertex_set, 0b110);
+  EXPECT_EQ(edge_gen.edges[0].head_vertex, UNDIRECTED);
+
+  // Notify to skip, so the next 3 are skipped: {02, 12} {02>0, 12} {02>2, 12}.
+  edge_gen.notify_contain_tk_skip();
+
+  // Next: {12>1}
+  EXPECT_TRUE(edge_gen.next());
+  EXPECT_EQ(edge_gen.edge_count, 1);
+  EXPECT_EQ(edge_gen.edges[0].vertex_set, 0b110);
+  EXPECT_EQ(edge_gen.edges[0].head_vertex, 1);
+
+  // Notify to skip, so the next 3 are skipped: {02, 12>1} {02>0, 12>1} {02>2, 12>1}.
+  edge_gen.notify_contain_tk_skip();
+
+  // Next 4: {12>2} {02, 12>2} {02>0, 12>2} {02>2, 12>2}
+  EXPECT_TRUE(edge_gen.next());
+  EXPECT_EQ(edge_gen.edge_count, 1);
+  EXPECT_EQ(edge_gen.edges[0].vertex_set, 0b110);
+  EXPECT_EQ(edge_gen.edges[0].head_vertex, 2);
+
+  for (int i0 = -1; i0 <= 1; i0++) {
+    EXPECT_TRUE(edge_gen.next());
+    EXPECT_EQ(edge_gen.edge_count, 2);
+    EXPECT_EQ(edge_gen.edges[0].vertex_set, 0b101);
+    EXPECT_EQ(edge_gen.edges[0].head_vertex, static_cast<uint8>(i0 == 1 ? 2 : i0));
+    EXPECT_EQ(edge_gen.edges[1].vertex_set, 0b110);
+    EXPECT_EQ(edge_gen.edges[1].head_vertex, 2);
+  }
+
+  EXPECT_FALSE(edge_gen.next());
+}
+
 TEST(EdgeGeneratorTest, Generate33) {
   EdgeGenerator edge_gen;
   edge_gen.initialize(3, 3);
