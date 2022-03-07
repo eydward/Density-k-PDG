@@ -32,7 +32,7 @@ int main(int argc, char* argv[]) {
   Graph::set_global_graph_info(k, n);
 
   std::string log_path =
-      "kPDG_run_" + std::to_string(Graph::K) + "_" + std::to_string(Graph::N) + ".log";
+      "kPDG_v2run_" + std::to_string(Graph::K) + "_" + std::to_string(Graph::N) + ".log";
   std::string arguments = "kPDG run arguments: K=" + std::to_string(Graph::K) +
                           ", N=" + std::to_string(Graph::N) +
                           ", TOTAL_EDGES=" + std::to_string(Graph::TOTAL_EDGES) +

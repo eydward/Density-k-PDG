@@ -20,7 +20,7 @@ class Counters {
   // The log file, can be nullptr.
   static std::ofstream* log;
 
-  static uint64 graph_inits;
+  static uint64 compute_vertex_signatures;
   static uint64 graph_allocations;
   static uint64 chunk_allocations;
   static uint64 graph_copies;
@@ -43,7 +43,7 @@ class Counters {
 
  public:
   static Fraction get_min_theta() { return min_theta; }
-  static void increment_graph_inits() { ++graph_inits; }
+  static void increment_compute_vertex_signatures() { ++compute_vertex_signatures; }
   static void increment_graph_allocations() { ++graph_allocations; }
   static void increment_chunk_allocations() { ++chunk_allocations; }
   static void increment_graph_copies() { ++graph_copies; }

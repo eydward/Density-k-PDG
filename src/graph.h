@@ -44,7 +44,7 @@ struct VertexSignature {
   // Let N_u, N_h, N_t be the neighboring vertex sets that correspond to the 3 degree counts above.
   // Within each set, sort by the signature values (without neighbor_hash value) of the vertices.
   // Then combine the hash with this given order.
-  uint8 neighbor_hash;
+  uint32 neighbor_hash;
 
   uint8 degree_undirected;  // Number of undirected edges through this vertex.
   uint8 degree_head;        // Number of directed edges using this vertex as the head.
@@ -57,7 +57,7 @@ struct VertexSignature {
   }
 
   // Returns a 32-bit hash code to represent the data.
-  uint32 get_hash() const { return *reinterpret_cast<const uint32*>(this); }
+  uint64 get_hash() const { return *reinterpret_cast<const uint64*>(this); }
 };
 
 // Represents a k-PDG, with the data structure optimized for computing isomorphisms.
@@ -79,11 +79,6 @@ struct Graph {
   // True if the graph is canonicalized (vertex signatures are in descreasing order).
   bool is_canonical;
 
-  // Number of vertices that have degrees >0.
-  // Only available if is_canonical is true, in which case the rest of the
-  // vertices array can be ignored.
-  uint8 vertex_count;
-
   // Number of edges in this graph.
   uint8 edge_count;
 
@@ -93,10 +88,10 @@ struct Graph {
   // The edge set in this graph.
   Edge edges[MAX_EDGES];
 
-  // The signatures of each vertex
-  VertexSignature vertices[MAX_VERTICES];
-
   Graph();
+
+  // Resets the current graph to be an empty graph.
+  void clear();
 
   // Returns theta such that (undirected edge density) + theta (directed edge density) = 1.
   // Namely, returns theta = (binom_nk - (undirected edge count)) / (directed edge count).
@@ -110,13 +105,14 @@ struct Graph {
   // And the input is consistent (head is inside the vertex set).
   void add_edge(Edge edge);
 
-  // Initializes everything in this graph from the edge set.
-  void init();
+  // Compute the vertex signatures in this graph from the edge set.
+  // The result is in the given array.
+  void compute_vertex_signature(VertexSignature vs[MAX_VERTICES]) const;
+  static void hash_neighbors(uint8 neighbors, const VertexSignature vertices[MAX_VERTICES],
+                             uint32& hash_code);
 
-  void hash_neighbors(uint8 neighbors, uint32& hash_code) const;
-
-  // Resets the current graph to no edges.
-  void clear();
+  // Use the given vertex signatures to compute the graph hash and update the graph_hash field.
+  void compute_graph_hash(const VertexSignature vs[MAX_VERTICES]);
 
   // Returns a graph isomorphic to this graph, by applying vertex permutation.
   // The first parameter specifies the permutation. For example p={1,2,0,3} means
@@ -129,14 +125,11 @@ struct Graph {
   void permute_canonical(int p[], Graph& g) const;
 
   // Canonicalized this graph, so that the vertices are ordered by their signatures.
-  void canonicalize();
+  // The vertex signatures of the canonicalized graph is returned in the given array.
+  void canonicalize(VertexSignature vs[MAX_VERTICES]);
 
   // Makes a copy of this graph to g.
-  void copy(Graph& g) const;
-
-  // Makes a copy of this graph to g, without calling init. The caller can add/remove edges,
-  // and must call init() before using g.
-  void copy_without_init(Graph* g) const;
+  void copy(Graph* g) const;
 
   // Returns true if this graph is isomorphic to the other.
   bool is_isomorphic(const Graph& other) const;

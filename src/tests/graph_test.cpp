@@ -12,36 +12,38 @@ TEST(GraphTest, Init) {
   g.add_edge(Edge(0b1100010, 5));         // 156>5
   g.add_edge(Edge(0b1110, 2));            // 123>2
   g.add_edge(Edge(0b1011, UNDIRECTED));   // 013
-  g.init();
 
   EXPECT_FALSE(g.is_canonical);
 
   EXPECT_EQ(4, g.edge_count);
   EXPECT_EQ(2, g.undirected_edge_count);
-  EXPECT_EQ(g.edges[0].vertex_set, 0b1011);
+  EXPECT_EQ(g.edges[0].vertex_set, 0b11100);
   EXPECT_EQ(g.edges[0].head_vertex, UNDIRECTED);
-  EXPECT_EQ(g.edges[1].vertex_set, 0b1110);
-  EXPECT_EQ(g.edges[1].head_vertex, 2);
-  EXPECT_EQ(g.edges[2].vertex_set, 0b11100);
-  EXPECT_EQ(g.edges[2].head_vertex, UNDIRECTED);
-  EXPECT_EQ(g.edges[3].vertex_set, 0b1100010);
-  EXPECT_EQ(g.edges[3].head_vertex, 5);
+  EXPECT_EQ(g.edges[1].vertex_set, 0b1100010);
+  EXPECT_EQ(g.edges[1].head_vertex, 5);
+  EXPECT_EQ(g.edges[2].vertex_set, 0b1110);
+  EXPECT_EQ(g.edges[2].head_vertex, 2);
+  EXPECT_EQ(g.edges[3].vertex_set, 0b1011);
+  EXPECT_EQ(g.edges[3].head_vertex, UNDIRECTED);
 
-  EXPECT_EQ(g.vertices[0].degree_undirected, 1);
-  EXPECT_EQ(g.vertices[0].degree_head, 0);
-  EXPECT_EQ(g.vertices[0].degree_tail, 0);
+  VertexSignature vertices[MAX_VERTICES];
+  g.compute_vertex_signature(vertices);
 
-  EXPECT_EQ(g.vertices[1].degree_undirected, 1);
-  EXPECT_EQ(g.vertices[1].degree_head, 0);
-  EXPECT_EQ(g.vertices[1].degree_tail, 2);
+  EXPECT_EQ(vertices[0].degree_undirected, 1);
+  EXPECT_EQ(vertices[0].degree_head, 0);
+  EXPECT_EQ(vertices[0].degree_tail, 0);
 
-  EXPECT_EQ(g.vertices[2].degree_undirected, 1);
-  EXPECT_EQ(g.vertices[2].degree_head, 1);
-  EXPECT_EQ(g.vertices[2].degree_tail, 0);
+  EXPECT_EQ(vertices[1].degree_undirected, 1);
+  EXPECT_EQ(vertices[1].degree_head, 0);
+  EXPECT_EQ(vertices[1].degree_tail, 2);
 
-  EXPECT_EQ(g.vertices[3].degree_undirected, 2);
-  EXPECT_EQ(g.vertices[3].degree_head, 0);
-  EXPECT_EQ(g.vertices[3].degree_tail, 1);
+  EXPECT_EQ(vertices[2].degree_undirected, 1);
+  EXPECT_EQ(vertices[2].degree_head, 1);
+  EXPECT_EQ(vertices[2].degree_tail, 0);
+
+  EXPECT_EQ(vertices[3].degree_undirected, 2);
+  EXPECT_EQ(vertices[3].degree_head, 0);
+  EXPECT_EQ(vertices[3].degree_tail, 1);
 }
 
 // Utility function to create and initialize T_3.
@@ -52,7 +54,9 @@ Graph get_T3() {
   g.add_edge(Edge(0b1110, 2));           // 123>2
   g.add_edge(Edge(0b1101, UNDIRECTED));  // 023
   g.add_edge(Edge(0b11100, 2));          // 234>2
-  g.init();
+
+  VertexSignature vertices[MAX_VERTICES];
+  g.canonicalize(vertices);
   return g;
 }
 
@@ -60,34 +64,38 @@ TEST(GraphTest, T3) {
   Graph g = get_T3();
 
   EXPECT_EQ(4, g.edge_count);
-  EXPECT_EQ(g.edges[0].vertex_set, 0b1011);
-  EXPECT_EQ(g.edges[0].head_vertex, UNDIRECTED);
-  EXPECT_EQ(g.edges[1].vertex_set, 0b1101);
-  EXPECT_EQ(g.edges[1].head_vertex, UNDIRECTED);
-  EXPECT_EQ(g.edges[2].vertex_set, 0b1110);
-  EXPECT_EQ(g.edges[2].head_vertex, 2);
-  EXPECT_EQ(g.edges[3].vertex_set, 0b11100);
-  EXPECT_EQ(g.edges[3].head_vertex, 2);
+  // Canonicalization: 1->1, 2->3, 3->0, 4->2, 0->4.
+  EXPECT_EQ(g.edges[0].vertex_set, 0b1011);  // 013>3
+  EXPECT_EQ(g.edges[0].head_vertex, 3);
+  EXPECT_EQ(g.edges[1].vertex_set, 0b1101);  // 023>3
+  EXPECT_EQ(g.edges[1].head_vertex, 3);
+  EXPECT_EQ(g.edges[2].vertex_set, 0b10011);  // 014
+  EXPECT_EQ(g.edges[2].head_vertex, UNDIRECTED);
+  EXPECT_EQ(g.edges[3].vertex_set, 0b11001);  // 034
+  EXPECT_EQ(g.edges[3].head_vertex, UNDIRECTED);
 
-  EXPECT_EQ(g.vertices[0].degree_undirected, 2);
-  EXPECT_EQ(g.vertices[0].degree_head, 0);
-  EXPECT_EQ(g.vertices[0].degree_tail, 0);
+  VertexSignature vertices[MAX_VERTICES];
+  g.compute_vertex_signature(vertices);
 
-  EXPECT_EQ(g.vertices[1].degree_undirected, 1);
-  EXPECT_EQ(g.vertices[1].degree_head, 0);
-  EXPECT_EQ(g.vertices[1].degree_tail, 1);
+  EXPECT_EQ(vertices[0].degree_undirected, 2);
+  EXPECT_EQ(vertices[0].degree_head, 0);
+  EXPECT_EQ(vertices[0].degree_tail, 2);
 
-  EXPECT_EQ(g.vertices[2].degree_undirected, 1);
-  EXPECT_EQ(g.vertices[2].degree_head, 2);
-  EXPECT_EQ(g.vertices[2].degree_tail, 0);
+  EXPECT_EQ(vertices[1].degree_undirected, 1);
+  EXPECT_EQ(vertices[1].degree_head, 0);
+  EXPECT_EQ(vertices[1].degree_tail, 1);
 
-  EXPECT_EQ(g.vertices[3].degree_undirected, 2);
-  EXPECT_EQ(g.vertices[3].degree_head, 0);
-  EXPECT_EQ(g.vertices[3].degree_tail, 2);
+  EXPECT_EQ(vertices[2].degree_undirected, 0);
+  EXPECT_EQ(vertices[2].degree_head, 0);
+  EXPECT_EQ(vertices[2].degree_tail, 1);
 
-  EXPECT_EQ(g.vertices[4].degree_undirected, 0);
-  EXPECT_EQ(g.vertices[4].degree_head, 0);
-  EXPECT_EQ(g.vertices[4].degree_tail, 1);
+  EXPECT_EQ(vertices[3].degree_undirected, 1);
+  EXPECT_EQ(vertices[3].degree_head, 2);
+  EXPECT_EQ(vertices[3].degree_tail, 0);
+
+  EXPECT_EQ(vertices[4].degree_undirected, 2);
+  EXPECT_EQ(vertices[4].degree_head, 0);
+  EXPECT_EQ(vertices[4].degree_tail, 0);
 }
 
 TEST(GraphTest, Clear) {
@@ -96,7 +104,6 @@ TEST(GraphTest, Clear) {
   EXPECT_EQ(g.graph_hash, 0);
   EXPECT_EQ(g.edge_count, 0);
   EXPECT_EQ(g.undirected_edge_count, 0);
-  EXPECT_EQ(g.vertices[1].get_hash(), 0);
 }
 
 TEST(GraphTest, PermuteIsomorphic) {
@@ -114,7 +121,8 @@ TEST(GraphTest, PermuteIsomorphic) {
 
 TEST(GraphTest, PermuteCanonical) {
   Graph g = get_T3();
-  g.canonicalize();
+  VertexSignature vertices[MAX_VERTICES];
+  g.canonicalize(vertices);
   Graph h;
   int p[5]{0, 1, 2, 3, 4};
   g.permute_canonical(p, h);
@@ -130,8 +138,8 @@ TEST(GraphTest, PermuteCanonical2) {
   g.add_edge(Edge(0b0110, UNDIRECTED));  // 12
   g.add_edge(Edge(0b0101, 2));           // 02>2
   g.add_edge(Edge(0b1010, 3));           // 13>3
-  g.init();
-  g.canonicalize();
+  VertexSignature vertices[MAX_VERTICES];
+  g.canonicalize(vertices);
 
   int p[4]{0, 1, 3, 2};
   g.permute_canonical(p, h);
@@ -143,14 +151,24 @@ TEST(GraphTest, PermuteCanonical2) {
 TEST(GraphTest, Canonicalize) {
   Graph g = get_T3();
   Graph h = get_T3();
-  h.canonicalize();
 
-  EXPECT_FALSE(g.is_canonical);
+  EXPECT_TRUE(g.is_canonical);
   EXPECT_TRUE(h.is_canonical);
   EXPECT_EQ(g.graph_hash, h.graph_hash);
   EXPECT_TRUE(h.is_isomorphic(g));
+  EXPECT_TRUE(g.is_isomorphic(h));
+  EXPECT_TRUE(h.is_identical(g));
+  EXPECT_TRUE(g.is_identical(h));
+
+  // Canonicalization should be idempotent.
+  VertexSignature vertices[MAX_VERTICES];
+  h.canonicalize(vertices);
+  EXPECT_TRUE(h.is_canonical);
+  EXPECT_EQ(g.graph_hash, h.graph_hash);
+  EXPECT_TRUE(h.is_isomorphic(g));
+
   for (int v = 0; v < 4; v++) {
-    EXPECT_GE(h.vertices[v].get_hash(), h.vertices[v + 1].get_hash());
+    EXPECT_GE(vertices[v].get_hash(), vertices[v + 1].get_hash());
   }
 }
 
@@ -161,21 +179,24 @@ TEST(GraphTest, Canonicalize2) {
   g.add_edge(Edge(0b0111000, 4));           // 345>4
   g.add_edge(Edge(0b0110100, UNDIRECTED));  // 245
   g.add_edge(Edge(0b1110000, 4));           // 456>4
-  g.init();
-  EXPECT_EQ(g.vertices[0].get_degrees(), 0);
-  EXPECT_EQ(g.vertices[1].get_degrees(), 0);
-  EXPECT_EQ(g.vertices[2].get_degrees(), 0x020000);
+
+  VertexSignature vertices[MAX_VERTICES];
+  g.compute_vertex_signature(vertices);
+  g.compute_graph_hash(vertices);
+
+  EXPECT_EQ(vertices[0].get_degrees(), 0);
+  EXPECT_EQ(vertices[1].get_degrees(), 0);
+  EXPECT_EQ(vertices[2].get_degrees(), 0x020000);
 
   Graph h = g;
-  h.canonicalize();
+  h.canonicalize(vertices);
   EXPECT_EQ(g.graph_hash, h.graph_hash);
   EXPECT_TRUE(h.is_isomorphic(g));
   EXPECT_TRUE(h.is_canonical);
-  EXPECT_EQ(h.vertex_count, 5);
 
   Graph f = get_T3();
   Graph::set_global_graph_info(3, 7);
-  f.canonicalize();
+  f.canonicalize(vertices);
   EXPECT_EQ(h.graph_hash, f.graph_hash);
 }
 
@@ -183,20 +204,25 @@ TEST(GraphTest, Canonicalize3) {
   Graph::set_global_graph_info(2, 7);
   Graph g, h;
   g.add_edge(Edge(0b0101, UNDIRECTED));
-  g.init();
-  g.copy(h);
-  h.canonicalize();
+  g.copy(&h);
+
+  VertexSignature vertices[MAX_VERTICES];
+  h.canonicalize(vertices);
   EXPECT_TRUE(h.is_canonical);
-  EXPECT_EQ(h.vertex_count, 2);
 }
 
 TEST(GraphTest, Copy) {
   Graph g = get_T3();
   g.add_edge(Edge(0b0111, UNDIRECTED));
-  g.init();
+
+  VertexSignature vertices[MAX_VERTICES];
+  g.compute_vertex_signature(vertices);
+  g.compute_graph_hash(vertices);
   Graph h;
-  g.copy_without_init(&h);
-  h.init();
+  g.copy(&h);
+  h.compute_vertex_signature(vertices);
+  h.compute_graph_hash(vertices);
+
   EXPECT_EQ(g.graph_hash, h.graph_hash);
   EXPECT_TRUE(h.is_isomorphic(g));
   EXPECT_EQ(g.edge_count, h.edge_count);
@@ -208,14 +234,17 @@ TEST(GraphTest, NonIsomorphic) {
   Graph g = get_T3();
 
   Graph h;
-  g.copy_without_init(&h);
+  g.copy(&h);
   h.add_edge(Edge(0b10110, UNDIRECTED));  // 124
-  h.init();
+  VertexSignature vertices[MAX_VERTICES];
+  h.compute_vertex_signature(vertices);
+  h.compute_graph_hash(vertices);
 
   Graph f;
-  g.copy_without_init(&f);
+  g.copy(&f);
   f.add_edge(Edge(0b10110, 1));  // 124
-  f.init();
+  f.compute_vertex_signature(vertices);
+  f.compute_graph_hash(vertices);
 
   EXPECT_NE(g.graph_hash, f.graph_hash);
   EXPECT_FALSE(f.is_isomorphic(g));
@@ -232,9 +261,9 @@ TEST(GraphTest, ContainsT3) {
     g.permute(p, h);
     EXPECT_TRUE(h.contains_Tk(p[0]));
     EXPECT_TRUE(h.contains_Tk(p[1]));
-    EXPECT_TRUE(h.contains_Tk(p[2]));
+    EXPECT_FALSE(h.contains_Tk(p[2]));
     EXPECT_TRUE(h.contains_Tk(p[3]));
-    EXPECT_FALSE(h.contains_Tk(p[4]));
+    EXPECT_TRUE(h.contains_Tk(p[4]));
   } while (std::next_permutation(p, p + 5));
 }
 
@@ -243,7 +272,10 @@ TEST(GraphTest, NotContainsT3) {
   g.add_edge(Edge(0b1011, UNDIRECTED));  // 013
   g.add_edge(Edge(0b1110, UNDIRECTED));  // 123
   g.add_edge(Edge(0b1101, UNDIRECTED));  // 023
-  g.init();
+
+  VertexSignature vertices[MAX_VERTICES];
+  g.compute_vertex_signature(vertices);
+  g.compute_graph_hash(vertices);
 
   int p[5]{0, 1, 2, 3, 4};
   do {

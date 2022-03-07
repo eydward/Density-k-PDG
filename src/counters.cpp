@@ -5,7 +5,7 @@
 Fraction Counters::min_theta(1E8, 1);
 Edge Counters::min_theta_edges[255]{};
 int Counters::min_theta_edge_count = 0;
-uint64 Counters::graph_inits = 0;
+uint64 Counters::compute_vertex_signatures = 0;
 uint64 Counters::graph_allocations = 0;
 uint64 Counters::chunk_allocations = 0;
 uint64 Counters::graph_copies = 0;
@@ -24,7 +24,7 @@ std::ofstream* Counters::log = nullptr;
 
 void Counters::initialize(std::ofstream* log_stream) {
   min_theta = Fraction(1E8, 1);
-  graph_inits = 0;
+  compute_vertex_signatures = 0;
   graph_copies = 0;
   graph_canonicalize_ops = 0;
   graph_isomorphic_tests = 0;
@@ -79,7 +79,8 @@ void Counters::print_counters_to_stream(std::ostream& os) {
   os << "\nWall clock time:  "
      << std::chrono::duration_cast<std::chrono::milliseconds>(end - start_time).count() << "ms"
      << "\nGraph allocs\t\t= " << graph_allocations << "\nChunk allocs\t\t= " << chunk_allocations
-     << "\nGraph inits\t\t= " << graph_inits << "\nGraph copies\t\t= " << graph_copies
+     << "\nCompute Vertex Signatures\t= " << compute_vertex_signatures
+     << "\nGraph copies\t\t= " << graph_copies
      << "\nGraph canonicalize ops\t= " << graph_canonicalize_ops
      << "\nGraph permute ops\t= " << graph_permute_ops
      << "\nGraph permute canonical\t= " << graph_permute_canonical_ops
