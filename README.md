@@ -52,12 +52,15 @@ All source code are in the `src` directory.
 
 ## Algorithm Design Summary
 ### Growing the Search Tree
-We use a simple idea to grow the search tree while try to avoid unnecessary work. This is implemented in `grower.h`.  Note all graphs are on N vertices {0,1,...,N-1}. When we say "a graph with n vertices" in this section, we mean the number of vertices that appear in some edges is n.
+We use a simple idea to grow the search tree while try to avoid unnecessary work where we can. This is implemented in `grower.h, .cpp` with the edge set enumeration logic implemented in `edge_gen.h, .cpp`.  Note all graphs are on N vertices {0,1,...,N-1}. When we say "a graph with n vertices" in this section, we mean the number of vertices that have positive degrees.
 
-1. Start with K-1 vertices {0,...,K-2} and 0 edge. 
-2. Let n = K.  Let canonicals be empty set. 
+1. Start with K-1 vertices {0,...,K-2} and 0 edge. This is the only graph in `canonicals[K-1]`.
+2. Let n = K.  Let `canonicals[n]` be empty set. 
 4. Repeat until n > N:
     - Add vertex (n-1) to the vertex set.
-    - General all edge candidates that goes through the new vertex, by finding \binom{n-1}{k-1} sets without vertex (n-1), and add vertex (n-1) to each edge.
-    - For each graph g in the canonical set, we want to add all possible combinations of the edge candidates (2^\binom{n-1}{k-1} in total) to g and see if we can generate additional graphs that are not isomorphic to anything already in the canonical set. 
-        *  
+    - General all edge candidates that goes through the new vertex, by finding all \binom{n-1}{k-1} vertex sets without vertex (n-1), and adding vertex (n-1) to each edge. (This is in `initialize()` in `edge_gen.cpp`.)
+    - For each graph g in the canonical set, we want to add all possible combinations of the edge candidates (`(K+2)^\binom{n-1}{k-1}-1` in total) to g and see if we can generate additional graphs that are not isomorphic to anything already in the canonical set. This is done in `next()` in `edge_gen.cpp`. Basically run a `\binom{n-1}{k-1}` digit counter, the value of each digit goes from 0 to K+1. 0 means the corresponding edge is not in the set to be added to g. 1 means the corresponding edge is in the set to be added to g, as an undirected edge. >=2 means the corresponding edge is in the set to be added to g, as a directed edge, with the value indicating the head. For example if the edge candidates has 6 edges, then we run a 6-digit counter: `000001`, `000002`, ... , `00000(K+1)`, `000010`, `000011`, ... `(K+1)(K+1)(K+1)(K+1)(K+1)(K+1)`. And each counter value corresponds to a set of edges to be added to g.
+        * For each edge set: make a copy of g, add the edge set to the copy, check whether it's T_k-free (explained below). 
+        * If it contains T_k as a subgraph, ignore it and move on to the next edge set from the edge generator.
+        * If it's T_k-free, canonicalize it (explained below), and check if it is isomorphic to some graph already stored in `canonicals[n]`. If it's not isomorphic to any existing graph, add it to `canonicals[n]`.
+    - As an important optimization, if g together with an edge set contains T_k as a subgraph, then g together with any superset of that edge set also contains T_k. So we should skip checking those edge sets. There is no great way to do this in the most general way, but a simple optimization that is reasonably effective is to skip the "lower" edges. Take the 6-edge example from the above. Let's say certain direction of edge 2 and edge 3 gives us a graph that contains T_k, where the counter value is `003400`. Then in theory we can skip all `xy34zw` for all values of `x,y,z,w`. That's hard to do, but we can easily skip all `0034zw`. This is implemented in `notify_contain_tk_skip()` in `edge_gen.cpp`.
