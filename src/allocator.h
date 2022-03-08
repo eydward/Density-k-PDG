@@ -19,7 +19,7 @@ class GraphAllocator {
   AllocationChunk* chunk;
 
  public:
-  GraphAllocator() : chunk(nullptr) {}
+  GraphAllocator();
 
   // Returns a usable graph object with everything zeroed. If the caller
   // wants to keep the object (e.g. store it in some C++ container),

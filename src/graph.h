@@ -76,7 +76,7 @@ struct Graph {
   // The hash code is invariant under isomorphisms.
   uint32 graph_hash;
 
-  // True if the graph is canonicalized (vertex signatures are in descreasing order).
+  // True if the graph is canonicalized (vertex signatures are in decreasing order).
   bool is_canonical;
 
   // Number of edges in this graph.

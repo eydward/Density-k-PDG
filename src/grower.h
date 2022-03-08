@@ -32,7 +32,11 @@ class Grower {
   void print_state_to_stream(bool print_graphs, std::ostream& os);
 
  public:
-  Grower(std::ostream* log_stream = nullptr) : log(log_stream) {}
+  Grower(std::ostream* log_stream = nullptr) : log(log_stream) {
+    for (int n = 0; n <= MAX_VERTICES; n++) {
+      canonicals[n].max_load_factor(20);
+    }
+  }
 
   // One canonical graphs with n vertices in each isomorphism class is in canonicals[n].
   std::unordered_set<const Graph*, GraphHasher, GraphComparer> canonicals[MAX_VERTICES + 1];

@@ -2,9 +2,9 @@
 
 class AllocationChunk {
  private:
-  // Max number of items this allocator can hold. Use 4MB chunks. The "-128" part is to
-  // allow bookkeeping overhead of C++ runtime heap, to stay below 4MB.
-  static constexpr int MAX_ITEMS = ((1 << 22) - 128) / sizeof(Graph);
+  // Max number of items this allocator can hold. Use 2MB chunks. The "-128" part is to
+  // allow bookkeeping overhead of C++ runtime heap, to stay below 2MB.
+  static constexpr int MAX_ITEMS = ((1 << 21) - 128) / sizeof(Graph);
   Graph array[MAX_ITEMS];
   int current_index;
 
@@ -25,6 +25,10 @@ class AllocationChunk {
     return array + current_index;
   }
 };
+
+GraphAllocator::GraphAllocator() : chunk(nullptr) {
+  std::cout << "sizeof(AllocationChunk)=" << sizeof(AllocationChunk) << "\n\n";
+}
 
 Graph* GraphAllocator::get_current_graph_from_allocator() {
   if (chunk == nullptr || chunk->is_full()) {

@@ -28,6 +28,10 @@ cc_binary(
     srcs=["kPDG.cpp"],
     deps=[":graph"],
     copts=["-std=c++20"],
+    linkstatic=True,
+    features = [
+        "fully_static_link",
+    ],
 )
 
 cc_test(

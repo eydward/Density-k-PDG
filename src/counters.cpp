@@ -21,6 +21,10 @@ uint64 Counters::graph_contains_Tk_tests = 0;
 std::chrono::time_point<std::chrono::steady_clock> Counters::start_time;
 std::chrono::time_point<std::chrono::steady_clock> Counters::last_print_time;
 std::ofstream* Counters::log = nullptr;
+uint64 Counters::set_bucket_count = 0;
+uint64 Counters::set_max_bucket_count = 0;
+float Counters::set_load_factor = 0;
+float Counters::set_max_load_factor = 0;
 
 void Counters::initialize(std::ofstream* log_stream) {
   min_theta = Fraction(1E8, 1);
@@ -50,6 +54,14 @@ void Counters::observe_theta(const Graph& g) {
     }
   }
   print_at_time_interval();
+}
+
+void Counters::current_set_stats(uint64 bucket_count, uint64 max_bucket_count, float load_factor,
+                                 float max_load_factor) {
+  set_bucket_count = bucket_count;
+  set_max_bucket_count = max_bucket_count;
+  set_load_factor = load_factor;
+  set_max_load_factor = max_load_factor;
 }
 
 void Counters::print_at_time_interval() {
@@ -89,5 +101,7 @@ void Counters::print_counters_to_stream(std::ostream& os) {
      << "\n    False w/ hash match\t= " << graph_isomorphic_hash_no
      << "\nGraph identical tests\t= " << graph_identical_tests
      << "\nGraph contains T_k\t= " << graph_contains_Tk_tests
+     << "\nunordered_set(buckets, max_buckets, loadf, max_loadf)= (" << set_bucket_count << ", "
+     << set_max_bucket_count << ", " << set_load_factor << ", " << set_max_load_factor << ")"
      << "\n--------------------------------------------------\n";
 }

@@ -65,6 +65,8 @@ void Grower::grow_step(int n) {
       if (!canonicals[n].contains(copy)) {
         canonicals[n].insert(copy);
         Counters::observe_theta(*copy);
+        Counters::current_set_stats(canonicals[n].bucket_count(), canonicals[n].max_bucket_count(),
+                                    canonicals[n].load_factor(), canonicals[n].max_load_factor());
         allocator.mark_current_graph_used();
         copy = allocator.get_current_graph_from_allocator();
       }

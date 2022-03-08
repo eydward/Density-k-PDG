@@ -35,6 +35,10 @@ class Counters {
   static uint64 graph_permute_ops;
   static uint64 graph_permute_canonical_ops;
   static uint64 graph_contains_Tk_tests;
+  static uint64 set_bucket_count;
+  static uint64 set_max_bucket_count;
+  static float set_load_factor;
+  static float set_max_load_factor;
 
   // Prints the counter values the given output stream.
   static void print_counters_to_stream(std::ostream& os);
@@ -55,6 +59,8 @@ class Counters {
   static void increment_graph_permute_ops() { ++graph_permute_ops; }
   static void increment_graph_permute_canonical_ops() { ++graph_permute_canonical_ops; }
   static void increment_graph_contains_Tk_tests() { ++graph_contains_Tk_tests; }
+  static void current_set_stats(uint64 bucket_count, uint64 max_bucket_count, float load_factor,
+                                float max_load_factor);
 
   // If the given graph's theta is less than min_theta, assign it to min_theta.
   static void observe_theta(const Graph& g);
