@@ -443,11 +443,10 @@ void Graph::print_concise(std::ostream& os) const {
   Edge::print_edges(os, edge_count, edges);
 }
 
-#if false
 // Print the graph to the console for debugging purpose.
 void Graph::print() const {
   std::cout << "Graph[" << graph_hash << ", canonical=" << is_canonical
-            << ", ecnt=" << (int)edge_count << ", undir_ecnt=" << (int)undirected_edge_count
+            << ", eg_cnt=" << (int)edge_count << ", undir_eg_cnt=" << (int)undirected_edge_count
             << ", \n";
 
   bool is_first = true;
@@ -475,5 +474,7 @@ void Graph::print() const {
     }
   }
   std::cout << "}\n";
+
+  VertexSignature vs[MAX_VERTICES];
+  compute_vertex_signature(vs);
 }
-#endif

@@ -39,11 +39,13 @@ void Grower::print(bool print_graphs) {
 // Note all edges added in this step contains vertex (n-1).
 void Grower::grow_step(int n) {
   edge_gen.initialize(Graph::K, n);
+  Counters::new_growth_step(n, canonicals[n - 1].size());
 
   // This array will be reused when processing the graphs.
   VertexSignature vs[MAX_VERTICES];
 
   for (const Graph* g : canonicals[n - 1]) {
+    Counters::increment_growth_processed_graphs_in_current_step();
     edge_gen.reset_enumeration();
     assert(n == Graph::K || g->is_canonical);
 

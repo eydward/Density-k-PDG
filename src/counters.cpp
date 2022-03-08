@@ -25,19 +25,14 @@ uint64 Counters::set_bucket_count = 0;
 uint64 Counters::set_max_bucket_count = 0;
 float Counters::set_load_factor = 0;
 float Counters::set_max_load_factor = 0;
+uint64 Counters::growth_vertex_count;
+uint64 Counters::growth_total_graphs_in_current_step;
+uint64 Counters::growth_processed_graphs_in_current_step;
+uint64 Counters::growth_accumulated_canonicals_in_current_step;
 
 void Counters::initialize(std::ofstream* log_stream) {
   min_theta = Fraction(1E8, 1);
-  compute_vertex_signatures = 0;
-  graph_copies = 0;
-  graph_canonicalize_ops = 0;
-  graph_isomorphic_tests = 0;
-  graph_isomorphic_expensive = 0;
-  graph_isomorphic_hash_no = 0;
-  graph_identical_tests = 0;
-  graph_permute_ops = 0;
-  graph_permute_canonical_ops = 0;
-  graph_contains_Tk_tests = 0;
+  min_theta_edge_count = 0;
   last_print_time = start_time = std::chrono::steady_clock::now();
   log = log_stream;
 }
@@ -45,6 +40,7 @@ void Counters::initialize(std::ofstream* log_stream) {
 // If the given graph's theta is less than min_theta, assign it to min_theta.
 void Counters::observe_theta(const Graph& g) {
   ++graph_accumulated_canonicals;
+  ++growth_accumulated_canonicals_in_current_step;
   Fraction theta = g.get_theta();
   if (theta < min_theta) {
     min_theta = theta;
@@ -54,6 +50,11 @@ void Counters::observe_theta(const Graph& g) {
     }
   }
   print_at_time_interval();
+}
+
+void Counters::new_growth_step(uint64 vertex_count, uint64 total_graphs_in_current_step) {
+  growth_vertex_count = vertex_count;
+  growth_total_graphs_in_current_step = total_graphs_in_current_step;
 }
 
 void Counters::current_set_stats(uint64 bucket_count, uint64 max_bucket_count, float load_factor,
@@ -94,14 +95,16 @@ void Counters::print_counters_to_stream(std::ostream& os) {
      << "\nCompute Vertex Signatures\t= " << compute_vertex_signatures
      << "\nGraph copies\t\t= " << graph_copies
      << "\nGraph canonicalize ops\t= " << graph_canonicalize_ops
-     << "\nGraph permute ops\t= " << graph_permute_ops
      << "\nGraph permute canonical\t= " << graph_permute_canonical_ops
-     << "\nGraph isomorphic tests\t= " << graph_isomorphic_tests
-     << "\n    Expensive tests\t= " << graph_isomorphic_expensive
-     << "\n    False w/ hash match\t= " << graph_isomorphic_hash_no
-     << "\nGraph identical tests\t= " << graph_identical_tests
      << "\nGraph contains T_k\t= " << graph_contains_Tk_tests
+     << "\nGraph isomorphic test stats (total, expensive, false w/ hash match, identical test)= ("
+     << graph_isomorphic_tests << ", " << graph_isomorphic_expensive << ", "
+     << graph_isomorphic_hash_no << ", " << graph_identical_tests << ")"
      << "\nunordered_set(buckets, max_buckets, loadf, max_loadf)= (" << set_bucket_count << ", "
      << set_max_bucket_count << ", " << set_load_factor << ", " << set_max_load_factor << ")"
+     << "\nGrowth stats(vertex count, total in step, processed in step, accumulated in step)= ("
+     << growth_vertex_count << ", " << growth_total_graphs_in_current_step << ", "
+     << growth_processed_graphs_in_current_step << ", "
+     << growth_accumulated_canonicals_in_current_step << ")"
      << "\n--------------------------------------------------\n";
 }

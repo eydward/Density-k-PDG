@@ -39,6 +39,10 @@ class Counters {
   static uint64 set_max_bucket_count;
   static float set_load_factor;
   static float set_max_load_factor;
+  static uint64 growth_vertex_count;
+  static uint64 growth_total_graphs_in_current_step;
+  static uint64 growth_processed_graphs_in_current_step;
+  static uint64 growth_accumulated_canonicals_in_current_step;
 
   // Prints the counter values the given output stream.
   static void print_counters_to_stream(std::ostream& os);
@@ -59,6 +63,14 @@ class Counters {
   static void increment_graph_permute_ops() { ++graph_permute_ops; }
   static void increment_graph_permute_canonical_ops() { ++graph_permute_canonical_ops; }
   static void increment_graph_contains_Tk_tests() { ++graph_contains_Tk_tests; }
+  static void increment_growth_processed_graphs_in_current_step() {
+    ++growth_processed_graphs_in_current_step;
+  }
+
+  // Starting a new step in growth.
+  static void new_growth_step(uint64 vertex_count, uint64 total_graphs_in_current_step);
+
+  // The statistics of the std::unordered_set used to store all canonicals.
   static void current_set_stats(uint64 bucket_count, uint64 max_bucket_count, float load_factor,
                                 float max_load_factor);
 
