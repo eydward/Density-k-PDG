@@ -95,3 +95,5 @@ With the above we can describe the algorithm to determine isomorphism (implement
    - We don't need to perform all n! permutations. Instead, we only need to permute within the set of vertices that have the same `VertexSignature`. Because if two vertices have different signatures, we know that they won't produce identical graphs. 
    - So we do this by walking through the sorted `VertexSignature` array, find the equal ranges, use the equal ranges to initialize a `Permutator` object (implemented in `permutator.h, cpp`). Then loop through `Permutator.next()` which produces all vertex set permutations that permutes within vertices with the same signatures. 
    
+### T_k-free
+General partially directed hypergraph subgraph check is really really complicated and expensive (much more complicated than isomorphism check, since now the problem is to find a subgraph for it to isomorphic to). But luckily, T_k-free is simple and fast. This is implemented in `contains_Tk()` in `graph.cpp`. The comment of that function is very detailed so I won't repeat here. It relies heavily on bit mask manipulation. 
