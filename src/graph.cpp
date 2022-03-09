@@ -41,6 +41,26 @@ void Edge::print_edges(std::ostream& os, uint8 edge_count, const Edge edges[]) {
   os << "}\n";
 }
 
+// Utility function to print an array of VertexSignatures to the given output stream,
+// for debugging purpose.
+void VertexSignature::print_vertices(std::ostream& os,
+                                     const VertexSignature vertices[MAX_VERTICES]) {
+  os << "  {";
+  bool is_first = true;
+  for (int v = 0; v < MAX_VERTICES; v++) {
+    if (vertices[v].get_degrees() != 0) {
+      if (!is_first) {
+        os << ", ";
+      }
+      is_first = false;
+      os << "V[" << v << "]=(" << static_cast<int>(vertices[v].degree_undirected) << ", "
+         << static_cast<int>(vertices[v].degree_head) << ", "
+         << static_cast<int>(vertices[v].degree_tail) << ", " << vertices[v].neighbor_hash << ")";
+    }
+  }
+  os << "}\n";
+}
+
 // Global to all graph instances: number of vertices in each edge.
 int Graph::K = 0;
 // Global to all graph instances: total number of vertices in each graph.
@@ -100,7 +120,7 @@ void Graph::compute_vertex_signature(VertexSignature vs[MAX_VERTICES]) const {
   Counters::increment_compute_vertex_signatures();
 
   static_assert(sizeof(VertexSignature) == 8);
-  for (int v = 0; v < N; v++) {
+  for (int v = 0; v < MAX_VERTICES; v++) {
     *reinterpret_cast<uint64*>(&vs[v]) = 0;
   }
 
@@ -361,6 +381,12 @@ bool Graph::is_isomorphic(const Graph& other) const {
   }
 
   Counters::increment_graph_isomorphic_hash_no();
+
+#if false
+  std::cout << "Non-isomorphic with match hashes:\n";
+  pa->print();
+  pb->print();
+#endif
   return false;
 }
 
@@ -445,36 +471,11 @@ void Graph::print_concise(std::ostream& os) const {
 
 // Print the graph to the console for debugging purpose.
 void Graph::print() const {
-  std::cout << "Graph[" << graph_hash << ", canonical=" << is_canonical
+  std::cout << "Graph ~ " << graph_hash << ", canonical=" << is_canonical
             << ", eg_cnt=" << (int)edge_count << ", undir_eg_cnt=" << (int)undirected_edge_count
             << ", \n";
-
-  bool is_first = true;
-  std::cout << "  undir {";
-  for (int i = 0; i < edge_count; i++) {
-    if (edges[i].head_vertex == UNDIRECTED) {
-      if (!is_first) {
-        std::cout << ", ";
-      }
-      print_vertices(std::cout, edges[i].vertex_set);
-      is_first = false;
-    }
-  }
-
-  std::cout << "}\n  dir   {";
-  is_first = true;
-  for (int i = 0; i < edge_count; i++) {
-    if (edges[i].head_vertex != UNDIRECTED) {
-      if (!is_first) {
-        std::cout << ", ";
-      }
-      print_vertices(std::cout, edges[i].vertex_set);
-      std::cout << ">" << (int)edges[i].head_vertex;
-      is_first = false;
-    }
-  }
-  std::cout << "}\n";
-
+  print_concise(std::cout);
   VertexSignature vs[MAX_VERTICES];
   compute_vertex_signature(vs);
+  VertexSignature::print_vertices(std::cout, vs);
 }

@@ -36,7 +36,6 @@ class Counters {
   static uint64 graph_permute_canonical_ops;
   static uint64 graph_contains_Tk_tests;
   static uint64 set_bucket_count;
-  static uint64 set_max_bucket_count;
   static float set_load_factor;
   static float set_max_load_factor;
   static uint64 growth_vertex_count;
@@ -71,8 +70,7 @@ class Counters {
   static void new_growth_step(uint64 vertex_count, uint64 total_graphs_in_current_step);
 
   // The statistics of the std::unordered_set used to store all canonicals.
-  static void current_set_stats(uint64 bucket_count, uint64 max_bucket_count, float load_factor,
-                                float max_load_factor);
+  static void current_set_stats(uint64 bucket_count, float load_factor, float max_load_factor);
 
   // If the given graph's theta is less than min_theta, assign it to min_theta.
   static void observe_theta(const Graph& g);

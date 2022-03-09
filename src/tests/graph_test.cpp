@@ -252,6 +252,30 @@ TEST(GraphTest, NonIsomorphic) {
   EXPECT_FALSE(f.is_isomorphic(h));
 }
 
+TEST(GraphTest, NonIsomorphicWithSameHash) {
+  Graph::set_global_graph_info(3, 5);
+  Graph g, h;
+  g.add_edge(Edge(0b00111, 0));           // 012>0
+  g.add_edge(Edge(0b01011, 1));           // 013>1
+  g.add_edge(Edge(0b10101, UNDIRECTED));  // 024
+  g.add_edge(Edge(0b11010, UNDIRECTED));  // 134
+  g.add_edge(Edge(0b11100, UNDIRECTED));  // 234
+  VertexSignature vg[MAX_VERTICES];
+  g.canonicalize(vg);
+
+  h.add_edge(Edge(0b00111, 1));           // 012>1
+  h.add_edge(Edge(0b01011, 0));           // 013>0
+  h.add_edge(Edge(0b10101, UNDIRECTED));  // 024
+  h.add_edge(Edge(0b11010, UNDIRECTED));  // 134
+  h.add_edge(Edge(0b11100, UNDIRECTED));  // 234
+  VertexSignature vh[MAX_VERTICES];
+  h.canonicalize(vh);
+
+  EXPECT_FALSE(g.is_isomorphic(h));
+  EXPECT_FALSE(h.is_isomorphic(g));
+  EXPECT_EQ(g.graph_hash, h.graph_hash);
+}
+
 TEST(GraphTest, ContainsT3) {
   Graph g = get_T3();
   Graph h;

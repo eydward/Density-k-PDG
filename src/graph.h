@@ -32,7 +32,7 @@ struct Edge {
 #endif
   }
 
-  // Utility function to print an edge array to the given output stream.
+  // Utility function to print an edge array to the given output stream, for debugging purpose.
   // Undirected edge is printed as "013" (for vertex set {0,1,3}),
   // and directed edge is printed as "013>1" (for vertex set {0,1,3} and head vertex 1).
   static void print_edges(std::ostream& os, uint8 edge_count, const Edge edges[]);
@@ -58,6 +58,10 @@ struct VertexSignature {
 
   // Returns a 32-bit hash code to represent the data.
   uint64 get_hash() const { return *reinterpret_cast<const uint64*>(this); }
+
+  // Utility function to print an array of VertexSignatures to the given output stream,
+  // for debugging purpose.
+  static void print_vertices(std::ostream& os, const VertexSignature vertices[MAX_VERTICES]);
 };
 
 // Represents a k-PDG, with the data structure optimized for computing isomorphisms.
