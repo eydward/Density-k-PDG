@@ -19,6 +19,8 @@ class Counters {
   static std::chrono::time_point<std::chrono::steady_clock> last_print_time;
   // The log file, can be nullptr.
   static std::ofstream* log;
+  // True after the first status print.
+  static bool has_printed;
 
   static uint64 compute_vertex_signatures;
   static uint64 graph_allocations;

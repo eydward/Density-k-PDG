@@ -21,6 +21,7 @@ uint64 Counters::graph_contains_Tk_tests = 0;
 std::chrono::time_point<std::chrono::steady_clock> Counters::start_time;
 std::chrono::time_point<std::chrono::steady_clock> Counters::last_print_time;
 std::ofstream* Counters::log = nullptr;
+bool Counters::has_printed = false;
 uint64 Counters::set_bucket_count = 0;
 float Counters::set_load_factor = 0;
 float Counters::set_max_load_factor = 0;
@@ -66,7 +67,11 @@ void Counters::current_set_stats(uint64 bucket_count, float load_factor, float m
 
 void Counters::print_at_time_interval() {
   const auto now = std::chrono::steady_clock::now();
-  if (std::chrono::duration_cast<std::chrono::seconds>(now - last_print_time).count() >= 10) {
+  int seconds = std::chrono::duration_cast<std::chrono::seconds>(now - last_print_time).count();
+  if (!has_printed && seconds >= 10) {
+    print_counters();
+    has_printed = true;
+  } else if (seconds >= 100) {
     print_counters();
     last_print_time = now;
   }
@@ -91,10 +96,10 @@ void Counters::print_counters_to_stream(std::ostream& os) {
 
   os << "\nAccumulated canonicals\t= " << graph_accumulated_canonicals
      << "\nAllocations (chunks, graphs)= (" << chunk_allocations << ", " << graph_allocations << ")"
-     << "\nOps (vertex sig, copies canonicalize, permute, contains T_k)= ("
-     << compute_vertex_signatures << ", " << graph_copies << ", " << graph_canonicalize_ops << ", "
+     << "\nOps (vertex sig, copies, canonicalize, permute, T_k)= (" << compute_vertex_signatures
+     << ", " << graph_copies << ", " << graph_canonicalize_ops << ", "
      << graph_permute_canonical_ops << ", " << graph_contains_Tk_tests << ")"
-     << "\nGraph isomorphic test stats (total, expensive, false w/ hash match, identical test)= ("
+     << "\nIsomorphic test counts (total, expensive, false w/ =hash, identical)= ("
      << graph_isomorphic_tests << ", " << graph_isomorphic_expensive << ", "
      << graph_isomorphic_hash_no << ", " << graph_identical_tests << ")"
      << "\nunordered_set(buckets, max_buckets, loadf, max_loadf)= (" << set_bucket_count << ", "

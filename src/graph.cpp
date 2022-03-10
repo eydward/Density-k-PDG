@@ -376,7 +376,14 @@ bool Graph::is_isomorphic(const Graph& other) const {
     Graph h;
     while (perm.next()) {
       pa->permute_canonical(perm.p, h);
-      if (h.is_identical(*pb)) return true;
+      if (h.is_identical(*pb)) {
+#if false
+        std::cout << "Is-isomorphic after permute:\n";
+        pa->print();
+        pb->print();
+#endif
+        return true;
+      }
     }
   }
 
