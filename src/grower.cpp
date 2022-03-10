@@ -89,6 +89,7 @@ void Grower::print_state_to_stream(bool print_graphs, std::ostream& os) {
     total_canonicals += canonicals[i].size();
     if (print_graphs) {
       for (const Graph* g : canonicals[i]) {
+        os << "    ";
         g->print_concise(os);
       }
     }

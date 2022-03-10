@@ -420,7 +420,7 @@ bool Graph::is_identical(const Graph& other) const {
 // from B, by repeatedly (1) delete a vertex (2) delete an edge (3) forget the direction of
 // an edge.
 bool Graph::contains_Tk(int v) const {
-  Counters::increment_graph_contains_Tk_tests();
+  uint64 counter = Counters::increment_graph_contains_Tk_tests();
 
   // There are two possibilities that $v \in T_k \subseteq H$.
   // (1) v is in the "triangle with stem cut off". Namely:
@@ -442,6 +442,8 @@ bool Graph::contains_Tk(int v) const {
   //   m    = 00000011
   //   mask = 01111111
   //   e_k  = 01111011    $S\cup xy$              $S\cup zx$
+  //   stem = 01111000
+  //   xyz  = 00000111
   for (int i = 0; i < edge_count - 1; i++) {
     uint8 e_i = edges[i].vertex_set;
     if ((e_i & (1 << v)) == 0) continue;
@@ -458,29 +460,37 @@ bool Graph::contains_Tk(int v) const {
 
           uint8 e_k = edges[k].vertex_set;
           if (__builtin_popcount(mask ^ e_k) == 1) {
-            // At this point we know the 3 edges have the vertex sets we want, check directions.
-            if (edges[i].head_vertex == v || edges[j].head_vertex == v) return true;
-            if ((m & (1 << edges[i].head_vertex)) != 0 || (m & (1 << edges[j].head_vertex)) != 0 ||
-                (m & (1 << edges[k].head_vertex)) != 0)
+            uint8 stem = m ^ e_k;
+            uint8 xyz = (e_i | e_j | e_k) & ~stem;
+            if ((edges[i].head_vertex != UNDIRECTED && (xyz & (1 << edges[i].head_vertex)) != 0) ||
+                (edges[j].head_vertex != UNDIRECTED && (xyz & (1 << edges[j].head_vertex)) != 0) ||
+                (edges[k].head_vertex != UNDIRECTED && (xyz & (1 << edges[k].head_vertex)) != 0)) {
+              // if (counter % 97 == 0) {
+              //   std::cout << "contains_Tk for v=" << v << " : true B :(i,j,k)=" << i << j << k
+              //             << "\n  ";
+              //   print_concise(std::cout);
+              // }
               return true;
+            }
           }
         }
       }
     }
   }
+  // if (counter % 97 == 0) {
+  //   std::cout << "contains_Tk for v=" << v << " : false :\n  ";
+  //   print_concise(std::cout);
+  // }
   return false;
 }
 
-void Graph::print_concise(std::ostream& os) const {
-  os << "  ";
-  Edge::print_edges(os, edge_count, edges);
-}
+void Graph::print_concise(std::ostream& os) const { Edge::print_edges(os, edge_count, edges); }
 
 // Print the graph to the console for debugging purpose.
 void Graph::print() const {
   std::cout << "Graph ~ " << graph_hash << ", canonical=" << is_canonical
             << ", eg_cnt=" << (int)edge_count << ", undir_eg_cnt=" << (int)undirected_edge_count
-            << ", \n";
+            << ", \n  ";
   print_concise(std::cout);
   VertexSignature vs[MAX_VERTICES];
   compute_vertex_signature(vs);

@@ -63,7 +63,7 @@ class Counters {
   static void increment_graph_identical_tests() { ++graph_identical_tests; }
   static void increment_graph_permute_ops() { ++graph_permute_ops; }
   static void increment_graph_permute_canonical_ops() { ++graph_permute_canonical_ops; }
-  static void increment_graph_contains_Tk_tests() { ++graph_contains_Tk_tests; }
+  static uint64 increment_graph_contains_Tk_tests() { return ++graph_contains_Tk_tests; }
   static void increment_growth_processed_graphs_in_current_step() {
     ++growth_processed_graphs_in_current_step;
   }

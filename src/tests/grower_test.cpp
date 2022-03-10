@@ -5,7 +5,7 @@
 
 using namespace testing;
 
-TEST(GrowerTest, G27) {
+TEST(GrowerTest, G23) {
   Graph::set_global_graph_info(2, 3);
   Grower s;
   s.grow();
@@ -15,7 +15,7 @@ TEST(GrowerTest, G27) {
   EXPECT_EQ(s.canonicals[3].size(), 7);
 }
 
-TEST(GrowerTest, G23) {
+TEST(GrowerTest, G23_B) {
   Graph::set_global_graph_info(2, 3);
   Counters::initialize();
   Grower s;
