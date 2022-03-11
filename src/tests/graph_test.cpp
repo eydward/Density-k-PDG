@@ -371,6 +371,38 @@ TEST(GraphTest, ContainsT3_E) {
   }
 }
 
+TEST(GraphTest, ContainsT3_F) {
+  Graph::set_global_graph_info(3, 7);
+  Graph g = parse_edges("{013>3, 014>4, 024>4, 124, 234>4, 135>5, 045>4, 245>4, 345>4}");
+  for (int v = 0; v < 7; v++) {
+    EXPECT_FALSE(g.contains_Tk(0));
+  }
+}
+
+TEST(GraphTest, ContainsT3_G) {
+  Graph::set_global_graph_info(3, 7);
+  Graph g = parse_edges("{012>1, 013>3, 134, 125>1, 135>5, 235>5, 045>4, 245>4}");
+  EXPECT_TRUE(g.contains_Tk(1));
+  EXPECT_TRUE(g.contains_Tk(2));
+  EXPECT_TRUE(g.contains_Tk(3));
+  EXPECT_TRUE(g.contains_Tk(5));
+  EXPECT_FALSE(g.contains_Tk(0));
+  EXPECT_FALSE(g.contains_Tk(4));
+  EXPECT_FALSE(g.contains_Tk(6));
+}
+
+TEST(GraphTest, ContainsT3_H) {
+  Graph::set_global_graph_info(3, 7);
+  Graph g = parse_edges("{012>1, 013>3, 134, 125>1, 135, 235, 045>4, 245>4}");
+  EXPECT_TRUE(g.contains_Tk(1));
+  EXPECT_TRUE(g.contains_Tk(2));
+  EXPECT_TRUE(g.contains_Tk(3));
+  EXPECT_TRUE(g.contains_Tk(5));
+  EXPECT_FALSE(g.contains_Tk(0));
+  EXPECT_FALSE(g.contains_Tk(4));
+  EXPECT_FALSE(g.contains_Tk(6));
+}
+
 TEST(GraphTest, NotContainsT3) {
   Graph h;
   Graph g = parse_edges("{013, 123, 023}");
