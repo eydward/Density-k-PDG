@@ -25,10 +25,12 @@ bool Counters::has_printed = false;
 uint64 Counters::set_bucket_count = 0;
 float Counters::set_load_factor = 0;
 float Counters::set_max_load_factor = 0;
-uint64 Counters::growth_vertex_count;
-uint64 Counters::growth_total_graphs_in_current_step;
-uint64 Counters::growth_processed_graphs_in_current_step;
-uint64 Counters::growth_accumulated_canonicals_in_current_step;
+uint64 Counters::growth_vertex_count = 0;
+uint64 Counters::growth_total_graphs_in_current_step = 0;
+uint64 Counters::growth_processed_graphs_in_current_step = 0;
+uint64 Counters::growth_accumulated_canonicals_in_current_step = 0;
+uint64 Counters::growth_automorphisms_found = 0;
+uint64 Counters::growth_automorphisms_vset_skips = 0;
 
 void Counters::initialize(std::ofstream* log_stream) {
   min_theta = Fraction(1E8, 1);
@@ -107,5 +109,7 @@ void Counters::print_counters_to_stream(std::ostream& os) {
      << "\nGrowth stats(vertex count, total in step, processed in step, accumulated in step)= ("
      << growth_vertex_count << ", " << growth_total_graphs_in_current_step << ", "
      << growth_processed_graphs_in_current_step << ", "
-     << growth_accumulated_canonicals_in_current_step << ")\n";
+     << growth_accumulated_canonicals_in_current_step << ")"
+     << "\nGrowth automorphism stats(found, vset skips)= (" << growth_automorphisms_found << ", "
+     << growth_automorphisms_vset_skips << ")\n";
 }

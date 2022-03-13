@@ -13,8 +13,7 @@ void Grower::grow() {
   // Initialize empty graph with k-1 vertices.
   Graph* g = allocator.get_current_graph_from_allocator();
   VertexSignature vs[MAX_VERTICES];
-  g->compute_vertex_signature(vs);
-  g->compute_graph_hash(vs);
+  g->canonicalize(vs);
   canonicals[Graph::K - 1].insert(g);
   Counters::observe_theta(*g);
   allocator.mark_current_graph_used();
@@ -48,6 +47,19 @@ void Grower::grow_step(int n) {
     Counters::increment_growth_processed_graphs_in_current_step();
     edge_gen.reset_enumeration();
     assert(n == Graph::K || g->is_canonical);
+
+#if false
+    int perm[MAX_VERTICES];
+    for (int v = 0; v < MAX_VERTICES; v++) perm[v] = v;
+    Graph h;
+    while (std::next_permutation(perm, perm + n - 1)) {
+      g->permute_canonical(perm, h);
+      if (g->is_identical(h)) {
+        Counters::increment_growth_automorphisms_found();
+        edge_gen.notify_automorphism(perm);
+      }
+    };
+#endif
 
     Graph* copy = allocator.get_current_graph_from_allocator();
     // Loop through all ((K+1)^\binom{n-1}{k-1} - 1) edge combinations, add them to g, and check

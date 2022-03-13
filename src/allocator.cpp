@@ -27,7 +27,7 @@ class AllocationChunk {
 };
 
 GraphAllocator::GraphAllocator() : chunk(nullptr) {
-  std::cout << "sizeof(AllocationChunk)=" << sizeof(AllocationChunk) << "\n\n";
+  // std::cout << "sizeof(AllocationChunk)=" << sizeof(AllocationChunk) << "\n\n";
 }
 
 Graph* GraphAllocator::get_current_graph_from_allocator() {
