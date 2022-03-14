@@ -2,6 +2,13 @@
 
 #include "counters.h"
 
+Grower::Grower(int codegrees, std::ostream* log_stream)
+    : log(log_stream), use_codegrees(codegrees) {
+  for (int n = 0; n <= MAX_VERTICES; n++) {
+    canonicals[n].max_load_factor(20);
+  }
+}
+
 // Find all canonical isomorphism class representations with up to max_n vertices.
 void Grower::grow() {
   assert(Graph::N <= 7);
@@ -12,8 +19,8 @@ void Grower::grow() {
 
   // Initialize empty graph with k-1 vertices.
   Graph* g = allocator.get_current_graph_from_allocator();
-  VertexSignature vs[MAX_VERTICES];
-  g->canonicalize(vs);
+  GraphInvariants gi;
+  g->canonicalize(gi, use_codegrees);
   canonicals[Graph::K - 1].insert(g);
   Counters::observe_theta(*g);
   allocator.mark_current_graph_used();
@@ -40,8 +47,8 @@ void Grower::grow_step(int n) {
   edge_gen.initialize(Graph::K, n);
   Counters::new_growth_step(n, canonicals[n - 1].size());
 
-  // This array will be reused when processing the graphs.
-  VertexSignature vs[MAX_VERTICES];
+  // This data structure will be reused when processing the graphs.
+  GraphInvariants gi;
 
   for (const Graph* g : canonicals[n - 1]) {
     Counters::increment_growth_processed_graphs_in_current_step();
@@ -74,7 +81,7 @@ void Grower::grow_step(int n) {
         continue;
       }
 
-      copy->canonicalize(vs);
+      copy->canonicalize(gi, use_codegrees);
 
       if (!canonicals[n].contains(copy)) {
         canonicals[n].insert(copy);

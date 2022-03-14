@@ -37,6 +37,32 @@ struct Edge {
   // and directed edge is printed as "013>1" (for vertex set {0,1,3} and head vertex 1).
   static void print_edges(std::ostream& os, uint8 edge_count, const Edge edges[]);
 };
+static_assert(sizeof(Edge) == 2);
+
+// This struct represents either the degree information for a vertex,
+// or the codegree information for a set of vertices.
+//
+// For a given vertex set U, the codegree of U is the number of edges that contain U as a
+// subset. So in fact, the degree of a vertex is just the codegree of the single element set.
+struct DegreeInfo {
+  // Number of undirected edges through the give vertex set.
+  uint8 degree_undirected;
+  // Number of directed edges through the given vertex set, with the head in the given vertex head.
+  uint8 degree_head;
+  // Number of directed edges through the given vertex set, with the head not in the set.
+  uint8 degree_tail;
+
+  // Utility function to print an degree info array to the output stream, for debugging purpose.
+  uint32 get_degrees() const {
+    return static_cast<uint32>(degree_undirected) | static_cast<uint32>(degree_head) << 8 |
+           static_cast<uint32>(degree_tail) << 16;
+  }
+
+  // Prints the array of degree info to the stream, for debugging purpose.
+  // m is the number of degree info to print in the given array.
+  static void print_degree_info(std::ostream& os, const DegreeInfo degs[MAX_VERTICES], int m);
+};
+static_assert(sizeof(DegreeInfo) <= 4);
 
 // Represent the characteristics of a vertex, that is invariant under graph isomorphisms.
 struct VertexSignature {
@@ -46,15 +72,8 @@ struct VertexSignature {
   // Then combine the hash with this given order.
   uint32 neighbor_hash;
 
-  uint8 degree_undirected;  // Number of undirected edges through this vertex.
-  uint8 degree_head;        // Number of directed edges using this vertex as the head.
-  uint8 degree_tail;        // Number of directed edges through this vertex but not as head.
-
-  // Returns a 32-bit code that represents degree information.
-  uint32 get_degrees() const {
-    return static_cast<uint32>(degree_undirected) << 16 | static_cast<uint32>(degree_head) << 8 |
-           static_cast<uint32>(degree_tail);
-  }
+  // The degree info of this vertex.
+  DegreeInfo deg;
 
   // Returns a 32-bit hash code to represent the data.
   uint64 get_hash() const { return *reinterpret_cast<const uint64*>(this); }
@@ -62,6 +81,26 @@ struct VertexSignature {
   // Utility function to print an array of VertexSignatures to the given output stream,
   // for debugging purpose.
   static void print_vertices(std::ostream& os, const VertexSignature vertices[MAX_VERTICES]);
+};
+static_assert(sizeof(DegreeInfo) <= 8);
+
+// Represents the information of the graph that are invariant under isomorphisms,
+// which we use in compute the graph hash, in order to speed up isomorphism checks.
+struct GraphInvariants {
+  // Information of the vertices
+  VertexSignature vertices[MAX_VERTICES];
+  // Information of the codegrees on vertex sets.
+  DegreeInfo codegrees[MAX_EDGES];
+};
+
+// Represents the bitmasks of vertices, used to in various computations such as codegree info.
+// Each VertexMask struct instance holds all valid vertex bitmasks for a given k value.
+struct VertexMask {
+  // Number of valid masks in the next array.
+  uint8 mask_count;
+  // Each element in this array has exactly k bits that are 1s. The position of the 1-bits
+  // indicate which vertex should be used in the computations.
+  uint8 masks[MAX_EDGES];
 };
 
 // Represents a k-PDG, with the data structure optimized for computing isomorphisms.
@@ -73,6 +112,9 @@ struct Graph {
   static int N;
   // Global to all graph instances: number of edges in a complete graph.
   static int TOTAL_EDGES;
+  // Global to all graph instances: pre-computed the vertex masks, used in
+  // various computations including compute_codegree_signature().
+  static VertexMask VERTEX_MASKS[MAX_VERTICES];
 
   // Set the values of K, N, and TOTAL_EDGES.
   static void set_global_graph_info(int k, int n);
@@ -109,14 +151,24 @@ struct Graph {
   // And the input is consistent (head is inside the vertex set).
   void add_edge(Edge edge);
 
-  // Compute the vertex signatures in this graph from the edge set.
+ private:
+  // Computes the vertex signatures in this graph from the edge set.
   // The result is in the given array.
   void compute_vertex_signature(VertexSignature vs[MAX_VERTICES]) const;
+  // Computes the codegrees of all valid vertex sets. The value of codeg_vertices specifies
+  // the number of vertices in each set to compute the codegree info.
+  // For definition of codegrees, see the comments of the DegreeInfo struct.
+  uint32 compute_codegree_signature(DegreeInfo degs[MAX_EDGES], int codeg_vertices) const;
+  // Computes the hash code from the vertice degree info of the neighboring vertices.
   static void hash_neighbors(uint8 neighbors, const VertexSignature vertices[MAX_VERTICES],
                              uint32& hash_code);
-
   // Use the given vertex signatures to compute the graph hash and update the graph_hash field.
-  void compute_graph_hash(const VertexSignature vs[MAX_VERTICES]);
+  uint32 compute_graph_hash(const VertexSignature vs[MAX_VERTICES]) const;
+
+ public:
+  // Uses the graph invariants to generate the hash code for the graph and put it in the
+  // `graph_hash` field.
+  void generate_graph_hash(GraphInvariants& gi, int use_codegrees);
 
   // Returns a graph isomorphic to this graph, by applying vertex permutation.
   // The first parameter specifies the permutation. For example p={1,2,0,3} means
@@ -129,8 +181,8 @@ struct Graph {
   void permute_canonical(int p[], Graph& g) const;
 
   // Canonicalized this graph, so that the vertices are ordered by their signatures.
-  // The vertex signatures of the canonicalized graph is returned in the given array.
-  void canonicalize(VertexSignature vs[MAX_VERTICES]);
+  // The vertex signatures of the canonicalized graph is returned in the GraphInvariants struct.
+  void canonicalize(GraphInvariants& gi, int use_codegrees);
 
   // Makes a copy of this graph to g.
   void copy(Graph* g) const;

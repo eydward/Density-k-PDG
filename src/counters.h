@@ -33,6 +33,9 @@ class Counters {
   static uint64 graph_isomorphic_expensive;
   // Number of isomorphic tests that result in no, but had identical hash
   static uint64 graph_isomorphic_hash_no;
+  // Among the cases where hash code match but the graphs are not isomorphic, the number of cases
+  // where the codegree info are different.
+  static uint64 graph_isomorphic_codeg_diff;
   static uint64 graph_identical_tests;
   static uint64 graph_permute_ops;
   static uint64 graph_permute_canonical_ops;
@@ -62,6 +65,7 @@ class Counters {
   static void increment_graph_isomorphic_tests() { ++graph_isomorphic_tests; }
   static void increment_graph_isomorphic_expensive() { ++graph_isomorphic_expensive; }
   static void increment_graph_isomorphic_hash_no() { ++graph_isomorphic_hash_no; }
+  static void increment_graph_isomorphic_codeg_diff() { ++graph_isomorphic_codeg_diff; }
   static void increment_graph_identical_tests() { ++graph_identical_tests; }
   static void increment_graph_permute_ops() { ++graph_permute_ops; }
   static void increment_graph_permute_canonical_ops() { ++graph_permute_canonical_ops; }

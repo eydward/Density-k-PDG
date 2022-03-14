@@ -2,10 +2,12 @@
 #include "grower.h"
 
 void print_usage() {
-  std::cout << "Usage: kPDG K N [print_graphs]\n"
+  std::cout << "Usage: kPDG K N C [print_graphs]\n"
             << "  Each argument is an integer, K and N are required, others optional.\n"
             << "  K = Number of vertices in each edge.\n"
             << "  N = Total number of vertices in a graph.  2 <= K <= N <= 7.\n"
+            << "  C = Number of vertices used in codegree computation. C==0 or 2 <= C < K.\n"
+            << "      0 means not to use codegrees.\n"
             << "  (optional) print_graphs: 0 (default) or 1. 1 = print the accumulated graphs.\n";
 }
 
@@ -13,17 +15,18 @@ template <int K, int N>
 void run(std::ostream* log, bool print_graph) {}
 
 int main(int argc, char* argv[]) {
-  if (argc < 3) {
+  if (argc < 4) {
     print_usage();
     return -1;
   }
   int k = atoi(argv[1]);
   int n = atoi(argv[2]);
+  int c = atoi(argv[3]);
   bool print_graph = false;
-  if (argc >= 4) {
-    print_graph = atoi(argv[3]) != 0;
+  if (argc >= 5) {
+    print_graph = atoi(argv[4]) != 0;
   }
-  if (k < 2 || n > 7 || k > n) {
+  if (k < 2 || n > 7 || k > n || c < 0 || c == 1 || c >= k) {
     std::cout << "Invalid command line arguments. See usage for details.\n";
     print_usage();
     return -1;
@@ -31,10 +34,10 @@ int main(int argc, char* argv[]) {
 
   Graph::set_global_graph_info(k, n);
 
-  std::string log_path =
-      "kPDG_v3run_" + std::to_string(Graph::K) + "_" + std::to_string(Graph::N) + ".log";
+  std::string log_path = "kPDG_v4run_" + std::to_string(Graph::K) + "_" + std::to_string(Graph::N) +
+                         "_" + std::to_string(c) + ".log";
   std::string arguments = "kPDG run arguments: K=" + std::to_string(Graph::K) +
-                          ", N=" + std::to_string(Graph::N) +
+                          ", N=" + std::to_string(Graph::N) + ", C=" + std::to_string(c) +
                           ", TOTAL_EDGES=" + std::to_string(Graph::TOTAL_EDGES) +
                           ", print_graph=" + std::to_string(print_graph) +
                           "\n  sizeof(Edge)=" + std::to_string(sizeof(Edge)) +
@@ -47,7 +50,7 @@ int main(int argc, char* argv[]) {
 
   Counters::initialize(&log);
 
-  Grower s(&log);
+  Grower s(c, &log);
   s.grow();
   s.print(print_graph);
 

@@ -48,15 +48,30 @@ void VertexSignature::print_vertices(std::ostream& os,
   os << "  {";
   bool is_first = true;
   for (int v = 0; v < MAX_VERTICES; v++) {
-    if (vertices[v].get_degrees() != 0) {
+    if (vertices[v].deg.get_degrees() != 0) {
       if (!is_first) {
         os << ", ";
       }
       is_first = false;
-      os << "V[" << v << "]=(" << static_cast<int>(vertices[v].degree_undirected) << ", "
-         << static_cast<int>(vertices[v].degree_head) << ", "
-         << static_cast<int>(vertices[v].degree_tail) << ", " << vertices[v].neighbor_hash << ")";
+      os << "V[" << v << "]=(" << static_cast<int>(vertices[v].deg.degree_undirected) << ", "
+         << static_cast<int>(vertices[v].deg.degree_head) << ", "
+         << static_cast<int>(vertices[v].deg.degree_tail) << ", " << vertices[v].neighbor_hash
+         << ")";
     }
+  }
+  os << "}\n";
+}
+
+// Utility function to print an degree info array to the output stream, for debugging purpose.
+void DegreeInfo::print_degree_info(std::ostream& os, const DegreeInfo degs[MAX_VERTICES], int m) {
+  os << "  {";
+  for (int i = 0; i < m; i++) {
+    if (i > 0) {
+      os << ", ";
+    }
+    os << "d[" << i << "]=(" << static_cast<int>(degs[i].degree_undirected) << ", "
+       << static_cast<int>(degs[i].degree_head) << ", " << static_cast<int>(degs[i].degree_tail)
+       << ")";
   }
   os << "}\n";
 }
@@ -67,11 +82,23 @@ int Graph::K = 0;
 int Graph::N = 0;
 // Global to all graph instances: number of edges in a complete graph.
 int Graph::TOTAL_EDGES = 0;
+// Global to all graph instances: pre-computed the vertex masks, used in
+// various computations including compute_codegree_signature().
+VertexMask Graph::VERTEX_MASKS[MAX_VERTICES]{0};
 
 void Graph::set_global_graph_info(int k, int n) {
   K = k;
   N = n;
   TOTAL_EDGES = compute_binom(n, k);
+  for (int m = 1; m <= k; m++) {
+    VertexMask& mask = VERTEX_MASKS[m];
+    mask.mask_count = 0;
+    for (uint8 bits = 0; bits < (1 << n); bits++) {
+      if (__builtin_popcount(bits) == m) {
+        mask.masks[mask.mask_count++] = bits;
+      }
+    }
+  }
 }
 
 Graph::Graph() : graph_hash(0), is_canonical(false), edge_count(0), undirected_edge_count(0) {}
@@ -115,6 +142,16 @@ void Graph::add_edge(Edge edge) {
   }
 }
 
+void Graph::generate_graph_hash(GraphInvariants& gi, int use_codegrees) {
+  compute_vertex_signature(gi.vertices);
+  uint32 hash = compute_graph_hash(gi.vertices);
+  uint32 codegree_hash = compute_codegree_signature(gi.codegrees, use_codegrees);
+  if (codegree_hash != 0) {
+    hash = hash_combine32(hash, codegree_hash);
+  }
+  graph_hash = hash;
+}
+
 // Initializes everything in this graph from the edge set.
 void Graph::compute_vertex_signature(VertexSignature vs[MAX_VERTICES]) const {
   Counters::increment_compute_vertex_signatures();
@@ -136,14 +173,14 @@ void Graph::compute_vertex_signature(VertexSignature vs[MAX_VERTICES]) const {
       uint8 mask = 1 << v;
       if ((edges[i].vertex_set & mask) != 0) {
         if (head == UNDIRECTED) {
-          vs[v].degree_undirected++;
+          vs[v].deg.degree_undirected++;
           neighbors_undirected[v] |= (edges[i].vertex_set & ~(1 << v));
         } else if (head == v) {
-          vs[v].degree_head++;
+          vs[v].deg.degree_head++;
           neighbors_head[v] |= (edges[i].vertex_set & ~(1 << v));
         } else {
-          vs[v].degree_tail++;
-          neighbors_tail[v] |= (edges[i].vertex_set & ~((1 << v) | (1 << head)));
+          vs[v].deg.degree_tail++;
+          neighbors_tail[v] |= (edges[i].vertex_set & ~(1 << v));
         }
       }
     }
@@ -160,6 +197,39 @@ void Graph::compute_vertex_signature(VertexSignature vs[MAX_VERTICES]) const {
   }
 }
 
+uint32 Graph::compute_codegree_signature(DegreeInfo degs[MAX_EDGES], int codeg_vertices) const {
+  if (codeg_vertices < 2 || codeg_vertices > K) return 0;
+  const VertexMask& mask = VERTEX_MASKS[codeg_vertices];
+  for (int m = 0; m < mask.mask_count; m++) {
+    degs[m] = {0};
+  }
+
+  for (int i = 0; i < edge_count; i++) {
+    uint8 head = 1 << edges[i].head_vertex;
+    for (int m = 0; m < mask.mask_count; m++) {
+      uint8 bits = mask.masks[m];
+      if ((edges[i].vertex_set & bits) == bits) {
+        if (head == UNDIRECTED) {
+          degs[m].degree_undirected++;
+        } else if ((head & bits) != 0) {
+          degs[m].degree_head++;
+        } else {
+          degs[m].degree_tail++;
+        }
+      }
+    }
+  }
+
+  std::sort(degs, degs + mask.mask_count, [](const DegreeInfo& a, const DegreeInfo& b) {
+    return a.get_degrees() < b.get_degrees();
+  });
+  uint32 hash = 0;
+  for (int m = 0; m < mask.mask_count; m++) {
+    hash = hash_combine32(hash, degs[m].get_degrees());
+  }
+  return hash;
+}
+
 void Graph::hash_neighbors(uint8 neighbors, const VertexSignature vs[MAX_VERTICES],
                            uint32& hash_code) {
   // The working buffer to compute hash in deterministic order.
@@ -170,7 +240,7 @@ void Graph::hash_neighbors(uint8 neighbors, const VertexSignature vs[MAX_VERTICE
     int neighbor_count = 0;
     for (int i = 0; neighbors != 0; i++) {
       if ((neighbors & 0x1) != 0) {
-        signatures[neighbor_count++] = vs[i].get_degrees();
+        signatures[neighbor_count++] = vs[i].deg.get_degrees();
       }
       neighbors >>= 1;
     }
@@ -186,7 +256,7 @@ void Graph::hash_neighbors(uint8 neighbors, const VertexSignature vs[MAX_VERTICE
 }
 
 // Use the given vertex signatures to compute the graph hash and update the graph_hash field.
-void Graph::compute_graph_hash(const VertexSignature vs[MAX_VERTICES]) {
+uint32 Graph::compute_graph_hash(const VertexSignature vs[MAX_VERTICES]) const {
   uint64 hash = 0;
   uint64 signatures[MAX_VERTICES];
   for (int v = 0; v < N; v++) {
@@ -197,7 +267,7 @@ void Graph::compute_graph_hash(const VertexSignature vs[MAX_VERTICES]) {
   for (int v = 0; v < N; v++) {
     hash = hash_combine64(hash, signatures[v]);
   }
-  graph_hash = (hash >> 32) ^ hash;
+  return (hash >> 32) ^ hash;
 }
 
 // Returns a graph isomorphic to this graph, by applying vertex permutation.
@@ -224,9 +294,8 @@ void Graph::permute(int p[], Graph& g) const {
   g.edge_count = edge_count;
   g.undirected_edge_count = undirected_edge_count;
 
-  VertexSignature vs[MAX_VERTICES];
-  g.compute_vertex_signature(vs);
-  g.compute_graph_hash(vs);
+  GraphInvariants gi;
+  g.generate_graph_hash(gi, 0);
 }
 
 void Graph::permute_canonical(int p[], Graph& g) const {
@@ -257,16 +326,17 @@ void Graph::permute_canonical(int p[], Graph& g) const {
 }
 
 // Returns the canonicalized graph in g, where the vertices are ordered by their signatures.
-void Graph::canonicalize(VertexSignature vs[MAX_VERTICES]) {
+void Graph::canonicalize(GraphInvariants& gi, int use_codegrees) {
   Counters::increment_graph_canonicalize_ops();
 
   // Compute the signatures before canonicalization.
-  compute_vertex_signature(vs);
+  generate_graph_hash(gi, use_codegrees);
 
   // First get sorted vertex indices by the vertex signatures.
   // Note we sort by descreasing order, to push vertices to lower indices.
   int s[MAX_VERTICES];
   for (int v = 0; v < N; v++) s[v] = v;
+  const VertexSignature* vs = gi.vertices;
   std::sort(s, s + N, [vs](int a, int b) { return vs[a].get_hash() > vs[b].get_hash(); });
   // Now compute the inverse, which gives the permutation used to canonicalize.
   int p[MAX_VERTICES];
@@ -291,7 +361,7 @@ void Graph::canonicalize(VertexSignature vs[MAX_VERTICES]) {
   std::sort(edges, edges + edge_count,
             [](const Edge& a, const Edge& b) { return a.vertex_set < b.vertex_set; });
 
-  compute_graph_hash(vs);
+  // compute_graph_hash(vs);
   is_canonical = true;
 }
 
@@ -311,60 +381,33 @@ void Graph::copy(Graph* g) const {
 // Returns true if this graph is isomorphic to the other.
 bool Graph::is_isomorphic(const Graph& other) const {
   Counters::increment_graph_isomorphic_tests();
+  assert(is_canonical);
+  assert(other.is_canonical);
 
   if (edge_count != other.edge_count || undirected_edge_count != other.undirected_edge_count ||
-      graph_hash != other.graph_hash)
+      graph_hash != other.graph_hash) {
     return false;
-
-  bool has_this_vs = false, has_other_vs = false;
-  Graph this_copy, other_copy;
-  VertexSignature this_vs[MAX_VERTICES];
-  VertexSignature other_vs[MAX_VERTICES];
-
-  // Canonicalize if necessary.
-  const Graph *pa, *pb;
-  if (is_canonical) {
-    pa = this;
-  } else {
-    copy(&this_copy);
-    this_copy.canonicalize(this_vs);
-    pa = &this_copy;
-    has_this_vs = true;
-  }
-  if (other.is_canonical) {
-    pb = &other;
-  } else {
-    other.copy(&other_copy);
-    other_copy.canonicalize(other_vs);
-    pb = &other_copy;
-    has_other_vs = true;
   }
 
   // Opportunistic check: if after canonicalization, the two graphs are identical,
   // then they are isomorphic.
-  if (pa->is_identical(*pb)) return true;
+  if (is_identical(other)) {
+    return true;
+  }
   Counters::increment_graph_isomorphic_expensive();
-
-  if (!has_this_vs) {
-    pa->compute_vertex_signature(this_vs);
-  }
-  if (!has_other_vs) {
-    pb->compute_vertex_signature(other_vs);
-  }
-  for (int v = 0; v < N; v++) {
-    if (this_vs[v].get_hash() != other_vs[v].get_hash()) return false;
-  }
 
   // Now all the easy checks are done, have to permute and check.
   // The set of vertices with the same signature can permute among themselves.
   // If the two graphs are identical, then we've found isomorphism. Otherwise after
   // all permutations are tried, we declare the two graphs as non-isomorphic.
+  VertexSignature vs[MAX_VERTICES];
+  compute_vertex_signature(vs);
 
   std::vector<std::pair<int, int>> perm_sets;
-  for (int v = 0; v < N - 1 && this_vs[v].get_degrees() > 0; v++) {
-    if (this_vs[v + 1].get_hash() == this_vs[v].get_hash()) {
+  for (int v = 0; v < N - 1 && vs[v].deg.get_degrees() > 0; v++) {
+    if (vs[v + 1].get_hash() == vs[v].get_hash()) {
       int t = v;
-      while (t < N && this_vs[t].get_hash() == this_vs[v].get_hash()) {
+      while (t < N && vs[t].get_hash() == vs[v].get_hash()) {
         t++;
       }
       perm_sets.push_back(std::make_pair(v, t));
@@ -375,13 +418,19 @@ bool Graph::is_isomorphic(const Graph& other) const {
     Permutator perm(move(perm_sets));
     Graph h;
     while (perm.next()) {
-      pa->permute_canonical(perm.p, h);
-      if (h.is_identical(*pb)) {
-#if false
-        std::cout << "Is-isomorphic after permute:\n";
-        pa->print();
-        pb->print();
-#endif
+      permute_canonical(perm.p, h);
+      if (h.is_identical(other)) {
+        // if (codeg_hash_this != codeg_hash_other) {
+        //   std::cout << "Is-isomorphic but different codeg hash: " << codeg_hash_this << ", "
+        //             << codeg_hash_other << "\n";
+        //   pa->print();
+        //   DegreeInfo::print_degree_info(std::cout, degs_this,
+        //                                 codegree_masks[codeg_vcount].mask_count);
+        //   pb->print();
+        //   DegreeInfo::print_degree_info(std::cout, degs_other,
+        //                                 codegree_masks[codeg_vcount].mask_count);
+        // }
+        // assert(codeg_hash_this == codeg_hash_other);
         return true;
       }
     }
