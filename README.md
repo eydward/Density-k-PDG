@@ -31,9 +31,11 @@ test --test_output=errors
 ## Usage
 Run all commands in the project root directory. 
 * To execute all unit tests: `bazel test ...`
-* To run the program in DEBUG mode (slow, for debugging only): `bazel run -c dbg src:kPDG <K> <N>` 
-* To run the program in OPTIMIZED mode (fast): `bazel run -c opt src:kPDG <K> <N>`
-* Alternatively, run `bazel build -c opt ...` and then find the executable in `bazel-out\src\` and execute it manually with `kPDG <K> <N>`.
+* To run the program in DEBUG mode (slow, for debugging only): `bazel run -c dbg src:kPDG <K> <N> <C>` 
+* To run the program in OPTIMIZED mode (fast): `bazel run -c opt src:kPDG <K> <N> <C>`
+* Alternatively, run `bazel build -c opt ...` and then find the executable in `bazel-out\src\` and execute it manually with `kPDG <K> <N> <C>`.
+* 
+`K` and `N` are defined above. `C` is the number of vertices in computing the codegree info in graph hashing. 0 means no codegree info is used. 
 
 Note the code currently is single-threaded, doesn't take advantage of multi-core machines and certainly not capable to run in distributed environment. This is TODO. 
 
@@ -84,6 +86,9 @@ Determining isomorphism is expensive. In order to minimize the number of times w
 2. From the edges, we can compute the degree info of each vertex, stored in `VertexSignature` struct: undirected degree (number of undirected edges through the vertex), head degree (number of directed edges using the vertex as head), tail degree (number of directed edges through the vertex but not using it as head). While computing the degrees we also compute the undirected neighbors, head neighbors, tail neighbors, corresponding to the degree info. We then go through the neighbors and hash their degree info into each vertex's `VertexSignature`. Note hash combination of order-sensitive, so within each type of neighbors, we have to sort the degree info before combine them into the hash. After this step, two vertices hav the same `VertexSignature` if they have the same degree info, and (statistically likely) their neighbors look the same. This is implemented in `compute_vertex_signature()`. Note we used to have the `VertexSignature` array as part of the Graph struct, but in order to reduce the struct size, I had to take it out. 
 3. Now we can compute the hash of the entire graph. Sort the `VertexSignature`s, and combine them into the hash, that's our `graph_hash`. Again, hash combinition is order-sensitive so we have to sort first. This is implemented in `compute_graph_hash()`.
 4. Now we can canonicalize the graph: if we permute the vertices, the resulting graph is obviously isomorphic to the original graph. So we permute the vertices in this graph in such a way, that the `VertexSignature` array is now sorted in decreasing order. This is sufficient to allow fast determination whether two graphs are isomorphic to each other, if the vertices in each graph are "diverse" or don't look alike too much. This is implemented in `canonicalize()`. Note in `canonicalize()` we also sort the edges array, to make it easier to compare whether two graphs are identical.
+
+An optional feature is to add codegree info in the hashing above. This is controlled by the command line argument. In dense graphs adding codegree info into the hash can significantly reduce the number of cases where the two graphs are not isomorphic but they have the same hash value. However, computing the codegree info is also costly, so we have to experiment in order to find the fastest configuration. I found the codegree info intuition from Anirban Banerjee's paper "On the spectrum of hypergraphs". The codegree  of a set of vertices  is the number of edges that contain it as a subset.
+vertices i and j both,
 
 We can easily compute whether two graphs are *identical* by simply compare the edges array. This is implemented in `is_identical()`
 
