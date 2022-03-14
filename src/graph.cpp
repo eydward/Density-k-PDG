@@ -298,10 +298,8 @@ void Graph::permute(int p[], Graph& g, int codeg_vertices) const {
   g.generate_graph_hash(gi, codeg_vertices);
 }
 
-void Graph::permute_canonical(int p[], Graph& g) const {
-  Counters::increment_graph_permute_canonical_ops();
-
-  assert(is_canonical);
+void Graph::permute_edges(int p[], Graph& g) const {
+  g.edge_count = edge_count;
   // Copy the edges with permutation.
   for (int i = 0; i < edge_count; i++) {
     if (edges[i].head_vertex == UNDIRECTED) {
@@ -316,12 +314,17 @@ void Graph::permute_canonical(int p[], Graph& g) const {
       }
     }
   }
+}
+void Graph::permute_canonical(int p[], Graph& g) const {
+  Counters::increment_graph_permute_canonical_ops();
+
+  assert(is_canonical);
+  permute_edges(p, g);
   std::sort(g.edges, g.edges + edge_count,
             [](const Edge& a, const Edge& b) { return a.vertex_set < b.vertex_set; });
 
   g.graph_hash = graph_hash;
   g.is_canonical = is_canonical;
-  g.edge_count = edge_count;
   g.undirected_edge_count = undirected_edge_count;
 }
 
@@ -389,8 +392,7 @@ bool Graph::is_isomorphic(const Graph& other) const {
     return false;
   }
 
-  // Opportunistic check: if after canonicalization, the two graphs are identical,
-  // then they are isomorphic.
+  // Opportunistic check, just in case the two graphs are identical without doing any permutation.
   if (is_identical(other)) {
     return true;
   }
@@ -443,6 +445,30 @@ bool Graph::is_isomorphic(const Graph& other) const {
   pa->print();
   pb->print();
 #endif
+  return false;
+}
+
+bool Graph::is_isomorphic_slow(const Graph& other) const {
+  // Opportunistic check, just in case the two graphs are identical without doing any permutation.
+  if (is_identical(other)) {
+    return true;
+  }
+  // Bruteforce all permutations of the vertices, and check whether the permuted graph
+  // is identical to `other`.
+  int perm[MAX_VERTICES];
+  for (int v = 0; v < N; v++) {
+    perm[v] = v;
+  }
+  Graph copy;
+  while (std::next_permutation(perm, perm + N)) {
+    permute_edges(perm, copy);
+    if (copy.is_identical(other)) {
+      return true;
+    }
+  }
+  std::cout << "Non-isomorphic slow " << N << ":\n";
+  print();
+  other.print();
   return false;
 }
 

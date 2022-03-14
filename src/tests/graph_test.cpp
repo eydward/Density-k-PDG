@@ -159,6 +159,14 @@ TEST(GraphTest, Clear) {
   EXPECT_EQ(g.undirected_edge_count, 0);
 }
 
+TEST(GraphTest, IsomorphicSlow) {
+  Graph::set_global_graph_info(3, 5);
+  Graph g = parse_edges("{013>3, 023>3, 014, 034}");
+  Graph h = parse_edges("{014>0, 034>0, 124, 024}");
+  EXPECT_TRUE(g.is_isomorphic_slow(h));
+  EXPECT_TRUE(h.is_isomorphic_slow(g));
+}
+
 TEST(GraphTest, PermuteIsomorphic) {
   for (int codegree = 0; codegree <= 3; codegree++) {
     Graph g = get_T3(codegree);
@@ -167,6 +175,9 @@ TEST(GraphTest, PermuteIsomorphic) {
     GraphInvariants gi;
     do {
       g.permute(p, h, codegree);
+      EXPECT_TRUE(g.is_isomorphic_slow(h));
+      EXPECT_TRUE(h.is_isomorphic_slow(g));
+
       EXPECT_EQ(g.graph_hash, h.graph_hash);
       h.canonicalize(gi, codegree);
       EXPECT_TRUE(h.is_isomorphic(g));

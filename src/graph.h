@@ -165,6 +165,10 @@ struct Graph {
   // Use the given vertex signatures to compute the graph hash and update the graph_hash field.
   uint32 compute_graph_hash(const VertexSignature vs[MAX_VERTICES]) const;
 
+  // Perform a permutation of the vertices of this graph according to the p array, put in `g`.
+  // Only set the data in the edges array in `g` without touching other fields.
+  void permute_edges(int p[], Graph& g) const;
+
  public:
   // Uses the graph invariants to generate the hash code for the graph and put it in the
   // `graph_hash` field.
@@ -190,6 +194,12 @@ struct Graph {
   // Returns true if this graph is isomorphic to the other.
   bool is_isomorphic(const Graph& other) const;
 
+  // Do not use any optimizations or shortcuts, just mechanically check whether the two
+  // graphs are isomorphic by bruteforce permuting the vertices. This is not used in the
+  // actual run, but is used in self-test and verifying the correctness of the optimized
+  // algorithm.
+  bool is_isomorphic_slow(const Graph& other) const;
+
   // Returns true if the two graphs are identical (exactly same edge sets).
   bool is_identical(const Graph& other) const;
 
@@ -207,7 +217,8 @@ struct Graph {
   // can be called without calling init(), which saves time when doing T_k free growing.
   bool contains_Tk(int v) const;
 
-  // Print the graph to the console for debugging purpose.
+  // Print the graph to the output stream for debugging purpose.
   void print_concise(std::ostream& os) const;
+  // Print the graph to the console for debugging purpose.
   void print() const;
 };
