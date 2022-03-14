@@ -168,13 +168,13 @@ struct Graph {
  public:
   // Uses the graph invariants to generate the hash code for the graph and put it in the
   // `graph_hash` field.
-  void generate_graph_hash(GraphInvariants& gi, int use_codegrees);
+  void generate_graph_hash(GraphInvariants& gi, int codeg_vertices);
 
   // Returns a graph isomorphic to this graph, by applying vertex permutation.
   // The first parameter specifies the permutation. For example p={1,2,0,3} means
   //  0->1, 1->2, 2->0, 3->3.
   // The second parameter is the resulting graph.
-  void permute(int p[], Graph& g) const;
+  void permute(int p[], Graph& g, int codeg_vertices) const;
 
   // Similar to permute(), except the current graph must be canonicalized, and the permutation
   // is guaranteed to perserve that.
@@ -182,7 +182,7 @@ struct Graph {
 
   // Canonicalized this graph, so that the vertices are ordered by their signatures.
   // The vertex signatures of the canonicalized graph is returned in the GraphInvariants struct.
-  void canonicalize(GraphInvariants& gi, int use_codegrees);
+  void canonicalize(GraphInvariants& gi, int codeg_vertices);
 
   // Makes a copy of this graph to g.
   void copy(Graph* g) const;

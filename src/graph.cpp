@@ -142,10 +142,10 @@ void Graph::add_edge(Edge edge) {
   }
 }
 
-void Graph::generate_graph_hash(GraphInvariants& gi, int use_codegrees) {
+void Graph::generate_graph_hash(GraphInvariants& gi, int codeg_vertices) {
   compute_vertex_signature(gi.vertices);
   uint32 hash = compute_graph_hash(gi.vertices);
-  uint32 codegree_hash = compute_codegree_signature(gi.codegrees, use_codegrees);
+  uint32 codegree_hash = compute_codegree_signature(gi.codegrees, codeg_vertices);
   if (codegree_hash != 0) {
     hash = hash_combine32(hash, codegree_hash);
   }
@@ -274,7 +274,7 @@ uint32 Graph::compute_graph_hash(const VertexSignature vs[MAX_VERTICES]) const {
 // The first parameter specifies the permutation. For example p={1,2,0,3} means
 //  0->1, 1->2, 2->0, 3->3.
 // The second parameter is the resulting graph.
-void Graph::permute(int p[], Graph& g) const {
+void Graph::permute(int p[], Graph& g, int codeg_vertices) const {
   Counters::increment_graph_permute_ops();
 
   // Copy the edges with permutation.
@@ -295,7 +295,7 @@ void Graph::permute(int p[], Graph& g) const {
   g.undirected_edge_count = undirected_edge_count;
 
   GraphInvariants gi;
-  g.generate_graph_hash(gi, 0);
+  g.generate_graph_hash(gi, codeg_vertices);
 }
 
 void Graph::permute_canonical(int p[], Graph& g) const {
@@ -326,11 +326,11 @@ void Graph::permute_canonical(int p[], Graph& g) const {
 }
 
 // Returns the canonicalized graph in g, where the vertices are ordered by their signatures.
-void Graph::canonicalize(GraphInvariants& gi, int use_codegrees) {
+void Graph::canonicalize(GraphInvariants& gi, int codeg_vertices) {
   Counters::increment_graph_canonicalize_ops();
 
   // Compute the signatures before canonicalization.
-  generate_graph_hash(gi, use_codegrees);
+  generate_graph_hash(gi, codeg_vertices);
 
   // First get sorted vertex indices by the vertex signatures.
   // Note we sort by descreasing order, to push vertices to lower indices.
