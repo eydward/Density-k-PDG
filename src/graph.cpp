@@ -466,9 +466,9 @@ bool Graph::is_isomorphic_slow(const Graph& other) const {
       return true;
     }
   }
-  std::cout << "Non-isomorphic slow " << N << ":\n";
-  print();
-  other.print();
+  // std::cout << "Non-isomorphic slow " << N << ":\n";
+  // print();
+  // other.print();
   return false;
 }
 

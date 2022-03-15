@@ -2,6 +2,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "iso_stress_test.h"
 
 using namespace testing;
 
@@ -525,4 +526,17 @@ TEST(GraphTest, Theta) {
 
   Graph l = parse_edges("{012>2, 123>1, 023>2, 013>0}");
   EXPECT_EQ(l.get_theta(), Fraction(1, 1));
+}
+
+TEST(GraphTest, IsomorphicStress) {
+  for (int diff = 0; diff <= 3; diff++) {
+    for (int n = diff + 2; n <= 4; n++) {
+      int k = n - diff;
+      for (int c = 0; c < k; c++) {
+        if (c == 1) continue;
+        IsomorphismStressTest t(k, n, c);
+        t.run();
+      }
+    }
+  }
 }

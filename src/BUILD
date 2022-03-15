@@ -29,7 +29,26 @@ cc_binary(
     deps=[":graph"],
     copts=["-std=c++20"],
     linkstatic=True,
-    features = [
+    features=[
+        "fully_static_link",
+    ],
+)
+
+cc_library(
+    name="iso_stress_test",
+    hdrs=["tests/iso_stress_test.h"],
+    srcs=["tests/iso_stress_test.cpp"],
+    deps=[":graph"],
+    copts=["-std=c++20"],
+)
+
+cc_binary(
+    name="isostress",
+    srcs=["tests/isostress.cpp"],
+    deps=[":iso_stress_test"],
+    copts=["-std=c++20"],
+    linkstatic=True,
+    features=[
         "fully_static_link",
     ],
 )
@@ -45,6 +64,7 @@ cc_test(
     ],
     deps=[
         ":graph",
+        ":iso_stress_test",
         "@gtest//:gtest",
         "@gtest//:gtest_main",
     ],
