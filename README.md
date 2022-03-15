@@ -39,6 +39,12 @@ Run all commands in the project root directory.
 
 Note the code currently is single-threaded, doesn't take advantage of multi-core machines and certainly not capable to run in distributed environment. This is TODO. 
 
+## Testing and Verification
+We use the following steps to verify the correctness of the algorithm:
+* Unit tests in `tests` directory
+* Isomorphism stress test: use a straightforward `is_isomorphic_slow()` implementation without any optimization, and compare its result against `is_isomorphic()` which contains various optimizations. For `(k,n)` combinations that yield relatively small number of graphs, do this on all graph pairs exhaustively. Otherwise sample the graph pairs randomly to perform this check.
+* The theta values on `k=2` is proved for all `n`.
+
 ## Organization of Code
 All source code are in the `src` directory.
 - `BUILD`: the project that instructs `bazel` how to build, run, and test.
