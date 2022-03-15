@@ -163,7 +163,9 @@ TEST(GraphTest, Clear) {
 TEST(GraphTest, IsomorphicSlow) {
   Graph::set_global_graph_info(3, 5);
   Graph g = parse_edges("{013>3, 023>3, 014, 034}");
+  g.finalize_edges();
   Graph h = parse_edges("{014>0, 034>0, 124, 024}");
+  h.finalize_edges();
   EXPECT_TRUE(g.is_isomorphic_slow(h));
   EXPECT_TRUE(h.is_isomorphic_slow(g));
 }
@@ -394,6 +396,13 @@ TEST(GraphTest, IsomorphicNotIdentical) {
     EXPECT_TRUE(g.is_isomorphic(h));
     EXPECT_TRUE(h.is_isomorphic(g));
   }
+}
+
+TEST(GraphTest, Isomorphic_B) {
+  Graph::set_global_graph_info(2, 3);
+  Graph g = parse_edges("{01>0, 02>2, 12>1}");
+  Graph h = parse_edges("{01>1, 02>0, 12>2}");
+  EXPECT_TRUE(g.is_isomorphic_slow(h));
 }
 
 TEST(GraphTest, ContainsT3) {

@@ -293,7 +293,7 @@ void Graph::permute(int p[], Graph& g, int codeg_vertices) const {
   }
   g.edge_count = edge_count;
   g.undirected_edge_count = undirected_edge_count;
-
+  g.finalize_edges();
   GraphInvariants gi;
   g.generate_graph_hash(gi, codeg_vertices);
 }
@@ -320,8 +320,7 @@ void Graph::permute_canonical(int p[], Graph& g) const {
 
   assert(is_canonical);
   permute_edges(p, g);
-  std::sort(g.edges, g.edges + edge_count,
-            [](const Edge& a, const Edge& b) { return a.vertex_set < b.vertex_set; });
+  g.finalize_edges();
 
   g.graph_hash = graph_hash;
   g.is_canonical = is_canonical;
@@ -360,12 +359,17 @@ void Graph::canonicalize(GraphInvariants& gi, int codeg_vertices) {
     }
   }
 
+  finalize_edges();
+  is_canonical = true;
+}
+
+// Call either this function, or canonicalize(), after all edges are added. This allows
+// isomorphism checks to be performed. The operation in this function is included in
+// canonicalize() so there is no need to call this function if canonicalize() is used.
+void Graph::finalize_edges() {
   // Sort edges
   std::sort(edges, edges + edge_count,
             [](const Edge& a, const Edge& b) { return a.vertex_set < b.vertex_set; });
-
-  // compute_graph_hash(vs);
-  is_canonical = true;
 }
 
 // Makes a copy of this graph to g.
@@ -462,6 +466,7 @@ bool Graph::is_isomorphic_slow(const Graph& other) const {
   Graph copy;
   while (std::next_permutation(perm, perm + N)) {
     permute_edges(perm, copy);
+    copy.finalize_edges();
     if (copy.is_identical(other)) {
       return true;
     }

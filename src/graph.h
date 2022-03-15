@@ -151,6 +151,11 @@ struct Graph {
   // And the input is consistent (head is inside the vertex set).
   void add_edge(Edge edge);
 
+  // Call either this function, or canonicalize(), after all edges are added. This allows
+  // isomorphism checks to be performed. The operation in this function is included in
+  // canonicalize() so there is no need to call this function if canonicalize() is used.
+  void finalize_edges();
+
  private:
   // Computes the vertex signatures in this graph from the edge set.
   // The result is in the given array.
