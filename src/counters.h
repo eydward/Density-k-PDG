@@ -29,6 +29,8 @@ class Counters {
   static uint64 graph_accumulated_canonicals;
   static uint64 graph_canonicalize_ops;
   static uint64 graph_isomorphic_tests;
+  // Number of isomorphic tests that returned true.
+  static uint64 graph_isomorphic_true;
   // Number of isomorphic tests that have to use vertex permutations.
   static uint64 graph_isomorphic_expensive;
   // Number of isomorphic tests that result in no, but had identical hash
@@ -52,8 +54,6 @@ class Counters {
 
   // Prints the counter values the given output stream.
   static void print_counters_to_stream(std::ostream& os);
-  // Print status if sufficient time has elapsed since the last print.
-  static void print_at_time_interval();
 
  public:
   static Fraction get_min_theta() { return min_theta; }
@@ -63,6 +63,7 @@ class Counters {
   static void increment_graph_copies() { ++graph_copies; }
   static void increment_graph_canonicalize_ops() { ++graph_canonicalize_ops; }
   static void increment_graph_isomorphic_tests() { ++graph_isomorphic_tests; }
+  static void increment_graph_isomorphic_true() { ++graph_isomorphic_true; }
   static void increment_graph_isomorphic_expensive() { ++graph_isomorphic_expensive; }
   static void increment_graph_isomorphic_hash_no() { ++graph_isomorphic_hash_no; }
   static void increment_graph_isomorphic_codeg_diff() { ++graph_isomorphic_codeg_diff; }
@@ -88,6 +89,10 @@ class Counters {
   // Resets all values to 0, and starts the stopwatch, which will be used
   // by print_counters to calculate elapsed time.
   static void initialize(std::ofstream* log_stream = nullptr);
+
+  // Print status if sufficient time has elapsed since the last print.
+  static void print_at_time_interval();
+
   // Prints the counter values to console and log file.
   static void print_counters();
 };

@@ -398,6 +398,7 @@ bool Graph::is_isomorphic(const Graph& other) const {
 
   // Opportunistic check, just in case the two graphs are identical without doing any permutation.
   if (is_identical(other)) {
+    Counters::increment_graph_isomorphic_true();
     return true;
   }
   Counters::increment_graph_isomorphic_expensive();
@@ -437,6 +438,7 @@ bool Graph::is_isomorphic(const Graph& other) const {
         //                                 codegree_masks[codeg_vcount].mask_count);
         // }
         // assert(codeg_hash_this == codeg_hash_other);
+        Counters::increment_graph_isomorphic_true();
         return true;
       }
     }

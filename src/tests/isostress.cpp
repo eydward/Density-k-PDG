@@ -10,11 +10,14 @@
 // graphs to verify Graph::is_isomorphic()==Graph::is_isomorphic_slow(), we gain high confidence
 // that Graph::is_isomorphic() is implemented correctly.
 
+#include "../counters.h"
 #include "iso_stress_test.h"
 
 int main(int argc, char* argv[]) {
+  Counters::initialize();
+
   for (int diff = 0; diff <= 3; diff++) {
-    for (int n = diff + 2; n <= 4; n++) {
+    for (int n = diff + 2; n <= 7; n++) {
       int k = n - diff;
       for (int c = 0; c < k; c++) {
         if (c == 1) continue;
@@ -24,5 +27,6 @@ int main(int argc, char* argv[]) {
     }
   }
   std::cout << "\nALL DONE\n";
+  Counters::print_counters();
   return 0;
 }

@@ -12,6 +12,7 @@ uint64 Counters::graph_copies = 0;
 uint64 Counters::graph_accumulated_canonicals = 0;
 uint64 Counters::graph_canonicalize_ops = 0;
 uint64 Counters::graph_isomorphic_tests = 0;
+uint64 Counters::graph_isomorphic_true = 0;
 uint64 Counters::graph_isomorphic_expensive = 0;
 uint64 Counters::graph_isomorphic_hash_no = 0;
 uint64 Counters::graph_isomorphic_codeg_diff = 0;
@@ -102,10 +103,10 @@ void Counters::print_counters_to_stream(std::ostream& os) {
      << "\nOps (vertex sig, copies, canonicalize, permute, T_k)= (" << compute_vertex_signatures
      << ", " << graph_copies << ", " << graph_canonicalize_ops << ", "
      << graph_permute_canonical_ops << ", " << graph_contains_Tk_tests << ")"
-     << "\nIsomorphic test counts (total, expensive, false w/ =hash, identical, codeg_diff)= ("
-     << graph_isomorphic_tests << ", " << graph_isomorphic_expensive << ", "
-     << graph_isomorphic_hash_no << ", " << graph_identical_tests << ", "
-     << graph_isomorphic_codeg_diff << ")"
+     << "\nIsomorphic tests (total, true, expensive, false w/ =hash, identical, codeg_diff)= "
+     << "\n                 (" << graph_isomorphic_tests << ", " << graph_isomorphic_true << ", "
+     << graph_isomorphic_expensive << ", " << graph_isomorphic_hash_no << ", "
+     << graph_identical_tests << ", " << graph_isomorphic_codeg_diff << ")"
      << "\nunordered_set(buckets, max_buckets, loadf, max_loadf)= (" << set_bucket_count << ", "
      << set_load_factor << ", " << set_max_load_factor << ")"
      << "\nGrowth stats(vertex count, total in step, processed in step, accumulated in step)= ("

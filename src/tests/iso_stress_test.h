@@ -16,6 +16,7 @@
 class IsomorphismStressTest {
  private:
   const int k, n, c;
+  std::mt19937 random_engine;
   void exit_assert(bool expected, bool actual, const Graph& g, const Graph& h, const char* msg);
   Graph get_one_graph(const uint8 edge_state[MAX_EDGES]);
   bool next_edge_state(uint8 edge_state[MAX_EDGES]);
@@ -24,6 +25,8 @@ class IsomorphismStressTest {
   // [0] is always NOT_IN_SET, [1] is always UNDIRECTED,
   // [2] to [k+1] are the vertices in the corresponding edge.
   uint8 edge_candidates_vidx[MAX_EDGES][MAX_VERTICES + 2];
+
+  void verify_graphs(const Graph& g, const Graph& h);
 
  public:
   IsomorphismStressTest(int k_, int n_, int c_);
