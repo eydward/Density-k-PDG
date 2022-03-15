@@ -20,8 +20,13 @@ class IsomorphismStressTest {
   Graph get_one_graph(const uint8 edge_state[MAX_EDGES]);
   bool next_edge_state(uint8 edge_state[MAX_EDGES]);
 
+  // The vertex indices in the corresponding edge candidate.
+  // [0] is always NOT_IN_SET, [1] is always UNDIRECTED,
+  // [2] to [k+1] are the vertices in the corresponding edge.
+  uint8 edge_candidates_vidx[MAX_EDGES][MAX_VERTICES + 2];
+
  public:
-  IsomorphismStressTest(int k_, int n_, int c_) : k(k_), n(n_), c(c_) {}
+  IsomorphismStressTest(int k_, int n_, int c_);
 
   void run();
 };

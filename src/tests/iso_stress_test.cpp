@@ -4,6 +4,23 @@
 // through all possible graphs for the (k,n) combination. Otherwise we select a random subset
 // of all possible graphs.
 constexpr int FULL_TEST_THRESHOLD = 1000;
+constexpr uint8 NOT_IN_SET = 0xEE;
+
+IsomorphismStressTest::IsomorphismStressTest(int k_, int n_, int c_) : k(k_), n(n_), c(c_) {
+  Graph::set_global_graph_info(k, n);
+  assert(Graph::TOTAL_EDGES == Graph::VERTEX_MASKS[k].mask_count);
+  for (int e = 0; e < Graph::TOTAL_EDGES; e++) {
+    int vidx = 0;
+    edge_candidates_vidx[e][vidx++] = NOT_IN_SET;
+    edge_candidates_vidx[e][vidx++] = UNDIRECTED;
+    for (uint8 i = 0; i <= n - 1; i++) {
+      if ((Graph::VERTEX_MASKS[k].masks[e] & (1 << i)) != 0) {
+        edge_candidates_vidx[e][vidx++] = i;
+      }
+    }
+    assert(vidx == k + 2);
+  }
+}
 
 void IsomorphismStressTest::exit_assert(bool expected, bool actual, const Graph& g, const Graph& h,
                                         const char* msg) {
@@ -18,11 +35,12 @@ void IsomorphismStressTest::exit_assert(bool expected, bool actual, const Graph&
 Graph IsomorphismStressTest::get_one_graph(const uint8 edge_state[MAX_EDGES]) {
   Graph g;
   for (int i = 0; i < Graph::TOTAL_EDGES; i++) {
-    if (edge_state[i] == 0) continue;
-    Edge e;
-    e.vertex_set = Graph::VERTEX_MASKS[k].masks[i];
-    e.head_vertex = edge_state[i] == 1 ? UNDIRECTED : edge_state[i] - 2;
-    g.add_edge(e);
+    if (edge_state[i] != 0) {
+      Edge e;
+      e.vertex_set = Graph::VERTEX_MASKS[k].masks[i];
+      e.head_vertex = edge_candidates_vidx[i][edge_state[i]];
+      g.add_edge(e);
+    }
   }
   // g.print_concise(std::cout);
   exit_assert(true, g.is_isomorphic_slow(g), g, g, "slow!=self");
@@ -45,8 +63,6 @@ bool IsomorphismStressTest::next_edge_state(uint8 edge_state[MAX_EDGES]) {
 }
 
 void IsomorphismStressTest::run() {
-  // Setup
-  Graph::set_global_graph_info(k, n);
   // Total number of graphs. For each possible edge, its state can be directed with
   // k head choices, or undirected, or not in graph. Thus (k+2)^e.
   double total_graphs = pow(k + 2, Graph::TOTAL_EDGES);
