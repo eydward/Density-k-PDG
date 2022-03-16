@@ -6,7 +6,7 @@ K = number of vertices in each edge
 
 N = number of vertices in each graph
 
-values in the table : minimum theta value across all graphs with N vertices that are T_K free. Where theta(H) is defined as alpha(H) + theta(H) beta(H) =1, alpha(H) is the undirected edge density in the graph, beta(H) is the directed edge density in the graph.
+Values in the table : `$min_{|V(H)|=N, T_K \not\subseteq H} (1 - alpha(H)) / beta(H)$`, where alpha(H) is the undirected edge density, beta(H) is the directed edge density. In other words, it's the maximum theta value so that `$alpha(H) + theta * beta(H) <= 1$` is true for all graphs H with N vertices that are T_K free.
 
 | N   | K=2 | K=3   | K=4   | K=5   | K=6   | K=7   |
 | --- | --- | ----- | ----- | ----- | ----- | ----- |
