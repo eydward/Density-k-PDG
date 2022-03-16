@@ -418,9 +418,10 @@ bool Graph::is_isomorphic(const Graph& other) const {
         t++;
       }
       perm_sets.push_back(std::make_pair(v, t));
-      v = t;
+      v = t - 1;
     }
   }
+
   if (perm_sets.size() > 0) {
     Permutator perm(move(perm_sets));
     Graph h;
@@ -446,11 +447,9 @@ bool Graph::is_isomorphic(const Graph& other) const {
 
   Counters::increment_graph_isomorphic_hash_no();
 
-#if false
-  std::cout << "Non-isomorphic with match hashes:\n";
-  pa->print();
-  pb->print();
-#endif
+  // std::cout << "Non-isomorphic with match hashes:\n";
+  // print();
+  // other.print();
   return false;
 }
 

@@ -405,6 +405,22 @@ TEST(GraphTest, Isomorphic_B) {
   EXPECT_TRUE(g.is_isomorphic_slow(h));
 }
 
+TEST(GraphTest, Isomorphic_C) {
+  Graph::set_global_graph_info(5, 6);
+  Graph g = parse_edges("{01234>4, 01245>5, 01345>4}");
+  Graph h = parse_edges("{01234>4, 01245>4, 01345>5}");
+  g.finalize_edges();
+  h.finalize_edges();
+  EXPECT_TRUE(g.is_isomorphic_slow(h));
+  EXPECT_TRUE(h.is_isomorphic_slow(g));
+
+  GraphInvariants gi;
+  g.canonicalize(gi, 0);
+  h.canonicalize(gi, 0);
+  EXPECT_TRUE(g.is_isomorphic(h));
+  EXPECT_TRUE(h.is_isomorphic(g));
+}
+
 TEST(GraphTest, ContainsT3) {
   for (int codegree = 0; codegree <= 3; codegree++) {
     Graph g = get_T3(codegree);
