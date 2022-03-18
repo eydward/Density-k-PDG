@@ -104,6 +104,7 @@ struct Graph {
   // Set the values of K, N, and TOTAL_EDGES.
   static void set_global_graph_info(int k, int n);
 
+ private:
   // The hash code is invariant under isomorphisms.
   uint32 graph_hash;
 
@@ -122,14 +123,18 @@ struct Graph {
   // Information of the vertices
   VertexSignature vertices[MAX_VERTICES];
 
+ public:
   Graph();
-
-  // Resets the current graph to be an empty graph.
-  void clear();
 
   // Returns theta such that (undirected edge density) + theta (directed edge density) = 1.
   // Namely, returns theta = (binom_nk - (undirected edge count)) / (directed edge count).
   Fraction get_theta() const;
+
+  // Returns the hash of this graph.
+  uint32 get_graph_hash() const {
+    assert(is_canonical);
+    return graph_hash;
+  }
 
   // Returns true if the edge specified by the bitmask of the vertices in the edge is allowed
   // to be added to the graph (this vertex set does not yet exist in the edges).
@@ -139,51 +144,22 @@ struct Graph {
   // And the input is consistent (head is inside the vertex set).
   void add_edge(Edge edge);
 
-  // Call either this function, or canonicalize(), after all edges are added. This allows
-  // isomorphism checks to be performed. The operation in this function is included in
-  // canonicalize() so there is no need to call this function if canonicalize() is used.
-  void finalize_edges();
-
- private:
-  // Computes the vertex signatures in this graph from the edge set.
-  // The result is in the given array.
-  void compute_vertex_signature();
-  // Computes the hash code from the vertice degree info of the neighboring vertices.
-  void hash_neighbors(uint8 neighbors, uint32& hash_code) const;
-  // Use the given vertex signatures to compute the graph hash and update the graph_hash field.
-  uint32 compute_graph_hash() const;
-
-  // Perform a permutation of the vertices of this graph according to the p array, put in `g`.
-  // Only set the data in the edges array in `g` without touching other fields.
-  void permute_edges(int p[], Graph& g) const;
-
- public:
-  // Returns a graph isomorphic to this graph, by applying vertex permutation.
+  // Performs a permutation of the vertices according to the given p array on this graph.
   // The first parameter specifies the permutation. For example p={1,2,0,3} means
   //  0->1, 1->2, 2->0, 3->3.
   // The second parameter is the resulting graph.
-  // This is only used in unit tests to verify the correctness of implementation of other functions.
-  void permute_for_testing(int p[], Graph& g) const;
-
-  // Similar to permute(), except the current graph must be canonicalized, and the permutation
-  // is guaranteed to perserve that.
+  // This graph must be canonicalized, and the permutation is guaranteed to perserve that.
   void permute_canonical(int p[], Graph& g) const;
 
-  // Canonicalized this graph, so that the vertices are ordered by their signatures.
-  // The vertex signatures of the canonicalized graph is returned in the GraphInvariants struct.
+  // Canonicalizes this graph, so that the vertices are ordered by their signatures.
+  // This function also computes the graph_hash field.
   void canonicalize();
 
-  // Makes a copy of this graph to g.
-  void copy(Graph* g) const;
+  // Copy the edge info of this graph to g. It does not copy vertex signatures and graph hash.
+  void copy_edges(Graph& g) const;
 
   // Returns true if this graph is isomorphic to the other.
   bool is_isomorphic(const Graph& other) const;
-
-  // Do not use any optimizations or shortcuts, just mechanically check whether the two
-  // graphs are isomorphic by bruteforce permuting the vertices. This is not used in the
-  // actual run, but is used in self-test and verifying the correctness of the optimized
-  // algorithm.
-  bool is_isomorphic_slow(const Graph& other) const;
 
   // Returns true if the two graphs are identical (exactly same edge sets).
   bool is_identical(const Graph& other) const;
@@ -206,5 +182,52 @@ struct Graph {
   void print_concise(std::ostream& os) const;
   // Print the graph to the console for debugging purpose.
   void print() const;
+
+ private:
+  // Call either this function, or canonicalize(), after all edges are added. This allows
+  // isomorphism checks to be performed. The operation in this function is included in
+  // canonicalize() so there is no need to call this function if canonicalize() is used.
+  void finalize_edges();
+
+  // Computes the vertex signatures in this graph from the edge set.
+  // The result is in the given array.
+  void compute_vertex_signature();
+
+  // Computes the hash code from the vertice degree info of the neighboring vertices.
+  void hash_neighbors(uint8 neighbors, uint32& hash_code) const;
+
+  // Perform a permutation of the vertices of this graph according to the p array, put in `g`.
+  // Only set the data in the edges array in `g` without touching other fields.
+  void permute_edges(int p[], Graph& g) const;
+
+  // Returns a graph isomorphic to this graph, by applying vertex permutation.
+  // The first parameter specifies the permutation. For example p={1,2,0,3} means
+  //  0->1, 1->2, 2->0, 3->3.
+  // The second parameter is the resulting graph.
+  // This is only used in unit tests to verify the correctness of implementation of other functions.
+  void permute_for_testing(int p[], Graph& g) const;
+
+  // Do not use any optimizations or shortcuts, just mechanically check whether the two
+  // graphs are isomorphic by bruteforce permuting the vertices. This is not used in the
+  // actual run, but is used in self-test and verifying the correctness of the optimized
+  // algorithm.
+  bool is_isomorphic_slow(const Graph& other) const;
+
+  // Friend declarations that allows unit testing of some private implementations.
+#define FRIEND_TEST(test_case_name, test_name) friend class test_case_name##_##test_name##_Test
+  FRIEND_TEST(GraphTest, PermuteIsomorphic);
+  FRIEND_TEST(GraphTest, PermuteCanonical);
+  FRIEND_TEST(GraphTest, Canonicalize);
+  FRIEND_TEST(GraphTest, Canonicalize2);
+  FRIEND_TEST(GraphTest, Canonicalize3);
+  FRIEND_TEST(GraphTest, ContainsT3);
+  FRIEND_TEST(GraphTest, Copy);
+  FRIEND_TEST(GraphTest, NotContainsT3);
+  FRIEND_TEST(GraphTest, IsomorphicSlow);
+  FRIEND_TEST(GraphTest, Isomorphic_B);
+  FRIEND_TEST(GraphTest, Isomorphic_C);
+  FRIEND_TEST(GraphTest, GraphDataStructure);
+  FRIEND_TEST(GraphTest, T3);
+  friend class IsomorphismStressTest;
 };
 static_assert(sizeof(Graph) == 136);

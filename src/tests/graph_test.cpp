@@ -154,14 +154,6 @@ TEST(GraphTest, T3) {
   EXPECT_EQ(g.vertices[4].degree_tail, 0);
 }
 
-TEST(GraphTest, Clear) {
-  Graph g = get_T3();
-  g.clear();
-  EXPECT_EQ(g.graph_hash, 0);
-  EXPECT_EQ(g.edge_count, 0);
-  EXPECT_EQ(g.undirected_edge_count, 0);
-}
-
 TEST(GraphTest, IsomorphicSlow) {
   Graph::set_global_graph_info(3, 5);
   Graph g = parse_edges("{013>3, 023>3, 014, 034}");
@@ -181,7 +173,7 @@ TEST(GraphTest, PermuteIsomorphic) {
     EXPECT_TRUE(g.is_isomorphic_slow(h));
     EXPECT_TRUE(h.is_isomorphic_slow(g));
 
-    EXPECT_EQ(g.graph_hash, h.graph_hash);
+    EXPECT_EQ(g.get_graph_hash(), h.get_graph_hash());
     h.canonicalize();
     EXPECT_TRUE(h.is_isomorphic(g));
     EXPECT_EQ(g.edge_count, 4);
@@ -223,7 +215,7 @@ TEST(GraphTest, Canonicalize) {
 
   EXPECT_TRUE(g.is_canonical);
   EXPECT_TRUE(h.is_canonical);
-  EXPECT_EQ(g.graph_hash, h.graph_hash);
+  EXPECT_EQ(g.get_graph_hash(), h.get_graph_hash());
   EXPECT_TRUE(h.is_isomorphic(g));
   EXPECT_TRUE(g.is_isomorphic(h));
   EXPECT_TRUE(h.is_identical(g));
@@ -232,7 +224,7 @@ TEST(GraphTest, Canonicalize) {
   // Canonicalization should be idempotent.
   h.canonicalize();
   EXPECT_TRUE(h.is_canonical);
-  EXPECT_EQ(g.graph_hash, h.graph_hash);
+  EXPECT_EQ(g.get_graph_hash(), h.get_graph_hash());
   EXPECT_TRUE(h.is_isomorphic(g));
 }
 
@@ -249,20 +241,20 @@ TEST(GraphTest, Canonicalize2) {
 
   Graph h = g;
   h.canonicalize();
-  EXPECT_EQ(g.graph_hash, h.graph_hash);
+  EXPECT_EQ(g.get_graph_hash(), h.get_graph_hash());
   EXPECT_TRUE(h.is_canonical);
 
   Graph f = get_T3();
   Graph::set_global_graph_info(3, 7);
   f.canonicalize();
-  EXPECT_EQ(h.graph_hash, f.graph_hash);
+  EXPECT_EQ(h.get_graph_hash(), f.get_graph_hash());
 }
 
 TEST(GraphTest, Canonicalize3) {
   Graph::set_global_graph_info(2, 7);
   Graph g, h;
   g.add_edge(Edge(0b0101, UNDIRECTED));
-  g.copy(&h);
+  g.copy_edges(h);
 
   h.canonicalize();
   EXPECT_TRUE(h.is_canonical);
@@ -283,10 +275,10 @@ TEST(GraphTest, Copy) {
 
   g.canonicalize();
   Graph h;
-  g.copy(&h);
+  g.copy_edges(h);
   h.canonicalize();
 
-  EXPECT_EQ(g.graph_hash, h.graph_hash);
+  EXPECT_EQ(g.get_graph_hash(), h.get_graph_hash());
   EXPECT_TRUE(h.is_isomorphic(g));
   EXPECT_EQ(g.edge_count, h.edge_count);
   EXPECT_EQ(g.undirected_edge_count, 3);
@@ -297,18 +289,18 @@ TEST(GraphTest, NonIsomorphic) {
   Graph g = get_T3();
 
   Graph h;
-  g.copy(&h);
+  g.copy_edges(h);
   h.add_edge(Edge(0b10110, UNDIRECTED));  // 124
   h.canonicalize();
 
   Graph f;
-  g.copy(&f);
+  g.copy_edges(f);
   f.add_edge(Edge(0b10110, 1));  // 124
   f.canonicalize();
 
-  EXPECT_NE(g.graph_hash, f.graph_hash);
+  EXPECT_NE(g.get_graph_hash(), f.get_graph_hash());
   EXPECT_FALSE(f.is_isomorphic(g));
-  EXPECT_NE(h.graph_hash, f.graph_hash);
+  EXPECT_NE(h.get_graph_hash(), f.get_graph_hash());
   EXPECT_FALSE(f.is_isomorphic(h));
 }
 
@@ -322,7 +314,7 @@ TEST(GraphTest, NonIsomorphicWithSameHash) {
   h.canonicalize();
   EXPECT_FALSE(g.is_isomorphic(h));
   EXPECT_FALSE(h.is_isomorphic(g));
-  EXPECT_EQ(g.graph_hash, h.graph_hash);
+  EXPECT_EQ(g.get_graph_hash(), h.get_graph_hash());
 }
 
 TEST(GraphTest, IsomorphicWithSameHash) {
@@ -331,7 +323,7 @@ TEST(GraphTest, IsomorphicWithSameHash) {
   Graph h = parse_edges("{02, 12>1, 03>0, 05>5, 15>5, 45>5}");
   g.canonicalize();
   h.canonicalize();
-  EXPECT_EQ(g.graph_hash, h.graph_hash);
+  EXPECT_EQ(g.get_graph_hash(), h.get_graph_hash());
   EXPECT_TRUE(g.is_identical(h));
   EXPECT_TRUE(h.is_isomorphic(g));
 }

@@ -90,12 +90,6 @@ void Graph::set_global_graph_info(int k, int n) {
 
 Graph::Graph() : graph_hash(0), is_canonical(false), edge_count(0), undirected_edge_count(0) {}
 
-// Resets the current graph to be an empty graph.
-void Graph::clear() {
-  is_canonical = false;
-  graph_hash = edge_count = undirected_edge_count = 0;
-}
-
 // Returns theta such that (undirected edge density) + theta (directed edge density) = 1.
 // Namely, returns theta = (binom_nk - (undirected edge count)) / (directed edge count).
 Fraction Graph::get_theta() const {
@@ -197,21 +191,6 @@ void Graph::hash_neighbors(uint8 neighbors, uint32& hash_code) const {
   }
 }
 
-// Use the given vertex signatures to compute the graph hash and update the graph_hash field.
-uint32 Graph::compute_graph_hash() const {
-  uint64 hash = 0;
-  uint64 signatures[MAX_VERTICES];
-  for (int v = 0; v < N; v++) {
-    signatures[v] = vertices[v].get_hash();
-  }
-  // Note we sort by descreasing order. Then hash everything in.
-  std::sort(signatures, signatures + N, std::greater<uint64>());
-  for (int v = 0; v < N; v++) {
-    hash = hash_combine64(hash, signatures[v]);
-  }
-  return (hash >> 32) ^ hash;
-}
-
 // Returns a graph isomorphic to this graph, by applying vertex permutation.
 // The first parameter specifies the permutation. For example p={1,2,0,3} means
 //  0->1, 1->2, 2->0, 3->3.
@@ -233,11 +212,15 @@ void Graph::permute_for_testing(int p[], Graph& g) const {
       }
     }
   }
+  // Copy the vertices
+  for (int v = 0; v < N; v++) {
+    g.vertices[v] = vertices[v];
+  }
   g.edge_count = edge_count;
   g.undirected_edge_count = undirected_edge_count;
   g.finalize_edges();
-  g.compute_vertex_signature();
-  g.graph_hash = compute_graph_hash();
+  g.is_canonical = is_canonical;
+  g.graph_hash = graph_hash;
 }
 
 void Graph::permute_edges(int p[], Graph& g) const {
@@ -257,6 +240,12 @@ void Graph::permute_edges(int p[], Graph& g) const {
     }
   }
 }
+
+// Performs a permutation of the vertices according to the given p array on this graph.
+// The first parameter specifies the permutation. For example p={1,2,0,3} means
+//  0->1, 1->2, 2->0, 3->3.
+// The second parameter is the resulting graph.
+// This graph must be canonicalized, and the permutation is guaranteed to perserve that.
 void Graph::permute_canonical(int p[], Graph& g) const {
   Counters::increment_graph_permute_canonical_ops();
 
@@ -319,16 +308,16 @@ void Graph::finalize_edges() {
             [](const Edge& a, const Edge& b) { return a.vertex_set < b.vertex_set; });
 }
 
-// Makes a copy of this graph to g.
-void Graph::copy(Graph* g) const {
+// Copy the edge info of this graph to g. It does not copy vertex signatures and graph hash.
+void Graph::copy_edges(Graph& g) const {
   Counters::increment_graph_copies();
 
-  g->graph_hash = graph_hash;
-  g->is_canonical = is_canonical;
-  g->edge_count = edge_count;
-  g->undirected_edge_count = undirected_edge_count;
+  g.graph_hash = 0;
+  g.is_canonical = false;
+  g.edge_count = edge_count;
+  g.undirected_edge_count = undirected_edge_count;
   for (int i = 0; i < edge_count; i++) {
-    g->edges[i] = edges[i];
+    g.edges[i] = edges[i];
   }
 }
 

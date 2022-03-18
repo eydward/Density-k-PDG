@@ -3,8 +3,7 @@
 #include <bits/stdc++.h>
 
 Fraction Counters::min_theta(1E8, 1);
-Edge Counters::min_theta_edges[255]{};
-int Counters::min_theta_edge_count = 0;
+Graph Counters::min_theta_graph{};
 uint64 Counters::compute_vertex_signatures = 0;
 uint64 Counters::graph_allocations = 0;
 uint64 Counters::chunk_allocations = 0;
@@ -36,7 +35,6 @@ uint64 Counters::growth_automorphisms_vset_skips = 0;
 
 void Counters::initialize(std::ofstream* log_stream) {
   min_theta = Fraction(1E8, 1);
-  min_theta_edge_count = 0;
   last_print_time = start_time = std::chrono::steady_clock::now();
   log = log_stream;
 }
@@ -48,10 +46,7 @@ void Counters::observe_theta(const Graph& g) {
   Fraction theta = g.get_theta();
   if (theta < min_theta) {
     min_theta = theta;
-    min_theta_edge_count = g.edge_count;
-    for (int i = 0; i < g.edge_count; i++) {
-      min_theta_edges[i] = g.edges[i];
-    }
+    min_theta_graph = g;
   }
   print_at_time_interval();
 }
@@ -96,7 +91,7 @@ void Counters::print_counters_to_stream(std::ostream& os) {
      << std::chrono::duration_cast<std::chrono::milliseconds>(end - start_time).count() << "ms"
      << "\nCurrent minimum theta = " << min_theta.n << " / " << min_theta.d
      << "\nProduced by graph: ";
-  Edge::print_edges(os, min_theta_edge_count, min_theta_edges);
+  min_theta_graph.print_concise(os);
 
   os << "\nAccumulated canonicals\t= " << graph_accumulated_canonicals
      << "\nAllocations (chunks, graphs)= (" << chunk_allocations << ", " << graph_allocations << ")"

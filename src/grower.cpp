@@ -46,7 +46,6 @@ void Grower::grow_step(int n) {
   for (const Graph& g : canonicals[n - 1]) {
     Counters::increment_growth_processed_graphs_in_current_step();
     edge_gen.reset_enumeration();
-    assert(n == Graph::K || g.is_canonical);
 
 #if false
     int perm[MAX_VERTICES];
@@ -64,7 +63,7 @@ void Grower::grow_step(int n) {
     // Loop through all ((K+1)^\binom{n-1}{k-1} - 1) edge combinations, add them to g, and check
     // add to canonicals unless it's isomorphic to an existing one.
     while (edge_gen.next()) {
-      g.copy(&copy);
+      g.copy_edges(copy);
       for (int i = 0; i < edge_gen.edge_count; i++) {
         copy.add_edge(edge_gen.edges[i]);
       }

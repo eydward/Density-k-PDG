@@ -9,10 +9,8 @@ class Counters {
  private:
   // The smallest theta value observed so far.
   static Fraction min_theta;
-  // The edges in the graph that produces the min_theta.
-  static Edge min_theta_edges[255];
-  // Number of edges in the graph that produces the min_theta.
-  static int min_theta_edge_count;
+  // The graph that produces the min_theta.
+  static Graph min_theta_graph;
   // The start time of the computation.
   static std::chrono::time_point<std::chrono::steady_clock> start_time;
   // The time of the last status print.
