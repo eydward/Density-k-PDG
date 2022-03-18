@@ -364,10 +364,6 @@ bool Graph::is_isomorphic(const Graph& other) const {
   }
 
   Counters::increment_graph_isomorphic_hash_no();
-
-  // std::cout << "Non-isomorphic with match hashes:\n";
-  // print();
-  // other.print();
   return false;
 }
 
@@ -390,9 +386,6 @@ bool Graph::is_isomorphic_slow(const Graph& other) const {
       return true;
     }
   }
-  // std::cout << "Non-isomorphic slow " << N << ":\n";
-  // print();
-  // other.print();
   return false;
 }
 
@@ -464,11 +457,6 @@ bool Graph::contains_Tk(int v) const {
             if ((edges[i].head_vertex != UNDIRECTED && (xyz & (1 << edges[i].head_vertex)) != 0) ||
                 (edges[j].head_vertex != UNDIRECTED && (xyz & (1 << edges[j].head_vertex)) != 0) ||
                 (edges[k].head_vertex != UNDIRECTED && (xyz & (1 << edges[k].head_vertex)) != 0)) {
-              // if (counter % 97 == 0) {
-              //   std::cout << "contains_Tk for v=" << v << " : true B :(i,j,k)=" << i << j << k
-              //             << "\n  ";
-              //   print_concise(std::cout);
-              // }
               return true;
             }
           }
@@ -476,10 +464,6 @@ bool Graph::contains_Tk(int v) const {
       }
     }
   }
-  // if (counter % 97 == 0) {
-  //   std::cout << "contains_Tk for v=" << v << " : false :\n  ";
-  //   print_concise(std::cout);
-  // }
   return false;
 }
 

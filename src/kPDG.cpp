@@ -10,8 +10,14 @@ void print_usage() {
             << "  (optional) print_graphs: 0 (default) or 1. 1 = print the accumulated graphs.\n";
 }
 
-template <int K, int N>
-void run(std::ostream* log, bool print_graph) {}
+// Returns current time in YYYYMMDD-HHmmss format.
+std::string get_current_time() {
+  std::time_t current_time = std::time(0);
+  const std::tm* now = std::localtime(&current_time);
+  char buf[80];
+  strftime(buf, sizeof(buf), "%Y%m%d-%H%M%S", now);
+  return buf;
+}
 
 int main(int argc, char* argv[]) {
   if (argc < 3) {
@@ -32,8 +38,9 @@ int main(int argc, char* argv[]) {
 
   Graph::set_global_graph_info(k, n);
 
-  std::string log_path =
-      "kPDG_v6run_" + std::to_string(Graph::K) + "_" + std::to_string(Graph::N) + ".log";
+  // Get current time, to be used in the log file path.
+  std::string log_path = "kPDG_v6run_" + std::to_string(Graph::K) + "_" + std::to_string(Graph::N) +
+                         "_" + get_current_time() + ".log";
   std::string arguments = "kPDG run arguments: K=" + std::to_string(Graph::K) +
                           ", N=" + std::to_string(Graph::N) +
                           ", TOTAL_EDGES=" + std::to_string(Graph::TOTAL_EDGES) +
@@ -48,12 +55,11 @@ int main(int argc, char* argv[]) {
 
   Counters::initialize(&log);
 
-  Grower s(&log);
+  Grower s(print_graph, &log);
   s.grow();
-  s.print(print_graph);
 
-  std::cout << "ALL DONE\n";
-  log << "ALL DONE\n";
+  std::cout << "\nALL DONE. Final result:\n";
+  log << "ALL DONE. Final result:\n";
   Counters::print_counters();
   log.flush();
   log.close();

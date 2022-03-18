@@ -5,8 +5,6 @@
 Fraction Counters::min_theta(1E8, 1);
 Graph Counters::min_theta_graph{};
 uint64 Counters::compute_vertex_signatures = 0;
-uint64 Counters::graph_allocations = 0;
-uint64 Counters::chunk_allocations = 0;
 uint64 Counters::graph_copies = 0;
 uint64 Counters::graph_accumulated_canonicals = 0;
 uint64 Counters::graph_canonicalize_ops = 0;
@@ -23,15 +21,13 @@ std::chrono::time_point<std::chrono::steady_clock> Counters::start_time;
 std::chrono::time_point<std::chrono::steady_clock> Counters::last_print_time;
 std::ofstream* Counters::log = nullptr;
 bool Counters::has_printed = false;
-uint64 Counters::set_bucket_count = 0;
-float Counters::set_load_factor = 0;
-float Counters::set_max_load_factor = 0;
 uint64 Counters::growth_vertex_count = 0;
 uint64 Counters::growth_total_graphs_in_current_step = 0;
 uint64 Counters::growth_processed_graphs_in_current_step = 0;
 uint64 Counters::growth_accumulated_canonicals_in_current_step = 0;
 uint64 Counters::growth_automorphisms_found = 0;
 uint64 Counters::growth_automorphisms_vset_skips = 0;
+uint64 Counters::growth_num_base_graphs_in_final_step = 0;
 
 void Counters::initialize(std::ofstream* log_stream) {
   min_theta = Fraction(1E8, 1);
@@ -58,10 +54,9 @@ void Counters::new_growth_step(uint64 vertex_count, uint64 total_graphs_in_curre
   growth_processed_graphs_in_current_step = 0;
 }
 
-void Counters::current_set_stats(uint64 bucket_count, float load_factor, float max_load_factor) {
-  set_bucket_count = bucket_count;
-  set_load_factor = load_factor;
-  set_max_load_factor = max_load_factor;
+void Counters::enter_final_step(uint64 num_base_graphs) {
+  growth_num_base_graphs_in_final_step = num_base_graphs;
+  growth_processed_graphs_in_current_step = 0;
 }
 
 void Counters::print_at_time_interval() {
@@ -93,21 +88,25 @@ void Counters::print_counters_to_stream(std::ostream& os) {
      << "\nProduced by graph: ";
   min_theta_graph.print_concise(os);
 
-  os << "\nAccumulated canonicals\t= " << graph_accumulated_canonicals
-     << "\nAllocations (chunks, graphs)= (" << chunk_allocations << ", " << graph_allocations << ")"
-     << "\nOps (vertex sig, copies, canonicalize, permute, T_k)= (" << compute_vertex_signatures
-     << ", " << graph_copies << ", " << graph_canonicalize_ops << ", "
-     << graph_permute_canonical_ops << ", " << graph_contains_Tk_tests << ")"
-     << "\nIsomorphic tests (total, true, expensive, false w/ =hash, identical, codeg_diff)= "
-     << "\n                 (" << graph_isomorphic_tests << ", " << graph_isomorphic_true << ", "
-     << graph_isomorphic_expensive << ", " << graph_isomorphic_hash_no << ", "
-     << graph_identical_tests << ", " << graph_isomorphic_codeg_diff << ")"
-     << "\nunordered_set(buckets, max_buckets, loadf, max_loadf)= (" << set_bucket_count << ", "
-     << set_load_factor << ", " << set_max_load_factor << ")"
-     << "\nGrowth stats(vertex count, total in step, processed in step, accumulated in step)= ("
-     << growth_vertex_count << ", " << growth_total_graphs_in_current_step << ", "
-     << growth_processed_graphs_in_current_step << ", "
-     << growth_accumulated_canonicals_in_current_step << ")"
-     << "\nGrowth automorphism stats(found, vset skips)= (" << growth_automorphisms_found << ", "
-     << growth_automorphisms_vset_skips << ")\n";
+  if (growth_num_base_graphs_in_final_step > 0) {
+    os << "Base graphs processed / total = " << growth_processed_graphs_in_current_step << " / "
+       << growth_num_base_graphs_in_final_step << ". Ops (copies, T_k)= (" << graph_copies << ", "
+       << graph_contains_Tk_tests << ")\n";
+  } else {
+    os << "\nAccumulated canonicals\t= " << graph_accumulated_canonicals
+       << "\nOps (vertex sig, copies, canonicalize, permute, T_k)= (" << compute_vertex_signatures
+       << ", " << graph_copies << ", " << graph_canonicalize_ops << ", "
+       << graph_permute_canonical_ops << ", " << graph_contains_Tk_tests << ")"
+       << "\nIsomorphic tests (total, true, expensive, false w/ =hash, identical, codeg_diff)= "
+       << "\n                 (" << graph_isomorphic_tests << ", " << graph_isomorphic_true << ", "
+       << graph_isomorphic_expensive << ", " << graph_isomorphic_hash_no << ", "
+       << graph_identical_tests << ", " << graph_isomorphic_codeg_diff << ")"
+       << "\nGrowth stats(vertex count, total in step, processed in step, accumulated in step)= ("
+       << growth_vertex_count << ", " << growth_total_graphs_in_current_step << ", "
+       << growth_processed_graphs_in_current_step << ", "
+       << growth_accumulated_canonicals_in_current_step << ")\n";
+  }
+  // os << "\nGrowth automorphism stats(found, vset skips)= (" << growth_automorphisms_found << ",
+  //  "
+  //  << growth_automorphisms_vset_skips << ")\n";
 }

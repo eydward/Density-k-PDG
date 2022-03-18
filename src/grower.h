@@ -14,6 +14,8 @@ class Grower {
     bool operator()(const Graph& g, const Graph& h) const { return g.is_isomorphic(h); }
   };
 
+  // Whether to print the graph content after the growth phase.
+  const bool print_graph;
   // The log file.
   std::ostream* const log;
   // Utility used to enumerate all edge sets to add.
@@ -23,7 +25,12 @@ class Grower {
   // and add them to the canonicals. Before calling this, all such graphs
   // with <n vertices must already be in the canonicals.
   // Note all edges added in this step contains vertex (n-1).
+  // This is used to grow all graphs up to N-1 vertices.
   void grow_step(int n);
+
+  // Enumerate all graphs in the final step where all graphs have N vertices.
+  // We don't need to store any graph in this step.
+  void enumerate_final_step();
 
   void print_config(std::ostream& os);
   void print_state_to_stream(bool print_graphs, std::ostream& os);
@@ -31,10 +38,10 @@ class Grower {
  public:
   // Constructs the Grower object.
   // log_stream is used for status reporting and debugging purpose.
-  Grower(std::ostream* log_stream = nullptr);
+  Grower(bool print_graph_ = false, std::ostream* log_stream = nullptr);
 
   // One canonical graphs with n vertices in each isomorphism class is in canonicals[n].
-  std::unordered_set<Graph, GraphHasher, GraphComparer> canonicals[MAX_VERTICES + 1];
+  std::unordered_set<Graph, GraphHasher, GraphComparer> canonicals[MAX_VERTICES];
 
   // Find all canonical isomorphism class representations with up to max_n vertices.
   void grow();

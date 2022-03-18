@@ -21,8 +21,6 @@ class Counters {
   static bool has_printed;
 
   static uint64 compute_vertex_signatures;
-  static uint64 graph_allocations;
-  static uint64 chunk_allocations;
   static uint64 graph_copies;
   static uint64 graph_accumulated_canonicals;
   static uint64 graph_canonicalize_ops;
@@ -40,15 +38,13 @@ class Counters {
   static uint64 graph_permute_ops;
   static uint64 graph_permute_canonical_ops;
   static uint64 graph_contains_Tk_tests;
-  static uint64 set_bucket_count;
-  static float set_load_factor;
-  static float set_max_load_factor;
   static uint64 growth_vertex_count;
   static uint64 growth_total_graphs_in_current_step;
   static uint64 growth_processed_graphs_in_current_step;
   static uint64 growth_accumulated_canonicals_in_current_step;
   static uint64 growth_automorphisms_found;
   static uint64 growth_automorphisms_vset_skips;
+  static uint64 growth_num_base_graphs_in_final_step;
 
   // Prints the counter values the given output stream.
   static void print_counters_to_stream(std::ostream& os);
@@ -56,8 +52,6 @@ class Counters {
  public:
   static Fraction get_min_theta() { return min_theta; }
   static void increment_compute_vertex_signatures() { ++compute_vertex_signatures; }
-  static void increment_graph_allocations() { ++graph_allocations; }
-  static void increment_chunk_allocations() { ++chunk_allocations; }
   static void increment_graph_copies() { ++graph_copies; }
   static void increment_graph_canonicalize_ops() { ++graph_canonicalize_ops; }
   static void increment_graph_isomorphic_tests() { ++graph_isomorphic_tests; }
@@ -78,8 +72,7 @@ class Counters {
   // Starting a new step in growth.
   static void new_growth_step(uint64 vertex_count, uint64 total_graphs_in_current_step);
 
-  // The statistics of the std::unordered_set used to store all canonicals.
-  static void current_set_stats(uint64 bucket_count, float load_factor, float max_load_factor);
+  static void enter_final_step(uint64 num_base_graphs);
 
   // If the given graph's theta is less than min_theta, assign it to min_theta.
   static void observe_theta(const Graph& g);
