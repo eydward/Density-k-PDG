@@ -21,7 +21,9 @@ class Counters {
   static bool has_printed;
 
   static uint64 compute_vertex_signatures;
-  static uint64 graph_copies;
+  static std::atomic<uint64> graph_copies;
+  static std::atomic<uint64> graph_contains_Tk_tests;
+  static uint64 growth_processed_graphs_in_current_step;
   static uint64 graph_accumulated_canonicals;
   static uint64 graph_canonicalize_ops;
   static uint64 graph_isomorphic_tests;
@@ -37,10 +39,8 @@ class Counters {
   static uint64 graph_identical_tests;
   static uint64 graph_permute_ops;
   static uint64 graph_permute_canonical_ops;
-  static uint64 graph_contains_Tk_tests;
   static uint64 growth_vertex_count;
   static uint64 growth_total_graphs_in_current_step;
-  static uint64 growth_processed_graphs_in_current_step;
   static uint64 growth_accumulated_canonicals_in_current_step;
   static uint64 growth_automorphisms_found;
   static uint64 growth_automorphisms_vset_skips;
@@ -75,7 +75,7 @@ class Counters {
   static void enter_final_step(uint64 num_base_graphs);
 
   // If the given graph's theta is less than min_theta, assign it to min_theta.
-  static void observe_theta(const Graph& g);
+  static void observe_theta(const Graph& g, uint64 graphs_processed = 1);
 
   // Resets all values to 0, and starts the stopwatch, which will be used
   // by print_counters to calculate elapsed time.

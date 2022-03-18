@@ -5,7 +5,9 @@
 Fraction Counters::min_theta(1E8, 1);
 Graph Counters::min_theta_graph{};
 uint64 Counters::compute_vertex_signatures = 0;
-uint64 Counters::graph_copies = 0;
+std::atomic<uint64> Counters::graph_copies = 0;
+std::atomic<uint64> Counters::graph_contains_Tk_tests = 0;
+uint64 Counters::growth_processed_graphs_in_current_step = 0;
 uint64 Counters::graph_accumulated_canonicals = 0;
 uint64 Counters::graph_canonicalize_ops = 0;
 uint64 Counters::graph_isomorphic_tests = 0;
@@ -16,14 +18,12 @@ uint64 Counters::graph_isomorphic_codeg_diff = 0;
 uint64 Counters::graph_identical_tests = 0;
 uint64 Counters::graph_permute_ops = 0;
 uint64 Counters::graph_permute_canonical_ops = 0;
-uint64 Counters::graph_contains_Tk_tests = 0;
 std::chrono::time_point<std::chrono::steady_clock> Counters::start_time;
 std::chrono::time_point<std::chrono::steady_clock> Counters::last_print_time;
 std::ofstream* Counters::log = nullptr;
 bool Counters::has_printed = false;
 uint64 Counters::growth_vertex_count = 0;
 uint64 Counters::growth_total_graphs_in_current_step = 0;
-uint64 Counters::growth_processed_graphs_in_current_step = 0;
 uint64 Counters::growth_accumulated_canonicals_in_current_step = 0;
 uint64 Counters::growth_automorphisms_found = 0;
 uint64 Counters::growth_automorphisms_vset_skips = 0;
@@ -36,9 +36,9 @@ void Counters::initialize(std::ofstream* log_stream) {
 }
 
 // If the given graph's theta is less than min_theta, assign it to min_theta.
-void Counters::observe_theta(const Graph& g) {
-  ++graph_accumulated_canonicals;
-  ++growth_accumulated_canonicals_in_current_step;
+void Counters::observe_theta(const Graph& g, uint64 graphs_processed) {
+  graph_accumulated_canonicals += graphs_processed;
+  growth_accumulated_canonicals_in_current_step += graphs_processed;
   Fraction theta = g.get_theta();
   if (theta < min_theta) {
     min_theta = theta;
@@ -90,8 +90,9 @@ void Counters::print_counters_to_stream(std::ostream& os) {
 
   if (growth_num_base_graphs_in_final_step > 0) {
     os << "Base graphs processed / total = " << growth_processed_graphs_in_current_step << " / "
-       << growth_num_base_graphs_in_final_step << ". Ops (copies, T_k)= (" << graph_copies << ", "
-       << graph_contains_Tk_tests << ")\n";
+       << growth_num_base_graphs_in_final_step << ". Ops (copies, T_k, processed)= ("
+       << graph_copies << ", " << graph_contains_Tk_tests << ", "
+       << growth_accumulated_canonicals_in_current_step << ")\n";
   } else {
     os << "\nAccumulated canonicals\t= " << graph_accumulated_canonicals
        << "\nOps (vertex sig, copies, canonicalize, permute, T_k)= (" << compute_vertex_signatures

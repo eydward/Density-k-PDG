@@ -6,8 +6,7 @@
 using namespace testing;
 
 TEST(EdgeGeneratorTest, Generate22) {
-  EdgeGenerator edge_gen;
-  edge_gen.initialize(2, 2);
+  EdgeGenerator edge_gen(2, 2);
 
   // 3 edges: {01} {01>0} {01>1}
   for (int i = -1; i <= 1; i++) {
@@ -29,21 +28,10 @@ TEST(EdgeGeneratorTest, Generate22) {
     EXPECT_EQ(edge_gen.edges[0].head_vertex, static_cast<uint8>(i));
   }
   EXPECT_FALSE(edge_gen.next());
-
-  // Make sure initialize cleans up everything and works again.
-  edge_gen.initialize(2, 2);
-  for (int i = -1; i <= 1; i++) {
-    EXPECT_TRUE(edge_gen.next());
-    EXPECT_EQ(edge_gen.edge_count, 1);
-    EXPECT_EQ(edge_gen.edges[0].vertex_set, 0b11);
-    EXPECT_EQ(edge_gen.edges[0].head_vertex, static_cast<uint8>(i));
-  }
-  EXPECT_FALSE(edge_gen.next());
 }
 
 TEST(EdgeGeneratorTest, Generate23) {
-  EdgeGenerator edge_gen;
-  edge_gen.initialize(2, 3);
+  EdgeGenerator edge_gen(2, 3);
 
   // First 3: {02} {02>0} {02>2}
   for (int i = -1; i <= 1; i++) {
@@ -76,8 +64,7 @@ TEST(EdgeGeneratorTest, Generate23) {
 }
 
 TEST(EdgeGeneratorTest, Generate23WithSkip) {
-  EdgeGenerator edge_gen;
-  edge_gen.initialize(2, 3);
+  EdgeGenerator edge_gen(2, 3);
 
   // First 3: {02} {02>0} {02>2}
   for (int i = -1; i <= 1; i++) {
@@ -124,8 +111,7 @@ TEST(EdgeGeneratorTest, Generate23WithSkip) {
 }
 
 TEST(EdgeGeneratorTest, Generate33) {
-  EdgeGenerator edge_gen;
-  edge_gen.initialize(3, 3);
+  EdgeGenerator edge_gen(3, 3);
 
   // First 3: {012} {012>0} {012>1} {012>2}
   for (int i = -1; i <= 2; i++) {
@@ -137,8 +123,7 @@ TEST(EdgeGeneratorTest, Generate33) {
 }
 
 TEST(EdgeGeneratorTest, Generate35) {
-  EdgeGenerator edge_gen;
-  edge_gen.initialize(3, 5);
+  EdgeGenerator edge_gen(3, 5);
 
   int count = 0;
   while (edge_gen.next()) {
@@ -150,8 +135,7 @@ TEST(EdgeGeneratorTest, Generate35) {
 }
 
 TEST(EdgeGeneratorTest, Generate27) {
-  EdgeGenerator edge_gen;
-  edge_gen.initialize(2, 7);
+  EdgeGenerator edge_gen(2, 7);
 
   int count = 0;
   while (edge_gen.next()) {
@@ -163,8 +147,7 @@ TEST(EdgeGeneratorTest, Generate27) {
 }
 
 TEST(EdgeGeneratorTest, Generate45) {
-  EdgeGenerator edge_gen;
-  edge_gen.initialize(4, 5);
+  EdgeGenerator edge_gen(4, 5);
 
   // First 5: {0124} {0124>0} {0124>1} {0124>2} {0124>4}
   for (int i = -1; i <= 3; i++) {

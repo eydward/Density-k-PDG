@@ -6,8 +6,8 @@
 class EdgeGenerator {
  private:
   const bool use_automorphism_opt;     // Use the automorphism optimization if this flag is true.
-  uint8 k;                             // Number of vertices in each edge.
-  uint8 n;                             // Number of vertices after adding the new vertex.
+  const uint8 k;                       // Number of vertices in each edge.
+  const uint8 n;                       // Number of vertices after adding the new vertex.
   uint8 high_idx_non_zero_enum_state;  // The highest index of the non-zero element in enum_state.
   uint8 edge_candidate_count;          // Number of edge candidates in the next array.
   uint8 edge_candidates[MAX_EDGES];    // All possible edges going through the new vertex.
@@ -39,11 +39,9 @@ class EdgeGenerator {
   uint8 edge_count;
   Edge edges[MAX_EDGES];
 
-  EdgeGenerator(bool use_automorphism_optimization = false);
-
   // Initializes the generator for the given new vertex count.
   // k = number of vertices in each edge.
-  void initialize(int k, int vertex_count);
+  EdgeGenerator(int k, int vertex_count, bool use_automorphism_optimization = false);
 
   // Resets the enumeration state. Starts over.
   void reset_enumeration();

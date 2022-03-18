@@ -3,14 +3,14 @@
 #include "grower.h"
 
 void print_usage() {
-  std::cout << "Usage: kPDG K N [print_graphs]\n"
+  std::cout << "Usage: kPDG K N T\n"
             << "  Each argument is an integer, K and N are required, others optional.\n"
             << "  K = Number of vertices in each edge.\n"
             << "  N = Total number of vertices in a graph.  2 <= K <= N <= 7.\n"
-            << "  (optional) print_graphs: 0 (default) or 1. 1 = print the accumulated graphs.\n";
+            << "  T = Number of worker threads. (0 means don't use threads).\n";
 }
 
-// Returns current time in YYYYMMDD-HHmmss format.
+// Returns current time in YYYYMMDD-HHmmss format. Used in the log file name.
 std::string get_current_time() {
   std::time_t current_time = std::time(0);
   const std::tm* now = std::localtime(&current_time);
@@ -20,17 +20,14 @@ std::string get_current_time() {
 }
 
 int main(int argc, char* argv[]) {
-  if (argc < 3) {
+  if (argc < 4) {
     print_usage();
     return -1;
   }
   int k = atoi(argv[1]);
   int n = atoi(argv[2]);
-  bool print_graph = false;
-  if (argc >= 4) {
-    print_graph = atoi(argv[3]) != 0;
-  }
-  if (k < 2 || n > 7 || k > n) {
+  int t = atoi(argv[3]);
+  if (k < 2 || n > 7 || k > n || t < 0 || t > 128) {
     std::cout << "Invalid command line arguments. See usage for details.\n";
     print_usage();
     return -1;
@@ -38,24 +35,23 @@ int main(int argc, char* argv[]) {
 
   Graph::set_global_graph_info(k, n);
 
-  // Get current time, to be used in the log file path.
-  std::string log_path = "kPDG_v6run_" + std::to_string(Graph::K) + "_" + std::to_string(Graph::N) +
-                         "_" + get_current_time() + ".log";
+  std::string log_file_name = "kPDG_v6run_" + std::to_string(Graph::K) + "_" +
+                              std::to_string(Graph::N) + "_" + std::to_string(t) + "_" +
+                              get_current_time();
   std::string arguments = "kPDG run arguments: K=" + std::to_string(Graph::K) +
                           ", N=" + std::to_string(Graph::N) +
                           ", TOTAL_EDGES=" + std::to_string(Graph::TOTAL_EDGES) +
-                          ", print_graph=" + std::to_string(print_graph) +
-                          "\n  sizeof(Edge)=" + std::to_string(sizeof(Edge)) +
-                          ", sizeof(VertexSignature)=" + std::to_string(sizeof(VertexSignature)) +
-                          ", sizeof(Graph)=" + std::to_string(sizeof(Graph)) + "\n\n";
-  std::cout << "Log file path: " << log_path << "\n";
-  std::ofstream log(log_path);
+                          ", THREADS=" + std::to_string(t) + "\n\n";
+  std::cout << "Log file path: " << log_file_name + ".log, " << log_file_name + "_detail.log"
+            << "\n";
+  std::ofstream log(log_file_name + ".log");
+  std::ofstream detail_log(log_file_name + "_detail.log");
   std::cout << arguments;
   log << arguments;
 
   Counters::initialize(&log);
 
-  Grower s(print_graph, &log);
+  Grower s(t, &log, &detail_log);
   s.grow();
 
   std::cout << "\nALL DONE. Final result:\n";

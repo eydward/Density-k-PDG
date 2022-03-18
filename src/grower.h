@@ -14,12 +14,13 @@ class Grower {
     bool operator()(const Graph& g, const Graph& h) const { return g.is_isomorphic(h); }
   };
 
-  // Whether to print the graph content after the growth phase.
-  const bool print_graph;
-  // The log file.
+  // The number of worker threads to use in the final enumeration step.
+  const int num_worker_threads;
+  // The log files.
   std::ostream* const log;
-  // Utility used to enumerate all edge sets to add.
-  EdgeGenerator edge_gen;
+  std::ostream* const log_detail;
+  // The worker threads used in the final enumeration phase.
+  std::vector<std::thread> worker_threads;
 
   // Constructs all non-isomorphic graphs with n vertices that are T_k-free,
   // and add them to the canonicals. Before calling this, all such graphs
@@ -32,21 +33,26 @@ class Grower {
   // We don't need to store any graph in this step.
   void enumerate_final_step();
 
-  void print_config(std::ostream& os);
-  void print_state_to_stream(bool print_graphs, std::ostream& os);
+  // Print the content of the canonicals after the growth to console and log files.
+  void print_before_final() const;
+  void print_config(std::ostream& os) const;
+  void print_state_to_stream(std::ostream& os) const;
+
+  void worker_thread_main(int thread_id);
+
+  std::mutex queue_mutex;
+  std::mutex counters_mutex;
+  std::queue<Graph> to_be_processed;
 
  public:
   // Constructs the Grower object.
   // log_stream is used for status reporting and debugging purpose.
-  Grower(bool print_graph_ = false, std::ostream* log_stream = nullptr);
+  Grower(int num_worker_threads_ = 0, std::ostream* log_ = nullptr,
+         std::ostream* log_detail_ = nullptr);
 
   // One canonical graphs with n vertices in each isomorphism class is in canonicals[n].
   std::unordered_set<Graph, GraphHasher, GraphComparer> canonicals[MAX_VERTICES];
 
   // Find all canonical isomorphism class representations with up to max_n vertices.
   void grow();
-
-  // Debug print the content of the canonicals after the growth.
-  // If print_graphs==true, print stats and all graphs. Otherwise prints stats only.
-  void print(bool print_graphs);
 };
