@@ -13,7 +13,7 @@ TEST(GrowerTest, G23) {
     EXPECT_EQ(s.canonicals[0].size(), 0);
     EXPECT_EQ(s.canonicals[1].size(), 1);
     EXPECT_EQ(s.canonicals[2].size(), 2);
-    EXPECT_EQ(s.canonicals[3].size(), 7);
+    EXPECT_EQ(s.canonicals[3].size(), 0);
   }
 }
 

@@ -81,15 +81,19 @@ void Grower::grow_step(int n) {
         continue;
       }
 
-      copy->canonicalize(gi, use_codegrees);
-
-      if (!canonicals[n].contains(copy)) {
-        canonicals[n].insert(copy);
+      if (n == Graph::N) {
         Counters::observe_theta(*copy);
-        Counters::current_set_stats(canonicals[n].bucket_count(), canonicals[n].load_factor(),
-                                    canonicals[n].max_load_factor());
-        allocator.mark_current_graph_used();
-        copy = allocator.get_current_graph_from_allocator();
+      } else {
+        copy->canonicalize(gi, use_codegrees);
+
+        if (!canonicals[n].contains(copy)) {
+          canonicals[n].insert(copy);
+          Counters::observe_theta(*copy);
+          Counters::current_set_stats(canonicals[n].bucket_count(), canonicals[n].load_factor(),
+                                      canonicals[n].max_load_factor());
+          allocator.mark_current_graph_used();
+          copy = allocator.get_current_graph_from_allocator();
+        }
       }
     }
   }

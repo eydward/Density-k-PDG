@@ -34,7 +34,7 @@ int main(int argc, char* argv[]) {
 
   Graph::set_global_graph_info(k, n);
 
-  std::string log_path = "kPDG_v4run_" + std::to_string(Graph::K) + "_" + std::to_string(Graph::N) +
+  std::string log_path = "kPDG_v5run_" + std::to_string(Graph::K) + "_" + std::to_string(Graph::N) +
                          "_" + std::to_string(c) + ".log";
   std::string arguments = "kPDG run arguments: K=" + std::to_string(Graph::K) +
                           ", N=" + std::to_string(Graph::N) + ", C=" + std::to_string(c) +
@@ -54,6 +54,8 @@ int main(int argc, char* argv[]) {
   s.grow();
   s.print(print_graph);
 
+  std::cout << "ALL DONE\n";
+  log << "ALL DONE\n";
   Counters::print_counters();
   log.flush();
   log.close();
