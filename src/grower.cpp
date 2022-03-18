@@ -3,11 +3,7 @@
 #include "counters.h"
 
 Grower::Grower(int codegrees, std::ostream* log_stream)
-    : log(log_stream), use_codegrees(codegrees) {
-  for (int n = 0; n <= MAX_VERTICES; n++) {
-    canonicals[n].max_load_factor(20);
-  }
-}
+    : log(log_stream), use_codegrees(codegrees) {}
 
 // Find all canonical isomorphism class representations with up to max_n vertices.
 void Grower::grow() {
@@ -18,12 +14,11 @@ void Grower::grow() {
   }
 
   // Initialize empty graph with k-1 vertices.
-  Graph* g = allocator.get_current_graph_from_allocator();
+  Graph g;
   GraphInvariants gi;
-  g->canonicalize(gi, use_codegrees);
+  g.canonicalize(gi, use_codegrees);
   canonicals[Graph::K - 1].insert(g);
-  Counters::observe_theta(*g);
-  allocator.mark_current_graph_used();
+  Counters::observe_theta(g);
 
   for (int n = Graph::K; n <= Graph::N; n++) {
     grow_step(n);
@@ -49,11 +44,12 @@ void Grower::grow_step(int n) {
 
   // This data structure will be reused when processing the graphs.
   GraphInvariants gi;
+  Graph copy;
 
-  for (const Graph* g : canonicals[n - 1]) {
+  for (const Graph& g : canonicals[n - 1]) {
     Counters::increment_growth_processed_graphs_in_current_step();
     edge_gen.reset_enumeration();
-    assert(n == Graph::K || g->is_canonical);
+    assert(n == Graph::K || g.is_canonical);
 
 #if false
     int perm[MAX_VERTICES];
@@ -68,31 +64,28 @@ void Grower::grow_step(int n) {
     };
 #endif
 
-    Graph* copy = allocator.get_current_graph_from_allocator();
     // Loop through all ((K+1)^\binom{n-1}{k-1} - 1) edge combinations, add them to g, and check
     // add to canonicals unless it's isomorphic to an existing one.
     while (edge_gen.next()) {
-      g->copy(copy);
+      g.copy(&copy);
       for (int i = 0; i < edge_gen.edge_count; i++) {
-        copy->add_edge(edge_gen.edges[i]);
+        copy.add_edge(edge_gen.edges[i]);
       }
-      if (copy->contains_Tk(n - 1)) {
+      if (copy.contains_Tk(n - 1)) {
         edge_gen.notify_contain_tk_skip();
         continue;
       }
 
       if (n == Graph::N) {
-        Counters::observe_theta(*copy);
+        Counters::observe_theta(copy);
       } else {
-        copy->canonicalize(gi, use_codegrees);
+        copy.canonicalize(gi, use_codegrees);
 
         if (!canonicals[n].contains(copy)) {
           canonicals[n].insert(copy);
-          Counters::observe_theta(*copy);
+          Counters::observe_theta(copy);
           Counters::current_set_stats(canonicals[n].bucket_count(), canonicals[n].load_factor(),
                                       canonicals[n].max_load_factor());
-          allocator.mark_current_graph_used();
-          copy = allocator.get_current_graph_from_allocator();
         }
       }
     }
@@ -111,9 +104,9 @@ void Grower::print_state_to_stream(bool print_graphs, std::ostream& os) {
     os << "order=" << i << " : canonicals= " << canonicals[i].size() << "\n";
     total_canonicals += canonicals[i].size();
     if (print_graphs) {
-      for (const Graph* g : canonicals[i]) {
+      for (const Graph& g : canonicals[i]) {
         os << "    ";
-        g->print_concise(os);
+        g.print_concise(os);
       }
     }
   }

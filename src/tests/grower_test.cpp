@@ -1,5 +1,6 @@
 #include "../grower.h"
 
+#include "../counters.h"
 #include "../graph.h"
 #include "gtest/gtest.h"
 

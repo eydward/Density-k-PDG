@@ -3,7 +3,6 @@ load("@rules_cc//cc:defs.bzl", "cc_binary")
 cc_library(
     name="graph",
     hdrs=[
-        "allocator.h",
         "counters.h",
         "edge_gen.h",
         "fraction.h",
@@ -12,7 +11,6 @@ cc_library(
         "permutator.h",
     ],
     srcs=[
-        "allocator.cpp",
         "counters.cpp",
         "edge_gen.cpp",
         "fraction.cpp",

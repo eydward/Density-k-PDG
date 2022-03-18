@@ -1,3 +1,4 @@
+#include "counters.h"
 #include "graph.h"
 #include "grower.h"
 
