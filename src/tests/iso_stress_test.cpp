@@ -9,8 +9,8 @@ constexpr int FULL_TEST_THRESHOLD = 1000;
 constexpr int RANDOM_ITERATIONS = 10 * 1000 * 1000;
 constexpr uint8 NOT_IN_SET = 0xEE;
 
-IsomorphismStressTest::IsomorphismStressTest(int k_, int n_, int c_)
-    : k(k_), n(n_), c(c_), random_engine(std::random_device()()) {
+IsomorphismStressTest::IsomorphismStressTest(int k_, int n_)
+    : k(k_), n(n_), random_engine(std::random_device()()) {
   Graph::set_global_graph_info(k, n);
   assert(Graph::TOTAL_EDGES == Graph::VERTEX_MASKS[k].mask_count);
   for (int e = 0; e < Graph::TOTAL_EDGES; e++) {
@@ -49,7 +49,7 @@ Graph IsomorphismStressTest::get_one_graph(const uint8 edge_state[MAX_EDGES]) {
   // g.print_concise(std::cout);
   exit_assert(true, g.is_isomorphic_slow(g), g, g, "slow!=self");
   GraphInvariants gi;
-  g.canonicalize(gi, c);
+  g.canonicalize(gi);
   exit_assert(true, g.is_isomorphic_slow(g), g, g, "slow!=self after canonicalize");
   exit_assert(true, g.is_isomorphic(g), g, g, "iso!=self");
   return g;
@@ -82,7 +82,7 @@ void IsomorphismStressTest::run() {
   double total_graphs = pow(k + 2, Graph::TOTAL_EDGES);
   bool use_sampling = total_graphs > FULL_TEST_THRESHOLD;
 
-  std::cout << "TEST k=" << k << ", n=" << n << ", c=" << c << ", e=" << Graph::TOTAL_EDGES
+  std::cout << "TEST k=" << k << ", n=" << n << ", e=" << Graph::TOTAL_EDGES
             << ", graph=" << total_graphs << ", use_sampling=" << use_sampling << " ...\n";
 
   std::vector<Graph> graphs;

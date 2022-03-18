@@ -2,8 +2,7 @@
 
 #include "counters.h"
 
-Grower::Grower(int codegrees, std::ostream* log_stream)
-    : log(log_stream), use_codegrees(codegrees) {}
+Grower::Grower(std::ostream* log_stream) : log(log_stream) {}
 
 // Find all canonical isomorphism class representations with up to max_n vertices.
 void Grower::grow() {
@@ -16,7 +15,7 @@ void Grower::grow() {
   // Initialize empty graph with k-1 vertices.
   Graph g;
   GraphInvariants gi;
-  g.canonicalize(gi, use_codegrees);
+  g.canonicalize(gi);
   canonicals[Graph::K - 1].insert(g);
   Counters::observe_theta(g);
 
@@ -79,7 +78,7 @@ void Grower::grow_step(int n) {
       if (n == Graph::N) {
         Counters::observe_theta(copy);
       } else {
-        copy.canonicalize(gi, use_codegrees);
+        copy.canonicalize(gi);
 
         if (!canonicals[n].contains(copy)) {
           canonicals[n].insert(copy);

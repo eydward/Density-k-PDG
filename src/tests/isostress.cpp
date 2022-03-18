@@ -19,11 +19,8 @@ int main(int argc, char* argv[]) {
   for (int diff = 0; diff <= 3; diff++) {
     for (int n = diff + 2; n <= 7; n++) {
       int k = n - diff;
-      for (int c = 0; c < k; c++) {
-        if (c == 1) continue;
-        IsomorphismStressTest t(k, n, c);
-        t.run();
-      }
+      IsomorphismStressTest t(k, n);
+      t.run();
     }
   }
   std::cout << "\nALL DONE\n";

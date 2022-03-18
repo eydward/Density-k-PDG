@@ -16,9 +16,6 @@ class Grower {
 
   // The log file.
   std::ostream* const log;
-  // Whether to use codegree info in computing graph hash. And if yes, the number of vertices
-  // used in the codegree computation. 0 means not to use codegree info.
-  const int use_codegrees;
   // Utility used to enumerate all edge sets to add.
   EdgeGenerator edge_gen;
 
@@ -33,12 +30,8 @@ class Grower {
 
  public:
   // Constructs the Grower object.
-  //
-  // The codegrees parameter specifies whether to use codegree info in computing graph hash.
-  // And if yes, the number of vertices used in the codegree computation. 0 means not to use
-  // codegree info.
   // log_stream is used for status reporting and debugging purpose.
-  Grower(int codegrees, std::ostream* log_stream = nullptr);
+  Grower(std::ostream* log_stream = nullptr);
 
   // One canonical graphs with n vertices in each isomorphism class is in canonicals[n].
   std::unordered_set<Graph, GraphHasher, GraphComparer> canonicals[MAX_VERTICES + 1];

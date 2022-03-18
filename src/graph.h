@@ -89,8 +89,6 @@ static_assert(sizeof(DegreeInfo) <= 8);
 struct GraphInvariants {
   // Information of the vertices
   VertexSignature vertices[MAX_VERTICES];
-  // Information of the codegrees on vertex sets.
-  DegreeInfo codegrees[MAX_EDGES];
 };
 
 // Represents the bitmasks of vertices, used to in various computations such as codegree info.
@@ -160,10 +158,6 @@ struct Graph {
   // Computes the vertex signatures in this graph from the edge set.
   // The result is in the given array.
   void compute_vertex_signature(VertexSignature vs[MAX_VERTICES]) const;
-  // Computes the codegrees of all valid vertex sets. The value of codeg_vertices specifies
-  // the number of vertices in each set to compute the codegree info.
-  // For definition of codegrees, see the comments of the DegreeInfo struct.
-  uint32 compute_codegree_signature(DegreeInfo degs[MAX_EDGES], int codeg_vertices) const;
   // Computes the hash code from the vertice degree info of the neighboring vertices.
   static void hash_neighbors(uint8 neighbors, const VertexSignature vertices[MAX_VERTICES],
                              uint32& hash_code);
@@ -177,13 +171,13 @@ struct Graph {
  public:
   // Uses the graph invariants to generate the hash code for the graph and put it in the
   // `graph_hash` field.
-  void generate_graph_hash(GraphInvariants& gi, int codeg_vertices);
+  void generate_graph_hash(GraphInvariants& gi);
 
   // Returns a graph isomorphic to this graph, by applying vertex permutation.
   // The first parameter specifies the permutation. For example p={1,2,0,3} means
   //  0->1, 1->2, 2->0, 3->3.
   // The second parameter is the resulting graph.
-  void permute(int p[], Graph& g, int codeg_vertices) const;
+  void permute(int p[], Graph& g) const;
 
   // Similar to permute(), except the current graph must be canonicalized, and the permutation
   // is guaranteed to perserve that.
@@ -191,7 +185,7 @@ struct Graph {
 
   // Canonicalized this graph, so that the vertices are ordered by their signatures.
   // The vertex signatures of the canonicalized graph is returned in the GraphInvariants struct.
-  void canonicalize(GraphInvariants& gi, int codeg_vertices);
+  void canonicalize(GraphInvariants& gi);
 
   // Makes a copy of this graph to g.
   void copy(Graph* g) const;

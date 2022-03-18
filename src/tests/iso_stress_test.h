@@ -15,7 +15,7 @@
 
 class IsomorphismStressTest {
  private:
-  const int k, n, c;
+  const int k, n;
   std::mt19937 random_engine;
   void exit_assert(bool expected, bool actual, const Graph& g, const Graph& h, const char* msg);
   Graph get_one_graph(const uint8 edge_state[MAX_EDGES]);
@@ -29,7 +29,7 @@ class IsomorphismStressTest {
   void verify_graphs(const Graph& g, const Graph& h);
 
  public:
-  IsomorphismStressTest(int k_, int n_, int c_);
+  IsomorphismStressTest(int k_, int n_);
 
   void run();
 };
