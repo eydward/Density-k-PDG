@@ -39,32 +39,14 @@ struct Edge {
 };
 static_assert(sizeof(Edge) == 2);
 
-// This struct represents either the degree information for a vertex,
-// or the codegree information for a set of vertices.
-//
-// For a given vertex set U, the codegree of U is the number of edges that contain U as a
-// subset. So in fact, the degree of a vertex is just the codegree of the single element set.
-struct DegreeInfo {
-  // Number of undirected edges through the give vertex set.
-  uint8 degree_undirected;
-  // Number of directed edges through the given vertex set, with the head in the given vertex head.
-  uint8 degree_head;
-  // Number of directed edges through the given vertex set, with the head not in the set.
-  uint8 degree_tail;
+// Prints the array of degree info to the stream, for debugging purpose.
+// m is the number of degree info to print in the given array.
+//  static void print_degree_info(std::ostream& os, const DegreeInfo degs[MAX_VERTICES], int m);
 
-  // Utility function to print an degree info array to the output stream, for debugging purpose.
-  uint32 get_degrees() const {
-    return static_cast<uint32>(degree_undirected) | static_cast<uint32>(degree_head) << 8 |
-           static_cast<uint32>(degree_tail) << 16;
-  }
+// static_assert(sizeof(DegreeInfo) == 4);
 
-  // Prints the array of degree info to the stream, for debugging purpose.
-  // m is the number of degree info to print in the given array.
-  static void print_degree_info(std::ostream& os, const DegreeInfo degs[MAX_VERTICES], int m);
-};
-static_assert(sizeof(DegreeInfo) <= 4);
-
-// Represent the characteristics of a vertex, that is invariant under graph isomorphisms.
+// Represent the characteristics of a vertex.
+// Both get_degrees() and get_hash() are invariant under graph isomorphisms.
 struct VertexSignature {
   // Combined hash code of the signatures (excluding hashes) of neighbors. Algorithm:
   // Let N_u, N_h, N_t be the neighboring vertex sets that correspond to the 3 degree counts above.
@@ -72,24 +54,35 @@ struct VertexSignature {
   // Then combine the hash with this given order.
   uint32 neighbor_hash;
 
-  // The degree info of this vertex.
-  DegreeInfo deg;
+  // Number of undirected edges through the give vertex set.
+  uint8 degree_undirected;
+  // Number of directed edges through the given vertex set, with the head in the given vertex head.
+  uint8 degree_head;
+  // Number of directed edges through the given vertex set, with the head not in the set.
+  uint8 degree_tail;
+  // The vertex id. This is not used in get_hash() in order to maintain invariant property.
+  uint8 vertex_id;
+
+  // Reset all data fields to 0, except setting the vertex_id using the given vid value.
+  void reset(int vid) {
+    neighbor_hash = degree_undirected = degree_head = degree_tail = 0;
+    vertex_id = vid;
+  }
+
+  // Utility function to print an degree info array to the output stream, for debugging purpose.
+  uint32 get_degrees() const {
+    return static_cast<uint32>(degree_undirected) | static_cast<uint32>(degree_head) << 8 |
+           static_cast<uint32>(degree_tail) << 16;
+  }
 
   // Returns a 32-bit hash code to represent the data.
-  uint64 get_hash() const { return *reinterpret_cast<const uint64*>(this); }
+  uint64 get_hash() const { return neighbor_hash | static_cast<uint64>(get_degrees()) << 32; }
 
   // Utility function to print an array of VertexSignatures to the given output stream,
   // for debugging purpose.
   static void print_vertices(std::ostream& os, const VertexSignature vertices[MAX_VERTICES]);
 };
-static_assert(sizeof(DegreeInfo) <= 8);
-
-// Represents the information of the graph that are invariant under isomorphisms,
-// which we use in compute the graph hash, in order to speed up isomorphism checks.
-struct GraphInvariants {
-  // Information of the vertices
-  VertexSignature vertices[MAX_VERTICES];
-};
+static_assert(sizeof(VertexSignature) == 8);
 
 // Represents the bitmasks of vertices, used to in various computations such as codegree info.
 // Each VertexMask struct instance holds all valid vertex bitmasks for a given k value.
@@ -132,6 +125,9 @@ struct Graph {
   // The edge set in this graph.
   Edge edges[MAX_EDGES];
 
+  // Information of the vertices
+  VertexSignature vertices[MAX_VERTICES];
+
   Graph();
 
   // Resets the current graph to be an empty graph.
@@ -157,12 +153,11 @@ struct Graph {
  private:
   // Computes the vertex signatures in this graph from the edge set.
   // The result is in the given array.
-  void compute_vertex_signature(VertexSignature vs[MAX_VERTICES]) const;
+  void compute_vertex_signature();
   // Computes the hash code from the vertice degree info of the neighboring vertices.
-  static void hash_neighbors(uint8 neighbors, const VertexSignature vertices[MAX_VERTICES],
-                             uint32& hash_code);
+  void hash_neighbors(uint8 neighbors, uint32& hash_code) const;
   // Use the given vertex signatures to compute the graph hash and update the graph_hash field.
-  uint32 compute_graph_hash(const VertexSignature vs[MAX_VERTICES]) const;
+  uint32 compute_graph_hash() const;
 
   // Perform a permutation of the vertices of this graph according to the p array, put in `g`.
   // Only set the data in the edges array in `g` without touching other fields.
@@ -171,7 +166,7 @@ struct Graph {
  public:
   // Uses the graph invariants to generate the hash code for the graph and put it in the
   // `graph_hash` field.
-  void generate_graph_hash(GraphInvariants& gi);
+  void generate_graph_hash();
 
   // Returns a graph isomorphic to this graph, by applying vertex permutation.
   // The first parameter specifies the permutation. For example p={1,2,0,3} means
@@ -185,7 +180,7 @@ struct Graph {
 
   // Canonicalized this graph, so that the vertices are ordered by their signatures.
   // The vertex signatures of the canonicalized graph is returned in the GraphInvariants struct.
-  void canonicalize(GraphInvariants& gi);
+  void canonicalize();
 
   // Makes a copy of this graph to g.
   void copy(Graph* g) const;
@@ -221,3 +216,4 @@ struct Graph {
   // Print the graph to the console for debugging purpose.
   void print() const;
 };
+static_assert(sizeof(Graph) == 136);

@@ -78,33 +78,29 @@ TEST(GraphTest, Init) {
   EXPECT_EQ(g.edges[3].head_vertex, UNDIRECTED);
   EXPECT_EQ(serialize_edges(g), "{234, 156>5, 123>2, 013}");
 
-  GraphInvariants gi;
-  g.generate_graph_hash(gi);
-  const VertexSignature* vertices = gi.vertices;
+  g.generate_graph_hash();
+  EXPECT_EQ(g.vertices[0].degree_undirected, 1);
+  EXPECT_EQ(g.vertices[0].degree_head, 0);
+  EXPECT_EQ(g.vertices[0].degree_tail, 0);
 
-  EXPECT_EQ(vertices[0].deg.degree_undirected, 1);
-  EXPECT_EQ(vertices[0].deg.degree_head, 0);
-  EXPECT_EQ(vertices[0].deg.degree_tail, 0);
+  EXPECT_EQ(g.vertices[1].degree_undirected, 1);
+  EXPECT_EQ(g.vertices[1].degree_head, 0);
+  EXPECT_EQ(g.vertices[1].degree_tail, 2);
 
-  EXPECT_EQ(vertices[1].deg.degree_undirected, 1);
-  EXPECT_EQ(vertices[1].deg.degree_head, 0);
-  EXPECT_EQ(vertices[1].deg.degree_tail, 2);
+  EXPECT_EQ(g.vertices[2].degree_undirected, 1);
+  EXPECT_EQ(g.vertices[2].degree_head, 1);
+  EXPECT_EQ(g.vertices[2].degree_tail, 0);
 
-  EXPECT_EQ(vertices[2].deg.degree_undirected, 1);
-  EXPECT_EQ(vertices[2].deg.degree_head, 1);
-  EXPECT_EQ(vertices[2].deg.degree_tail, 0);
-
-  EXPECT_EQ(vertices[3].deg.degree_undirected, 2);
-  EXPECT_EQ(vertices[3].deg.degree_head, 0);
-  EXPECT_EQ(vertices[3].deg.degree_tail, 1);
+  EXPECT_EQ(g.vertices[3].degree_undirected, 2);
+  EXPECT_EQ(g.vertices[3].degree_head, 0);
+  EXPECT_EQ(g.vertices[3].degree_tail, 1);
 }
 
 // Utility function to create and initialize T_3.
 Graph get_T3() {
   Graph::set_global_graph_info(3, 5);
   Graph g = parse_edges("{013, 123>2, 023, 234>2}");
-  GraphInvariants gi;
-  g.canonicalize(gi);
+  g.canonicalize();
   return g;
 }
 
@@ -112,7 +108,7 @@ TEST(GraphTest, T3) {
   Graph g = get_T3();
 
   EXPECT_EQ(4, g.edge_count);
-  // Canonicalization: 1->1, 2->3, 3->0, 4->2, 0->4.
+  // Canonicalization: 1->1, 2->3, 3-> 0, 4->2, 0->4.
   EXPECT_EQ(g.edges[0].vertex_set, 0b1011);  // 013>3
   EXPECT_EQ(g.edges[0].head_vertex, 3);
   EXPECT_EQ(g.edges[1].vertex_set, 0b1101);  // 023>3
@@ -123,29 +119,27 @@ TEST(GraphTest, T3) {
   EXPECT_EQ(g.edges[3].head_vertex, UNDIRECTED);
   EXPECT_EQ(serialize_edges(g), "{013>3, 023>3, 014, 034}");
 
-  GraphInvariants gi;
-  g.generate_graph_hash(gi);
-  const VertexSignature* vertices = gi.vertices;
+  g.generate_graph_hash();
 
-  EXPECT_EQ(vertices[0].deg.degree_undirected, 2);
-  EXPECT_EQ(vertices[0].deg.degree_head, 0);
-  EXPECT_EQ(vertices[0].deg.degree_tail, 2);
+  EXPECT_EQ(g.vertices[0].degree_undirected, 2);
+  EXPECT_EQ(g.vertices[0].degree_head, 0);
+  EXPECT_EQ(g.vertices[0].degree_tail, 2);
 
-  EXPECT_EQ(vertices[1].deg.degree_undirected, 1);
-  EXPECT_EQ(vertices[1].deg.degree_head, 0);
-  EXPECT_EQ(vertices[1].deg.degree_tail, 1);
+  EXPECT_EQ(g.vertices[1].degree_undirected, 1);
+  EXPECT_EQ(g.vertices[1].degree_head, 0);
+  EXPECT_EQ(g.vertices[1].degree_tail, 1);
 
-  EXPECT_EQ(vertices[2].deg.degree_undirected, 0);
-  EXPECT_EQ(vertices[2].deg.degree_head, 0);
-  EXPECT_EQ(vertices[2].deg.degree_tail, 1);
+  EXPECT_EQ(g.vertices[2].degree_undirected, 0);
+  EXPECT_EQ(g.vertices[2].degree_head, 0);
+  EXPECT_EQ(g.vertices[2].degree_tail, 1);
 
-  EXPECT_EQ(vertices[3].deg.degree_undirected, 1);
-  EXPECT_EQ(vertices[3].deg.degree_head, 2);
-  EXPECT_EQ(vertices[3].deg.degree_tail, 0);
+  EXPECT_EQ(g.vertices[3].degree_undirected, 1);
+  EXPECT_EQ(g.vertices[3].degree_head, 2);
+  EXPECT_EQ(g.vertices[3].degree_tail, 0);
 
-  EXPECT_EQ(vertices[4].deg.degree_undirected, 2);
-  EXPECT_EQ(vertices[4].deg.degree_head, 0);
-  EXPECT_EQ(vertices[4].deg.degree_tail, 0);
+  EXPECT_EQ(g.vertices[4].degree_undirected, 2);
+  EXPECT_EQ(g.vertices[4].degree_head, 0);
+  EXPECT_EQ(g.vertices[4].degree_tail, 0);
 }
 
 TEST(GraphTest, Clear) {
@@ -170,14 +164,13 @@ TEST(GraphTest, PermuteIsomorphic) {
   Graph g = get_T3();
   Graph h;
   int p[5]{0, 1, 2, 3, 4};
-  GraphInvariants gi;
   do {
     g.permute(p, h);
     EXPECT_TRUE(g.is_isomorphic_slow(h));
     EXPECT_TRUE(h.is_isomorphic_slow(g));
 
     EXPECT_EQ(g.graph_hash, h.graph_hash);
-    h.canonicalize(gi);
+    h.canonicalize();
     EXPECT_TRUE(h.is_isomorphic(g));
     EXPECT_EQ(g.edge_count, 4);
     EXPECT_EQ(g.undirected_edge_count, 2);
@@ -186,8 +179,7 @@ TEST(GraphTest, PermuteIsomorphic) {
 
 TEST(GraphTest, PermuteCanonical) {
   Graph g = get_T3();
-  GraphInvariants gi;
-  g.canonicalize(gi);
+  g.canonicalize();
   Graph h;
   int p[5]{0, 1, 2, 3, 4};
   g.permute_canonical(p, h);
@@ -200,8 +192,7 @@ TEST(GraphTest, PermuteCanonical2) {
   Graph::set_global_graph_info(2, 4);
   Graph h, f;
   Graph g = parse_edges("{03, 12, 02>2, 13>3}");
-  GraphInvariants gi;
-  g.canonicalize(gi);
+  g.canonicalize();
 
   int p[4]{0, 1, 3, 2};
   g.permute_canonical(p, h);
@@ -212,6 +203,10 @@ TEST(GraphTest, PermuteCanonical2) {
 
 TEST(GraphTest, Canonicalize) {
   Graph g = get_T3();
+  for (int v = 0; v < 4; v++) {
+    EXPECT_GE(g.vertices[v].get_hash(), g.vertices[v + 1].get_hash());
+  }
+
   Graph h = get_T3();
 
   EXPECT_TRUE(g.is_canonical);
@@ -223,35 +218,29 @@ TEST(GraphTest, Canonicalize) {
   EXPECT_TRUE(g.is_identical(h));
 
   // Canonicalization should be idempotent.
-  GraphInvariants gi;
-  h.canonicalize(gi);
+  h.canonicalize();
   EXPECT_TRUE(h.is_canonical);
   EXPECT_EQ(g.graph_hash, h.graph_hash);
   EXPECT_TRUE(h.is_isomorphic(g));
-
-  for (int v = 0; v < 4; v++) {
-    EXPECT_GE(gi.vertices[v].get_hash(), gi.vertices[v + 1].get_hash());
-  }
 }
 
 TEST(GraphTest, Canonicalize2) {
   Graph::set_global_graph_info(3, 7);
   Graph g = parse_edges("{235, 345>4, 245, 456>4}");
-  GraphInvariants gi;
-  g.generate_graph_hash(gi);
+  g.generate_graph_hash();
 
-  EXPECT_EQ(gi.vertices[0].deg.get_degrees(), 0);
-  EXPECT_EQ(gi.vertices[1].deg.get_degrees(), 0);
-  EXPECT_EQ(gi.vertices[2].deg.get_degrees(), 0x02);
+  EXPECT_EQ(g.vertices[0].get_degrees(), 0);
+  EXPECT_EQ(g.vertices[1].get_degrees(), 0);
+  EXPECT_EQ(g.vertices[2].get_degrees(), 0x02);
 
   Graph h = g;
-  h.canonicalize(gi);
+  h.canonicalize();
   EXPECT_EQ(g.graph_hash, h.graph_hash);
   EXPECT_TRUE(h.is_canonical);
 
   Graph f = get_T3();
   Graph::set_global_graph_info(3, 7);
-  f.canonicalize(gi);
+  f.canonicalize();
   EXPECT_EQ(h.graph_hash, f.graph_hash);
 }
 
@@ -261,8 +250,7 @@ TEST(GraphTest, Canonicalize3) {
   g.add_edge(Edge(0b0101, UNDIRECTED));
   g.copy(&h);
 
-  GraphInvariants gi;
-  h.canonicalize(gi);
+  h.canonicalize();
   EXPECT_TRUE(h.is_canonical);
 }
 
@@ -271,8 +259,7 @@ Graph get_G4() {
   Graph g = parse_edges(
       "{0125>5, 0135>5, 0235>5, 0145>5, 1245>1, 0345>5, 2345, 0126>6, 0136>6, 1236>6, 0146>6, "
       "0246>6, 1246>6, 0346>6, 2356>2}");
-  GraphInvariants gi;
-  g.canonicalize(gi);
+  g.canonicalize();
   return g;
 }
 
@@ -280,11 +267,10 @@ TEST(GraphTest, Copy) {
   Graph g = get_T3();
   g.add_edge(Edge(0b0111, UNDIRECTED));
 
-  GraphInvariants gi;
-  g.generate_graph_hash(gi);
+  g.generate_graph_hash();
   Graph h;
   g.copy(&h);
-  h.generate_graph_hash(gi);
+  h.generate_graph_hash();
 
   EXPECT_EQ(g.graph_hash, h.graph_hash);
   EXPECT_TRUE(h.is_isomorphic(g));
@@ -299,13 +285,12 @@ TEST(GraphTest, NonIsomorphic) {
   Graph h;
   g.copy(&h);
   h.add_edge(Edge(0b10110, UNDIRECTED));  // 124
-  GraphInvariants gi;
-  h.generate_graph_hash(gi);
+  h.generate_graph_hash();
 
   Graph f;
   g.copy(&f);
   f.add_edge(Edge(0b10110, 1));  // 124
-  f.generate_graph_hash(gi);
+  f.generate_graph_hash();
 
   EXPECT_NE(g.graph_hash, f.graph_hash);
   EXPECT_FALSE(f.is_isomorphic(g));
@@ -317,11 +302,10 @@ TEST(GraphTest, NonIsomorphicWithSameHash) {
   Graph::set_global_graph_info(3, 5);
   Graph g = parse_edges("{012>0, 013>1, 024, 134, 234}");
   Graph h = parse_edges("{012>1, 013>0, 024, 134, 234}");
-  GraphInvariants gi, hi;
 
   // The two graphs have the same hash, but not isomorphic
-  g.canonicalize(gi);
-  h.canonicalize(hi);
+  g.canonicalize();
+  h.canonicalize();
   EXPECT_FALSE(g.is_isomorphic(h));
   EXPECT_FALSE(h.is_isomorphic(g));
   EXPECT_EQ(g.graph_hash, h.graph_hash);
@@ -331,9 +315,8 @@ TEST(GraphTest, IsomorphicWithSameHash) {
   Graph::set_global_graph_info(2, 6);
   Graph g = parse_edges("{02, 12>1, 04>0, 05>5, 15>5, 35>5}");
   Graph h = parse_edges("{02, 12>1, 03>0, 05>5, 15>5, 45>5}");
-  GraphInvariants gi, hi;
-  g.canonicalize(gi);
-  h.canonicalize(hi);
+  g.canonicalize();
+  h.canonicalize();
   EXPECT_EQ(g.graph_hash, h.graph_hash);
   EXPECT_TRUE(g.is_identical(h));
   EXPECT_TRUE(h.is_isomorphic(g));
@@ -343,9 +326,8 @@ TEST(GraphTest, IsomorphicNotIdentical) {
   Graph::set_global_graph_info(3, 5);
   Graph g = parse_edges("{013>3, 023, 123, 014, 024>4, 124}");
   Graph h = parse_edges("{013, 023>3, 123, 014>4, 024, 124}");
-  GraphInvariants gi, hi;
-  g.canonicalize(gi);
-  h.canonicalize(hi);
+  g.canonicalize();
+  h.canonicalize();
 
   EXPECT_FALSE(g.is_identical(h));
   EXPECT_FALSE(h.is_identical(g));
@@ -369,9 +351,8 @@ TEST(GraphTest, Isomorphic_C) {
   EXPECT_TRUE(g.is_isomorphic_slow(h));
   EXPECT_TRUE(h.is_isomorphic_slow(g));
 
-  GraphInvariants gi;
-  g.canonicalize(gi);
-  h.canonicalize(gi);
+  g.canonicalize();
+  h.canonicalize();
   EXPECT_TRUE(g.is_isomorphic(h));
   EXPECT_TRUE(h.is_isomorphic(g));
 }
@@ -462,8 +443,7 @@ TEST(GraphTest, ContainsT3_H) {
 TEST(GraphTest, NotContainsT3) {
   Graph h;
   Graph g = parse_edges("{013, 123, 023}");
-  GraphInvariants gi;
-  g.generate_graph_hash(gi);
+  g.generate_graph_hash();
 
   int p[5]{0, 1, 2, 3, 4};
   do {

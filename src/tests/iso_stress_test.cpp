@@ -48,8 +48,7 @@ Graph IsomorphismStressTest::get_one_graph(const uint8 edge_state[MAX_EDGES]) {
   }
   // g.print_concise(std::cout);
   exit_assert(true, g.is_isomorphic_slow(g), g, g, "slow!=self");
-  GraphInvariants gi;
-  g.canonicalize(gi);
+  g.canonicalize();
   exit_assert(true, g.is_isomorphic_slow(g), g, g, "slow!=self after canonicalize");
   exit_assert(true, g.is_isomorphic(g), g, g, "iso!=self");
   return g;

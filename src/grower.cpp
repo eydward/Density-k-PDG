@@ -14,8 +14,7 @@ void Grower::grow() {
 
   // Initialize empty graph with k-1 vertices.
   Graph g;
-  GraphInvariants gi;
-  g.canonicalize(gi);
+  g.canonicalize();
   canonicals[Graph::K - 1].insert(g);
   Counters::observe_theta(g);
 
@@ -42,7 +41,6 @@ void Grower::grow_step(int n) {
   Counters::new_growth_step(n, canonicals[n - 1].size());
 
   // This data structure will be reused when processing the graphs.
-  GraphInvariants gi;
   Graph copy;
 
   for (const Graph& g : canonicals[n - 1]) {
@@ -78,7 +76,7 @@ void Grower::grow_step(int n) {
       if (n == Graph::N) {
         Counters::observe_theta(copy);
       } else {
-        copy.canonicalize(gi);
+        copy.canonicalize();
 
         if (!canonicals[n].contains(copy)) {
           canonicals[n].insert(copy);
