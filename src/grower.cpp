@@ -3,8 +3,13 @@
 #include "counters.h"
 #include "fraction.h"
 
-Grower::Grower(int num_worker_threads_, std::ostream* log_, std::ostream* log_detail_)
-    : num_worker_threads(num_worker_threads_), log(log_), log_detail(log_detail_) {}
+Grower::Grower(int num_worker_threads_, int restart_idx_, std::ostream* log_,
+               std::ostream* log_detail_)
+    : num_worker_threads(num_worker_threads_),
+      restart_idx(restart_idx_),
+      log(log_),
+      log_detail(log_detail_),
+      to_be_processed_id(0) {}
 
 // Find all canonical isomorphism class representations with up to max_n vertices.
 void Grower::grow() {
@@ -86,6 +91,12 @@ void Grower::enumerate_final_step() {
   for (const Graph& g : canonicals[Graph::N - 1]) {
     to_be_processed.push(g);
   }
+  if (restart_idx > 0) {
+    for (int i = 0; i < restart_idx; i++) {
+      to_be_processed.pop();
+      ++to_be_processed_id;
+    }
+  }
 
   if (num_worker_threads == 0) {
     worker_thread_main(0);
@@ -103,8 +114,9 @@ void Grower::enumerate_final_step() {
 
 void Grower::worker_thread_main(int thread_id) {
   EdgeGenerator edge_gen(Graph::K, Graph::N);
-  // This data structure will be reused when processing the graphs.
+  // These instances will be reused when processing the graphs.
   Graph base;
+  int base_graph_id;
   Graph copy;
   Graph min_theta_graph;
 
@@ -114,6 +126,7 @@ void Grower::worker_thread_main(int thread_id) {
       std::scoped_lock lock(queue_mutex);
       if (to_be_processed.empty()) return;
       base = to_be_processed.front();
+      base_graph_id = to_be_processed_id++;
       to_be_processed.pop();
       Counters::increment_growth_processed_graphs_in_current_step();
     }
@@ -144,8 +157,8 @@ void Grower::worker_thread_main(int thread_id) {
       std::scoped_lock lock(counters_mutex);
       Counters::observe_theta(min_theta_graph, graphs_processed);
       if (log_detail != nullptr) {
-        *log_detail << "---- T[" << thread_id << "] G: min_theta = " << min_theta.n << " / "
-                    << min_theta.d << " :\n  ";
+        *log_detail << "---- T[" << thread_id << "][" << base_graph_id
+                    << "] G: min_theta = " << min_theta.n << " / " << min_theta.d << " :\n  ";
         base.print_concise(*log_detail);
         *log_detail << "  ";
         min_theta_graph.print_concise(*log_detail);
@@ -168,7 +181,7 @@ void Grower::print_before_final() const {
                   << " --------\n";
       int idx = 0;
       for (const Graph& g : canonicals[i]) {
-        *log_detail << "  [" << ++idx << "] ";
+        *log_detail << "  [" << idx++ << "] ";
         g.print_concise(*log_detail);
       }
     }

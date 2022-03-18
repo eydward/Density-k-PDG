@@ -16,6 +16,8 @@ class Grower {
 
   // The number of worker threads to use in the final enumeration step.
   const int num_worker_threads;
+  // The starting index in the final enumeration phase.
+  const int restart_idx;
   // The log files.
   std::ostream* const log;
   std::ostream* const log_detail;
@@ -40,14 +42,20 @@ class Grower {
 
   void worker_thread_main(int thread_id);
 
-  std::mutex queue_mutex;
+  // The mutex to protect the counters under multi-threading.
   std::mutex counters_mutex;
+  // The mutex to protect the queue under multi-threading.
+  std::mutex queue_mutex;
+  // The queue of base graphs to be processed in the final enumeration phase.
+  // The worker threads will dequeue graphs from this queue to work on.
   std::queue<Graph> to_be_processed;
+  // The number of graphs that have been dequeued from the to_be_processed queue.
+  int to_be_processed_id;
 
  public:
   // Constructs the Grower object.
   // log_stream is used for status reporting and debugging purpose.
-  Grower(int num_worker_threads_ = 0, std::ostream* log_ = nullptr,
+  Grower(int num_worker_threads_ = 0, int restart_idx_ = 0, std::ostream* log_ = nullptr,
          std::ostream* log_detail_ = nullptr);
 
   // One canonical graphs with n vertices in each isomorphism class is in canonicals[n].

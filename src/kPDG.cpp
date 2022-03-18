@@ -3,11 +3,13 @@
 #include "grower.h"
 
 void print_usage() {
-  std::cout << "Usage: kPDG K N T\n"
+  std::cout << "Usage: kPDG K N T [restart_idx]\n"
             << "  Each argument is an integer, K and N are required, others optional.\n"
             << "  K = Number of vertices in each edge.\n"
             << "  N = Total number of vertices in a graph.  2 <= K <= N <= 7.\n"
-            << "  T = Number of worker threads. (0 means don't use threads).\n";
+            << "  T = Number of worker threads. (0 means don't use threads).\n"
+            << "  (optional) restart_idx = the starting index in the final enumeration phase,\n"
+            << "             can be used to restart a partially completed run.\n";
 }
 
 // Returns current time in YYYYMMDD-HHmmss format. Used in the log file name.
@@ -27,7 +29,9 @@ int main(int argc, char* argv[]) {
   int k = atoi(argv[1]);
   int n = atoi(argv[2]);
   int t = atoi(argv[3]);
-  if (k < 2 || n > 7 || k > n || t < 0 || t > 128) {
+  int restart_idx = (argc >= 5 ? atoi(argv[4]) : 0);
+
+  if (k < 2 || n > 7 || k > n || t < 0 || t > 128 || restart_idx < 0) {
     std::cout << "Invalid command line arguments. See usage for details.\n";
     print_usage();
     return -1;
@@ -37,7 +41,7 @@ int main(int argc, char* argv[]) {
 
   std::string log_file_name = "kPDG_v6run_" + std::to_string(Graph::K) + "_" +
                               std::to_string(Graph::N) + "_" + std::to_string(t) + "_" +
-                              get_current_time();
+                              std::to_string(restart_idx) + "_" + get_current_time();
   std::string arguments = "kPDG run arguments: K=" + std::to_string(Graph::K) +
                           ", N=" + std::to_string(Graph::N) +
                           ", TOTAL_EDGES=" + std::to_string(Graph::TOTAL_EDGES) +
@@ -51,7 +55,7 @@ int main(int argc, char* argv[]) {
 
   Counters::initialize(&log);
 
-  Grower s(t, &log, &detail_log);
+  Grower s(t, restart_idx, &log, &detail_log);
   s.grow();
 
   std::cout << "\nALL DONE. Final result:\n";
