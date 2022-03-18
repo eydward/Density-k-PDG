@@ -31,13 +31,11 @@ test --test_output=errors
 ## Usage
 Run all commands in the project root directory. 
 * To execute all unit tests: `bazel test ...`
-* To run the program in DEBUG mode (slow, for debugging only): `bazel run -c dbg src:kPDG <K> <N> <C>` 
-* To run the program in OPTIMIZED mode (fast): `bazel run -c opt src:kPDG <K> <N> <C>`
-* Alternatively, run `bazel build -c opt ...` and then find the executable in `bazel-out\src\` and execute it manually with `kPDG <K> <N> <C>`.
+* To run the program in DEBUG mode (slow, for debugging only): `bazel run -c dbg src:kPDG <K> <N> <T>` 
+* To run the program in OPTIMIZED mode (fast): `bazel run -c opt src:kPDG <K> <N> <T>`
+* Alternatively, run `bazel build -c opt ...` and then find the executable in `bazel-out\src\` and execute it manually with `kPDG <K> <N> <T>`.
 * 
-`K` and `N` are defined above. `C` is the number of vertices in computing the codegree info in graph hashing. 0 means no codegree info is used. 
-
-Note the code currently is single-threaded, doesn't take advantage of multi-core machines and certainly not capable to run in distributed environment. This is TODO. 
+`K` and `N` are defined above. `T` is the number worker threads (to maximimze throughput, use the number of CPUs on the computer).
 
 ## Testing and Verification
 We use the following steps to verify the correctness of the algorithm:
@@ -55,7 +53,6 @@ All source code are in the `src` directory.
 - `permutator.h, .cpp`: utility function to generate all permutations with specified ranges.
 - `fraction.h, .cpp`: simple implementation of a fraction. (We store the theta value as a fraction).
 - `counters.h, .cpp`: the header and implementation of a bunch of statistical counters. The minimum theta value is stored here with the graph producing it. Also a bunch of data used to track the performance of the algorithm.
-- `allocator.h, .cpp`: a simple memory allocator to create Graph objects. We used to store the Graph object inline inside `std::unordered_set` but when it grows hundreds of millions of entries and many GB of data, the performance becomes really bad, so we use this allocator and only put pointers in `std::unordered_set` in the Grower implementation.
 - `edge_gen.h, cpp`: utility to generate edge sets to be added to an existing graph, in order to grow the search tree. 
 
 ## Algorithm Design Summary
@@ -64,7 +61,7 @@ We use a simple idea to grow the search tree while trying to avoid unnecessary w
 
 1. Start with `K-1` vertices `{0,...,K-2}` and 0 edge. This is the only graph in `canonicals[K-1]`.
 2. Let `n = K`.  Let `canonicals[n]` be empty set. 
-4. Repeat until `n > N`:
+3. Repeat for `n in {K, K+1, ..., N-1}`:
     - Add vertex `n-1` to the vertex set.
     - General all edge candidates that goes through the new vertex, by finding all `\binom{n-1}{k-1}` vertex sets without vertex `n-1`, and adding vertex `n-1` to each edge. (This is in `initialize()` in `edge_gen.cpp`.)
     - For each graph `g` in the `canonicals[n-1]` set, we want to add all possible combinations of the edge candidates (`(K+2)^\binom{n-1}{k-1}-1` in total) to `g` and see if we can generate additional graphs that are not isomorphic to anything already in the canonical set. This is done in `next()` in `edge_gen.cpp`. Basically run a `\binom{n-1}{k-1}` digit counter, the value of each digit goes from `0` to `K+1`. `0` means the corresponding edge is not in the set to be added to `g`. `1` means the corresponding edge is in the set to be added to `g`, as an undirected edge. `>=2` means the corresponding edge is in the set to be added to `g`, as a directed edge, with the value indicating the head. For example if the edge candidates has `6` edges, then we run a 6-digit counter: `000001`, `000002`, ... , `00000(K+1)`, `000010`, `000011`, ... `(K+1)(K+1)(K+1)(K+1)(K+1)(K+1)`. And each counter value corresponds to a set of edges to be added to `g`.
@@ -72,11 +69,17 @@ We use a simple idea to grow the search tree while trying to avoid unnecessary w
         * If it contains `T_k` as a subgraph, ignore it and move on to the next edge set from the edge generator.
         * If it's `T_k`-free, canonicalize it (explained below), and check if it is isomorphic to some graph already stored in `canonicals[n]`. If it's not isomorphic to any existing graph, add it to `canonicals[n]`. Here we also check if the new graph gives us a lower theta value than previously observed, if so remembers the theta value, and the graph that produced it. 
     - As an important optimization, if `g` together with an edge set contains `T_k` as a subgraph, then g together with any superset of that edge set also contains `T_k`. So we should skip checking those edge sets. There is no great way to do this in the most general way, but a simple optimization that is reasonably effective is to skip the "lower" edges. Take the 6-edge example from the above. Let's say certain direction of edge 2 and edge 3 gives us a graph that contains T_k, where the counter value is `003400`. Then in theory we can skip all `xy34zw` for all values of `x,y,z,w`. That's hard to do, but we can easily skip all `0034zw`. This is implemented in `notify_contain_tk_skip()` in `edge_gen.cpp`.
+4. Now we have accumulated one graph in each isomorphism class for graphs with `N-1` vertices. Start the final enumeration phase. This is essentially same as step 3 above, except for the fact that we don't need to store any generated graph, therefore there is no need to either canonicalize the graph or check for isomorphisms. We just need to check whether the generated graph is `T_k`-free, and record the running minimum theta (and the graph that generates the minimum theta). 
+    - Note in this step we create a pool of worker threads (controlled by the command line argument). Each worker thread takes one base graph from the queue (obtained from step 3), and add edges to generate graphs on the base. It has it's own instance of EdgeGenerator to do this. And it accumulates the min theta value locally, until all graphs are generated on the base. It then push the min theta to the global Counters.
 
 An optimization idea, not yet implemented: if we precompute the automorphism group of each graph in `canonicals[n-1]`, before the edge set generation. Then for all vertex permutations that are automorphisms of `g`, we only need to try the edge sets on them once. This is on my list to implement.
 
 ### Graph Data Structure
-The goal is to store the graph using least number of bytes possible, for two reasons: (1) I run out of memory even on a desktop computer with 64GB memory when computing for `K=4,N=7`. (2) Smaller the data structure means better cache efficiency and faster execution time. Everything described in this section is in `graph.h`. An edge is stored in a 16-bit struct. 8-bit is used to store the vertex set, by using bit-mask (e.g. binary `001101` means vertex set `{0, 2, 3}`). The other 8-bit is used to store the head of the edge. `0xFF` means undirected, while other value `n` means the head is `n`.
+The goal of the Graph data structure is to enable fast operations, especially the following list of operations that must be repeated many times:
+* Copying a base graph to a new instance, and add edges in the new instance.
+* `T_k`-free check.
+* Isomorphism check.
+To achieve the goal, the Graph struct contains store the graph using least number of bytes possible, for two reasons: (1) I run out of memory even on a desktop computer with 64GB memory when computing for `K=4,N=7`. (2) Smaller the data structure means better cache efficiency and faster execution time. Everything described in this section is in `graph.h`. An edge is stored in a 16-bit struct. 8-bit is used to store the vertex set, by using bit-mask (e.g. binary `001101` means vertex set `{0, 2, 3}`). The other 8-bit is used to store the head of the edge. `0xFF` means undirected, while other value `n` means the head is `n`.
 
 We allow at most 35 edges and embed this edge array directly inside the `Graph` struct, to avoid another heap allocation and a pointer. This means we can run all K value for N<=7, but only some K values for N=8.
 
