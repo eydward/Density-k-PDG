@@ -60,7 +60,7 @@ Graph parse_edges(const std::string& text) {
   return g;
 }
 
-TEST(GraphTest, Init) {
+TEST(GraphTest, GraphDataStructure) {
   Graph::set_global_graph_info(3, 7);
   Graph g = parse_edges("{234, 156>5, 123>2, 013}");
 
@@ -78,22 +78,34 @@ TEST(GraphTest, Init) {
   EXPECT_EQ(g.edges[3].head_vertex, UNDIRECTED);
   EXPECT_EQ(serialize_edges(g), "{234, 156>5, 123>2, 013}");
 
-  g.generate_graph_hash();
-  EXPECT_EQ(g.vertices[0].degree_undirected, 1);
+  g.canonicalize();
+  EXPECT_EQ(g.vertices[0].degree_tail, 2);
   EXPECT_EQ(g.vertices[0].degree_head, 0);
-  EXPECT_EQ(g.vertices[0].degree_tail, 0);
+  EXPECT_EQ(g.vertices[0].degree_undirected, 1);
 
-  EXPECT_EQ(g.vertices[1].degree_undirected, 1);
+  EXPECT_EQ(g.vertices[1].degree_tail, 1);
   EXPECT_EQ(g.vertices[1].degree_head, 0);
-  EXPECT_EQ(g.vertices[1].degree_tail, 2);
+  EXPECT_EQ(g.vertices[1].degree_undirected, 2);
 
-  EXPECT_EQ(g.vertices[2].degree_undirected, 1);
-  EXPECT_EQ(g.vertices[2].degree_head, 1);
-  EXPECT_EQ(g.vertices[2].degree_tail, 0);
+  EXPECT_EQ(g.vertices[2].degree_tail, 1);
+  EXPECT_EQ(g.vertices[2].degree_head, 0);
+  EXPECT_EQ(g.vertices[2].degree_undirected, 0);
 
-  EXPECT_EQ(g.vertices[3].degree_undirected, 2);
-  EXPECT_EQ(g.vertices[3].degree_head, 0);
-  EXPECT_EQ(g.vertices[3].degree_tail, 1);
+  EXPECT_EQ(g.vertices[3].degree_tail, 0);
+  EXPECT_EQ(g.vertices[3].degree_head, 1);
+  EXPECT_EQ(g.vertices[3].degree_undirected, 1);
+
+  EXPECT_EQ(g.vertices[4].degree_tail, 0);
+  EXPECT_EQ(g.vertices[4].degree_head, 1);
+  EXPECT_EQ(g.vertices[4].degree_undirected, 0);
+
+  EXPECT_EQ(g.vertices[5].degree_tail, 0);
+  EXPECT_EQ(g.vertices[5].degree_head, 0);
+  EXPECT_EQ(g.vertices[5].degree_undirected, 1);
+
+  EXPECT_EQ(g.vertices[6].degree_tail, 0);
+  EXPECT_EQ(g.vertices[6].degree_head, 0);
+  EXPECT_EQ(g.vertices[6].degree_undirected, 1);
 }
 
 // Utility function to create and initialize T_3.
@@ -119,7 +131,7 @@ TEST(GraphTest, T3) {
   EXPECT_EQ(g.edges[3].head_vertex, UNDIRECTED);
   EXPECT_EQ(serialize_edges(g), "{013>3, 023>3, 014, 034}");
 
-  g.generate_graph_hash();
+  g.canonicalize();
 
   EXPECT_EQ(g.vertices[0].degree_undirected, 2);
   EXPECT_EQ(g.vertices[0].degree_head, 0);
@@ -165,7 +177,7 @@ TEST(GraphTest, PermuteIsomorphic) {
   Graph h;
   int p[5]{0, 1, 2, 3, 4};
   do {
-    g.permute(p, h);
+    g.permute_for_testing(p, h);
     EXPECT_TRUE(g.is_isomorphic_slow(h));
     EXPECT_TRUE(h.is_isomorphic_slow(g));
 
@@ -227,11 +239,13 @@ TEST(GraphTest, Canonicalize) {
 TEST(GraphTest, Canonicalize2) {
   Graph::set_global_graph_info(3, 7);
   Graph g = parse_edges("{235, 345>4, 245, 456>4}");
-  g.generate_graph_hash();
+  g.canonicalize();
 
-  EXPECT_EQ(g.vertices[0].get_degrees(), 0);
-  EXPECT_EQ(g.vertices[1].get_degrees(), 0);
-  EXPECT_EQ(g.vertices[2].get_degrees(), 0x02);
+  EXPECT_EQ(g.vertices[0].get_degrees(), 0x020002);
+  EXPECT_EQ(g.vertices[1].get_degrees(), 0x010001);
+  EXPECT_EQ(g.vertices[2].get_degrees(), 0x010000);
+  EXPECT_EQ(g.vertices[3].get_degrees(), 0x000201);
+  EXPECT_EQ(g.vertices[4].get_degrees(), 0x000002);
 
   Graph h = g;
   h.canonicalize();
@@ -267,10 +281,10 @@ TEST(GraphTest, Copy) {
   Graph g = get_T3();
   g.add_edge(Edge(0b0111, UNDIRECTED));
 
-  g.generate_graph_hash();
+  g.canonicalize();
   Graph h;
   g.copy(&h);
-  h.generate_graph_hash();
+  h.canonicalize();
 
   EXPECT_EQ(g.graph_hash, h.graph_hash);
   EXPECT_TRUE(h.is_isomorphic(g));
@@ -285,12 +299,12 @@ TEST(GraphTest, NonIsomorphic) {
   Graph h;
   g.copy(&h);
   h.add_edge(Edge(0b10110, UNDIRECTED));  // 124
-  h.generate_graph_hash();
+  h.canonicalize();
 
   Graph f;
   g.copy(&f);
   f.add_edge(Edge(0b10110, 1));  // 124
-  f.generate_graph_hash();
+  f.canonicalize();
 
   EXPECT_NE(g.graph_hash, f.graph_hash);
   EXPECT_FALSE(f.is_isomorphic(g));
@@ -363,7 +377,7 @@ TEST(GraphTest, ContainsT3) {
 
   int p[5]{0, 1, 2, 3, 4};
   do {
-    g.permute(p, h);
+    g.permute_for_testing(p, h);
     EXPECT_TRUE(h.contains_Tk(p[0]));
     EXPECT_TRUE(h.contains_Tk(p[1]));
     EXPECT_FALSE(h.contains_Tk(p[2]));
@@ -443,11 +457,11 @@ TEST(GraphTest, ContainsT3_H) {
 TEST(GraphTest, NotContainsT3) {
   Graph h;
   Graph g = parse_edges("{013, 123, 023}");
-  g.generate_graph_hash();
+  g.canonicalize();
 
   int p[5]{0, 1, 2, 3, 4};
   do {
-    g.permute(p, h);
+    g.permute_for_testing(p, h);
     for (int i = 0; i < 5; i++) {
       EXPECT_FALSE(h.contains_Tk(i));
     }
@@ -486,7 +500,7 @@ TEST(GraphTest, Theta) {
 
 TEST(GraphTest, IsomorphicStress) {
   for (int diff = 0; diff <= 3; diff++) {
-    for (int n = diff + 2; n <= 4; n++) {
+    for (int n = diff + 2; n <= 3; n++) {
       int k = n - diff;
       IsomorphismStressTest t(k, n);
       t.run();

@@ -53,28 +53,16 @@ void VertexSignature::print_vertices(std::ostream& os,
         os << ", ";
       }
       is_first = false;
-      os << "V[" << v << "]=(" << static_cast<int>(vertices[v].degree_undirected) << ", "
+      os << "V[" << v << "]=(" << static_cast<int>(vertices[v].vertex_id) << ", "
+         << static_cast<int>(vertices[v].degree_undirected) << ", "
          << static_cast<int>(vertices[v].degree_head) << ", "
-         << static_cast<int>(vertices[v].degree_tail) << ", " << vertices[v].neighbor_hash << ")";
+         << static_cast<int>(vertices[v].degree_tail) << ", " << std::hex
+         << vertices[v].get_degrees() << ", " << vertices[v].neighbor_hash << ", " << std::hex
+         << vertices[v].get_hash() << std::dec << ")";
     }
   }
   os << "}\n";
 }
-
-// // Utility function to print an degree info array to the output stream, for debugging purpose.
-// void DegreeInfo::print_degree_info(std::ostream& os, const DegreeInfo degs[MAX_VERTICES], int m)
-// {
-//   os << "  {";
-//   for (int i = 0; i < m; i++) {
-//     if (i > 0) {
-//       os << ", ";
-//     }
-//     os << "d[" << i << "]=(" << static_cast<int>(degs[i].degree_undirected) << ", "
-//        << static_cast<int>(degs[i].degree_head) << ", " << static_cast<int>(degs[i].degree_tail)
-//        << ")";
-//   }
-//   os << "}\n";
-// }
 
 // Global to all graph instances: number of vertices in each edge.
 int Graph::K = 0;
@@ -141,12 +129,6 @@ void Graph::add_edge(Edge edge) {
   }
 }
 
-void Graph::generate_graph_hash() {
-  compute_vertex_signature();
-  uint32 hash = compute_graph_hash();
-  graph_hash = hash;
-}
-
 // Initializes everything in this graph from the edge set.
 void Graph::compute_vertex_signature() {
   Counters::increment_compute_vertex_signatures();
@@ -155,7 +137,6 @@ void Graph::compute_vertex_signature() {
   for (int v = 0; v < MAX_VERTICES; v++) {
     vertices[v].reset(v);
   }
-
   // Compute signatures of vertices, first pass (degrees, but not hash code).
   // As a side product, also gather the neighbor vertex sets of each vertex.
   uint8 neighbors_undirected[MAX_VERTICES]{0};
@@ -235,7 +216,7 @@ uint32 Graph::compute_graph_hash() const {
 // The first parameter specifies the permutation. For example p={1,2,0,3} means
 //  0->1, 1->2, 2->0, 3->3.
 // The second parameter is the resulting graph.
-void Graph::permute(int p[], Graph& g) const {
+void Graph::permute_for_testing(int p[], Graph& g) const {
   Counters::increment_graph_permute_ops();
 
   // Copy the edges with permutation.
@@ -255,7 +236,8 @@ void Graph::permute(int p[], Graph& g) const {
   g.edge_count = edge_count;
   g.undirected_edge_count = undirected_edge_count;
   g.finalize_edges();
-  g.generate_graph_hash();
+  g.compute_vertex_signature();
+  g.graph_hash = compute_graph_hash();
 }
 
 void Graph::permute_edges(int p[], Graph& g) const {

@@ -39,12 +39,6 @@ struct Edge {
 };
 static_assert(sizeof(Edge) == 2);
 
-// Prints the array of degree info to the stream, for debugging purpose.
-// m is the number of degree info to print in the given array.
-//  static void print_degree_info(std::ostream& os, const DegreeInfo degs[MAX_VERTICES], int m);
-
-// static_assert(sizeof(DegreeInfo) == 4);
-
 // Represent the characteristics of a vertex.
 // Both get_degrees() and get_hash() are invariant under graph isomorphisms.
 struct VertexSignature {
@@ -71,12 +65,12 @@ struct VertexSignature {
 
   // Utility function to print an degree info array to the output stream, for debugging purpose.
   uint32 get_degrees() const {
-    return static_cast<uint32>(degree_undirected) | static_cast<uint32>(degree_head) << 8 |
-           static_cast<uint32>(degree_tail) << 16;
+    return static_cast<uint32>(degree_undirected) | (static_cast<uint32>(degree_head) << 8) |
+           (static_cast<uint32>(degree_tail) << 16);
   }
 
   // Returns a 32-bit hash code to represent the data.
-  uint64 get_hash() const { return neighbor_hash | static_cast<uint64>(get_degrees()) << 32; }
+  uint64 get_hash() const { return neighbor_hash | (static_cast<uint64>(get_degrees()) << 32); }
 
   // Utility function to print an array of VertexSignatures to the given output stream,
   // for debugging purpose.
@@ -164,15 +158,12 @@ struct Graph {
   void permute_edges(int p[], Graph& g) const;
 
  public:
-  // Uses the graph invariants to generate the hash code for the graph and put it in the
-  // `graph_hash` field.
-  void generate_graph_hash();
-
   // Returns a graph isomorphic to this graph, by applying vertex permutation.
   // The first parameter specifies the permutation. For example p={1,2,0,3} means
   //  0->1, 1->2, 2->0, 3->3.
   // The second parameter is the resulting graph.
-  void permute(int p[], Graph& g) const;
+  // This is only used in unit tests to verify the correctness of implementation of other functions.
+  void permute_for_testing(int p[], Graph& g) const;
 
   // Similar to permute(), except the current graph must be canonicalized, and the permutation
   // is guaranteed to perserve that.
