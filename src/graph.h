@@ -4,6 +4,7 @@
 
 #include "fraction.h"
 
+using int8 = int8_t;
 using uint8 = uint8_t;
 using uint16 = uint16_t;
 using uint32 = uint32_t;
@@ -35,7 +36,8 @@ struct Edge {
   // Utility function to print an edge array to the given output stream, for debugging purpose.
   // Undirected edge is printed as "013" (for vertex set {0,1,3}),
   // and directed edge is printed as "013>1" (for vertex set {0,1,3} and head vertex 1).
-  static void print_edges(std::ostream& os, uint8 edge_count, const Edge edges[]);
+  // If aligned==true, pad the undirected edges, so the print is easier to read.
+  static void print_edges(std::ostream& os, uint8 edge_count, const Edge edges[], bool aligned);
 };
 static_assert(sizeof(Edge) == 2);
 
@@ -179,9 +181,13 @@ struct Graph {
   bool contains_Tk(int v) const;
 
   // Print the graph to the output stream for debugging purpose.
-  void print_concise(std::ostream& os) const;
+  // If aligned==true, pad the undirected edges, so the print is easier to read.
+  void print_concise(std::ostream& os, bool aligned) const;
   // Print the graph to the console for debugging purpose.
   void print() const;
+
+  // Used to establish a deterministic order when growing the search tree.
+  bool operator<(const Graph& other) const;
 
  private:
   // Call either this function, or canonicalize(), after all edges are added. This allows

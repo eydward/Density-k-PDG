@@ -13,7 +13,7 @@ using namespace testing;
 // Returns the text representation of the edges in the graph.
 std::string serialize_edges(const Graph& g) {
   std::stringstream oss;
-  g.print_concise(oss);
+  g.print_concise(oss, false);
   std::string text = oss.str();
   throw_assert(text[text.length() - 1] == '\n');
   return text.substr(0, text.length() - 1);

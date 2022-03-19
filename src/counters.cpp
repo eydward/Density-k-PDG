@@ -84,7 +84,7 @@ void Counters::print_counters_to_stream(std::ostream& os) {
      << std::chrono::duration_cast<std::chrono::milliseconds>(end - start_time).count() << "ms"
      << "\nCurrent minimum theta = " << min_theta.n << " / " << min_theta.d
      << "\nProduced by graph: ";
-  min_theta_graph.print_concise(os);
+  min_theta_graph.print_concise(os, false);
 
   if (growth_num_base_graphs_in_final_step > 0) {
     os << "Base graphs processed / total = " << growth_processed_graphs_in_current_step << " / "

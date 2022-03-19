@@ -3,6 +3,14 @@
 #include "counters.h"
 #include "fraction.h"
 
+// Custom hash and compare for the Graph type. Treat isomorphic graphs as being equal.
+struct GraphHasher {
+  size_t operator()(const Graph& g) const { return g.get_graph_hash(); }
+};
+struct GraphComparer {
+  bool operator()(const Graph& g, const Graph& h) const { return g.is_isomorphic(h); }
+};
+
 Grower::Grower(int num_worker_threads_, int restart_idx_, std::ostream* log_,
                std::ostream* log_detail_)
     : num_worker_threads(num_worker_threads_),
@@ -20,49 +28,38 @@ void Grower::grow() {
   }
 
   // Initialize empty graph with k-1 vertices.
+  std::vector<Graph> collected_graphs[MAX_VERTICES];
   Graph g;
   g.canonicalize();
-  canonicals[Graph::K - 1].insert(g);
+  collected_graphs[Graph::K - 1].push_back(g);
   Counters::observe_theta(g);
 
   // First grow to N-1 vertices, accumulate one graph from each isomorphic class.
   for (int n = Graph::K; n < Graph::N; n++) {
-    grow_step(n);
+    collected_graphs[n] = grow_step(n, collected_graphs[n - 1]);
   }
   Counters::print_counters();
-  print_before_final();
+  print_before_final(collected_graphs);
   // Finally, enumerate all graphs with N vertices, no need to store graphs.
-  enumerate_final_step();
+  enumerate_final_step(collected_graphs[Graph::N - 1]);
 }
 
 // Constructs all non-isomorphic graphs with n vertices that are T_k-free,
 // and add them to the canonicals. Before calling this, all such graphs
 // with <n vertices must already be in the canonicals.
 // Note all edges added in this step contains vertex (n-1).
-void Grower::grow_step(int n) {
+std::vector<Graph> Grower::grow_step(int n, const std::vector<Graph>& base_graphs) {
   assert(n < Graph::N);
   EdgeGenerator edge_gen(Graph::K, n);
-  Counters::new_growth_step(n, canonicals[n - 1].size());
+  Counters::new_growth_step(n, base_graphs.size());
+  std::unordered_set<Graph, GraphHasher, GraphComparer> results;
 
   // This data structure will be reused when processing the graphs.
   Graph copy;
 
-  for (const Graph& g : canonicals[n - 1]) {
+  for (const Graph& g : base_graphs) {
     Counters::increment_growth_processed_graphs_in_current_step();
     edge_gen.reset_enumeration();
-
-#if false
-    int perm[MAX_VERTICES];
-    for (int v = 0; v < MAX_VERTICES; v++) perm[v] = v;
-    Graph h;
-    while (std::next_permutation(perm, perm + n - 1)) {
-      g->permute_canonical(perm, h);
-      if (g->is_identical(h)) {
-        Counters::increment_growth_automorphisms_found();
-        edge_gen.notify_automorphism(perm);
-      }
-    };
-#endif
 
     // Loop through all ((K+1)^\binom{n-1}{k-1} - 1) edge combinations, add them to g, and check
     // add to canonicals unless it's isomorphic to an existing one.
@@ -78,17 +75,21 @@ void Grower::grow_step(int n) {
 
       copy.canonicalize();
 
-      if (!canonicals[n].contains(copy)) {
-        canonicals[n].insert(copy);
+      if (!results.contains(copy)) {
+        results.insert(copy);
         Counters::observe_theta(copy);
       }
     }
   }
+
+  std::vector<Graph> new_graphs(results.cbegin(), results.cend());
+  std::sort(new_graphs.begin(), new_graphs.end());
+  return new_graphs;
 }
 
-void Grower::enumerate_final_step() {
-  Counters::enter_final_step(canonicals[Graph::N - 1].size());
-  for (const Graph& g : canonicals[Graph::N - 1]) {
+void Grower::enumerate_final_step(const std::vector<Graph>& base_graphs) {
+  Counters::enter_final_step(base_graphs.size());
+  for (const Graph& g : base_graphs) {
     to_be_processed.push(g);
   }
   if (restart_idx > 0) {
@@ -159,47 +160,46 @@ void Grower::worker_thread_main(int thread_id) {
       if (log_detail != nullptr) {
         *log_detail << "---- T[" << thread_id << "][" << base_graph_id
                     << "] G: min_theta = " << min_theta.n << " / " << min_theta.d << " :\n  ";
-        base.print_concise(*log_detail);
+        base.print_concise(*log_detail, true);
         *log_detail << "  ";
-        min_theta_graph.print_concise(*log_detail);
+        min_theta_graph.print_concise(*log_detail, true);
         log_detail->flush();
       }
     }
   }
 }
 
-// Print the content of the canonicals after the growth to console and log files.
-void Grower::print_before_final() const {
-  print_state_to_stream(std::cout);
+// Print the content of the collected graphs after the growth to console and log files.
+void Grower::print_before_final(const std::vector<Graph> collected_graphs[MAX_VERTICES]) const {
+  print_state_to_stream(std::cout, collected_graphs);
   if (log != nullptr) {
-    print_state_to_stream(*log);
+    print_state_to_stream(*log, collected_graphs);
     log->flush();
   }
   if (log_detail != nullptr) {
     for (int i = 0; i < Graph::N; i++) {
-      *log_detail << "-------- Accumulated canonicals[order=" << i << "] : " << canonicals[i].size()
-                  << " --------\n";
+      *log_detail << "-------- Accumulated canonicals[order=" << i
+                  << "] : " << collected_graphs[i].size() << " --------\n";
       int idx = 0;
-      for (const Graph& g : canonicals[i]) {
+      for (const Graph& g : collected_graphs[i]) {
         *log_detail << "  [" << idx++ << "] ";
-        g.print_concise(*log_detail);
+        g.print_concise(*log_detail, true);
       }
     }
     log_detail->flush();
   }
+}
+void Grower::print_state_to_stream(std::ostream& os,
+                                   const std::vector<Graph> collected_graphs[MAX_VERTICES]) const {
+  os << "Growth phase completed. State:\n";
+  for (int i = 0; i < Graph::N; i++) {
+    os << "  order=" << i << " : collected= " << collected_graphs[i].size() << "\n";
+  }
+  os << "\nStarting final enumeration phase...\n";
 }
 void Grower::print_config(std::ostream& os) const {
   os << "Searching for all T_k-free k-PDGs\n    K= " << Graph::K
      << " (number of vertices in each edge)\n    N= " << Graph::N
      << " (total number of vertices in each graph)\n    E= " << MAX_EDGES
      << " (maximum possible number of edges in each graph)\n";
-}
-void Grower::print_state_to_stream(std::ostream& os) const {
-  os << "Growth phase completed. State:\n";
-  uint64 total_canonicals = 0;
-  for (int i = 0; i < Graph::N; i++) {
-    os << "  order=" << i << " : canonicals= " << canonicals[i].size() << "\n";
-    total_canonicals += canonicals[i].size();
-  }
-  os << "Total canonicals= " << total_canonicals << "\nStarting final enumeration phase...\n";
 }

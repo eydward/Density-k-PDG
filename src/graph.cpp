@@ -25,7 +25,7 @@ void print_vertices(std::ostream& os, uint8 vertices) {
 // Utility function to print an edge array to the given output stream.
 // Undirected edge is printed as "013" (for vertex set {0,1,3}),
 // and directed edge is printed as "013>1" (for vertex set {0,1,3} and head vertex 1).
-void Edge::print_edges(std::ostream& os, uint8 edge_count, const Edge edges[]) {
+void Edge::print_edges(std::ostream& os, uint8 edge_count, const Edge edges[], bool aligned) {
   os << "{";
   bool is_first = true;
   for (int i = 0; i < edge_count; i++) {
@@ -36,6 +36,8 @@ void Edge::print_edges(std::ostream& os, uint8 edge_count, const Edge edges[]) {
     print_vertices(os, edges[i].vertex_set);
     if (edges[i].head_vertex != UNDIRECTED) {
       os << ">" << static_cast<int>(edges[i].head_vertex);
+    } else if (aligned) {
+      os << "  ";
     }
   }
   os << "}\n";
@@ -466,13 +468,32 @@ bool Graph::contains_Tk(int v) const {
   return false;
 }
 
-void Graph::print_concise(std::ostream& os) const { Edge::print_edges(os, edge_count, edges); }
+// Used to establish a deterministic order when growing the search tree.
+// Since this is called infrequently, its speed is not important. We want deterministic behavior
+// and an intuitive ordering for human inspection of the detailed log.
+bool Graph::operator<(const Graph& other) const {
+  if (edge_count < other.edge_count) return true;
+  if (edge_count > other.edge_count) return false;
+  for (uint8 i = 0; i < edge_count; i++) {
+    if (edges[i].vertex_set < other.edges[i].vertex_set) return true;
+    if (edges[i].vertex_set > other.edges[i].vertex_set) return false;
+    if (static_cast<int8>(edges[i].head_vertex) < static_cast<int8>(other.edges[i].head_vertex))
+      return true;
+    if (static_cast<int8>(edges[i].head_vertex) > static_cast<int8>(other.edges[i].head_vertex))
+      return false;
+  }
+  return false;
+}
+
+void Graph::print_concise(std::ostream& os, bool aligned) const {
+  Edge::print_edges(os, edge_count, edges, aligned);
+}
 
 // Print the graph to the console for debugging purpose.
 void Graph::print() const {
   std::cout << "Graph ~ " << graph_hash << ", canonical=" << is_canonical
             << ", eg_cnt=" << (int)edge_count << ", undir_eg_cnt=" << (int)undirected_edge_count
             << ", \n  ";
-  print_concise(std::cout);
+  print_concise(std::cout, true);
   VertexSignature::print_vertices(std::cout, vertices);
 }

@@ -6,14 +6,6 @@
 // Grow set of non-isomorphic graphs from empty graph, by adding one vertex at a time.
 class Grower {
  private:
-  // Custom hash and compare for the Graph type. Treat isomorphic graphs as being equal.
-  struct GraphHasher {
-    size_t operator()(const Graph& g) const { return g.get_graph_hash(); }
-  };
-  struct GraphComparer {
-    bool operator()(const Graph& g, const Graph& h) const { return g.is_isomorphic(h); }
-  };
-
   // The number of worker threads to use in the final enumeration step.
   const int num_worker_threads;
   // The starting index in the final enumeration phase.
@@ -24,21 +16,25 @@ class Grower {
   // The worker threads used in the final enumeration phase.
   std::vector<std::thread> worker_threads;
 
-  // Constructs all non-isomorphic graphs with n vertices that are T_k-free,
-  // and add them to the canonicals. Before calling this, all such graphs
-  // with <n vertices must already be in the canonicals.
-  // Note all edges added in this step contains vertex (n-1).
-  // This is used to grow all graphs up to N-1 vertices.
-  void grow_step(int n);
+  // Returns a collection of graphs with n vertices that are T_k-free, one in each
+  // isomorphism class. Note all edges added in this step contains vertex (n-1).
+  // The second parameter is the collection of graphs collected from the previous step
+  // with (n-1) vertices.
+  //
+  // This function is called repeatedly to grow all graphs up to N-1 vertices.
+  std::vector<Graph> grow_step(int n, const std::vector<Graph>&);
 
   // Enumerate all graphs in the final step where all graphs have N vertices.
-  // We don't need to store any graph in this step.
-  void enumerate_final_step();
+  // We don't need to collect any graph in this step.
+  // The parameter is the collection of graphs collected from the last grow_step()
+  // with (N-1) vertices.
+  void enumerate_final_step(const std::vector<Graph>&);
 
   // Print the content of the canonicals after the growth to console and log files.
-  void print_before_final() const;
+  void print_before_final(const std::vector<Graph> collected_graphs[MAX_VERTICES]) const;
+  void print_state_to_stream(std::ostream& os,
+                             const std::vector<Graph> collected_graphs[MAX_VERTICES]) const;
   void print_config(std::ostream& os) const;
-  void print_state_to_stream(std::ostream& os) const;
 
   void worker_thread_main(int thread_id);
 
@@ -57,9 +53,6 @@ class Grower {
   // log_stream is used for status reporting and debugging purpose.
   Grower(int num_worker_threads_ = 0, int restart_idx_ = 0, std::ostream* log_ = nullptr,
          std::ostream* log_detail_ = nullptr);
-
-  // One canonical graphs with n vertices in each isomorphism class is in canonicals[n].
-  std::unordered_set<Graph, GraphHasher, GraphComparer> canonicals[MAX_VERTICES];
 
   // Find all canonical isomorphism class representations with up to max_n vertices.
   void grow();
