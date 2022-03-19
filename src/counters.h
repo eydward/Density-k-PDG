@@ -42,8 +42,6 @@ class Counters {
   static uint64 growth_vertex_count;
   static uint64 growth_total_graphs_in_current_step;
   static uint64 growth_accumulated_canonicals_in_current_step;
-  static uint64 growth_automorphisms_found;
-  static uint64 growth_automorphisms_vset_skips;
   static uint64 growth_num_base_graphs_in_final_step;
 
   // Prints the counter values the given output stream.
@@ -66,8 +64,6 @@ class Counters {
   static void increment_growth_processed_graphs_in_current_step() {
     ++growth_processed_graphs_in_current_step;
   }
-  static void increment_growth_automorphisms_found() { ++growth_automorphisms_found; }
-  static void increment_growth_automorphisms_vset_skips() { ++growth_automorphisms_vset_skips; }
 
   // Starting a new step in growth.
   static void new_growth_step(uint64 vertex_count, uint64 total_graphs_in_current_step);

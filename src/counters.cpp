@@ -25,8 +25,6 @@ bool Counters::has_printed = false;
 uint64 Counters::growth_vertex_count = 0;
 uint64 Counters::growth_total_graphs_in_current_step = 0;
 uint64 Counters::growth_accumulated_canonicals_in_current_step = 0;
-uint64 Counters::growth_automorphisms_found = 0;
-uint64 Counters::growth_automorphisms_vset_skips = 0;
 uint64 Counters::growth_num_base_graphs_in_final_step = 0;
 
 void Counters::initialize(std::ofstream* log_stream) {
@@ -107,7 +105,4 @@ void Counters::print_counters_to_stream(std::ostream& os) {
        << growth_processed_graphs_in_current_step << ", "
        << growth_accumulated_canonicals_in_current_step << ")\n";
   }
-  // os << "\nGrowth automorphism stats(found, vset skips)= (" << growth_automorphisms_found << ",
-  //  "
-  //  << growth_automorphisms_vset_skips << ")\n";
 }
