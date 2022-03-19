@@ -44,9 +44,6 @@ cc_binary(
     deps=[":iso_stress_test"],
     copts=["-std=c++20"],
     linkstatic=True,
-    features=[
-        "fully_static_link",
-    ],
 )
 
 cc_test(

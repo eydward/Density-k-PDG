@@ -73,7 +73,7 @@ int Graph::N = 0;
 // Global to all graph instances: number of edges in a complete graph.
 int Graph::TOTAL_EDGES = 0;
 // Global to all graph instances: pre-computed the vertex masks, used in various computations.
-VertexMask Graph::VERTEX_MASKS[MAX_VERTICES]{0};
+VertexMask Graph::VERTEX_MASKS[MAX_VERTICES + 1]{0};
 
 void Graph::set_global_graph_info(int k, int n) {
   K = k;

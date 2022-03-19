@@ -101,7 +101,7 @@ struct Graph {
   static int TOTAL_EDGES;
   // Global to all graph instances: pre-computed the vertex masks, used in
   // various computations including compute_codegree_signature().
-  static VertexMask VERTEX_MASKS[MAX_VERTICES];
+  static VertexMask VERTEX_MASKS[MAX_VERTICES + 1];
 
   // Set the values of K, N, and TOTAL_EDGES.
   static void set_global_graph_info(int k, int n);
