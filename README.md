@@ -1,6 +1,6 @@
 # Compute Turan Density Coefficient for k-PDG (k-uniform partially directed hypergraphs)
 
-## Preliminary Results (to be verified)
+## Results
 
 K = number of vertices in each edge
 
@@ -15,11 +15,29 @@ Values in the table : `$min_{|V(H)|=N, T_K \not\subseteq H} (1 - alpha(H)) / bet
 | 4   | 3/2 | 4/3   |     1 |       |       |       |
 | 5   | 5/3 | 5/3   |   5/4 |     1 |       |       |
 | 6   | 5/3 | 5/3   |   3/2 |   6/5 |     1 |       |
-| 7   | 7/4 | ?     | ?     |   7/5 |   7/6 |     1 |
-| 8   | 7/4 |  ?    | ?     |   ?   |   ?   |   8/7 |
+| 7   | 7/4 |  ?    |  ?    |   7/5 |   7/6 |     1 |
+| 8   | 7/4 |  ?    |  ?    |   ?   |   ?   |   8/7 |
 
+## Running the program
+The easiest way to run is to get the binaries from either `bin-linux` or `bin-windows` directories. Alternatively, you can build from source, see next section for details. To run the program:
 
-## Setup
+`  kPDG K N T`
+
+where `K`, `N` are explained above, and `T` is the number of threads in the final enumeration step (for the best performance, use the number of CPUs on the computer). If the program will run for a long time and there is a need to distribute the work to multiple computers, use
+
+`  kPDG K N T start_idx end_idx`
+
+where `start_idx` and `end_idx` specify the range of base graph ids in the final enumeration phase. For example for `K=4, N=7`, the final enumeration phase has 29276 base graphs. We can distribute this to 6 machines, with 
+
+```
+   kPDG K N T 0 5000
+   kPDG K N T 5000 10000
+   ... 
+   kPDG K N T 25000 30000
+```
+Note the `end_idx` is allowed to be larger than the number of available base graphs for convenience. To see how many base graphs are there, just run the program for a short period of time, and observe the output saying `Growth phase completed. State:` and take the last `collected` value. 
+
+## Development Environment Setup
 * In order to build and run the code, c++ 20 compatible compiler is required. My environment uses `gcc (Rev8, Built by MSYS2 project) 11.2.0`, but any recent release of gcc should work. To install gcc on Windows, follow instructions in this [section](https://code.visualstudio.com/docs/languages/cpp#_example-install-mingwx64), On Linux just run `sudo apt install build-essential`.
 * It also requires bazel (see https://bazel.build/install). My global bazel config is the following (will be different if you use Linux instead of Windows)
 ```
