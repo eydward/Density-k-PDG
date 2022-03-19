@@ -7,13 +7,13 @@ constexpr uint8 NOT_IN_SET = 0xEE;
 // k_value = number of vertices in each edge.
 EdgeGenerator::EdgeGenerator(int k_value, int vertex_count, bool use_automorphism_optimization)
     : use_automorphism_opt(use_automorphism_optimization),
+      k(k_value),
+      n(vertex_count),
+      edge_candidate_count(0),
       // When N<=7, the largest set of edge candidate is 6 choose 3 = 20.
       // So need to reserve 2^20 bits in this vector.
       edge_candidate_id_sets(1 << 20),
-      k(k_value),
-      n(vertex_count),
-      edge_count(0),
-      edge_candidate_count(0) {
+      edge_count(0) {
   for (int i = 0; i < 256; i++) {
     edge_to_id[i] = 0xFF;
   }

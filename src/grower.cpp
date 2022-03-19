@@ -103,7 +103,7 @@ void Grower::enumerate_final_step() {
   } else {
     // Start the threads.
     for (int i = 0; i < num_worker_threads; i++) {
-      worker_threads.push_back(std::thread(worker_thread_main, this, i + 1));
+      worker_threads.push_back(std::thread(&Grower::worker_thread_main, this, i + 1));
     }
     // Wait for them to finish.
     for (std::thread& t : worker_threads) {
