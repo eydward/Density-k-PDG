@@ -11,13 +11,14 @@ struct GraphComparer {
   bool operator()(const Graph& g, const Graph& h) const { return g.is_isomorphic(h); }
 };
 
-Grower::Grower(int num_worker_threads_, int restart_idx_, std::ostream* log_,
+Grower::Grower(int num_worker_threads_, int start_idx_, int end_idx_, std::ostream* log_,
                std::ostream* log_detail_)
     : num_worker_threads(num_worker_threads_),
-      restart_idx(restart_idx_),
+      start_idx(start_idx_),
+      end_idx(end_idx_),
       log(log_),
       log_detail(log_detail_),
-      to_be_processed_id(0) {}
+      to_be_processed_id(start_idx_) {}
 
 // Find all canonical isomorphism class representations with up to max_n vertices.
 void Grower::grow() {
@@ -88,16 +89,14 @@ std::vector<Graph> Grower::grow_step(int n, const std::vector<Graph>& base_graph
 }
 
 void Grower::enumerate_final_step(const std::vector<Graph>& base_graphs) {
-  Counters::enter_final_step(base_graphs.size());
-  for (const Graph& g : base_graphs) {
-    to_be_processed.push(g);
+  int max_idx = static_cast<int>(base_graphs.size());
+  if (end_idx > 0 && end_idx < max_idx) {
+    max_idx = end_idx + 1;
   }
-  if (restart_idx > 0) {
-    for (int i = 0; i < restart_idx; i++) {
-      to_be_processed.pop();
-      ++to_be_processed_id;
-    }
+  for (int i = start_idx; i < max_idx; i++) {
+    to_be_processed.push(base_graphs[i]);
   }
+  Counters::enter_final_step(to_be_processed.size());
 
   if (num_worker_threads == 0) {
     worker_thread_main(0);
@@ -158,8 +157,8 @@ void Grower::worker_thread_main(int thread_id) {
       std::scoped_lock lock(counters_mutex);
       Counters::observe_theta(min_theta_graph, graphs_processed);
       if (log_detail != nullptr) {
-        *log_detail << "---- T[" << thread_id << "][" << base_graph_id
-                    << "] G: min_theta = " << min_theta.n << " / " << min_theta.d << " :\n  ";
+        *log_detail << "---- G[" << base_graph_id << "] T[" << thread_id
+                    << "]: min_theta = " << min_theta.n << " / " << min_theta.d << " :\n  ";
         base.print_concise(*log_detail, true);
         *log_detail << "  ";
         min_theta_graph.print_concise(*log_detail, true);
@@ -191,15 +190,15 @@ void Grower::print_before_final(const std::vector<Graph> collected_graphs[MAX_VE
 }
 void Grower::print_state_to_stream(std::ostream& os,
                                    const std::vector<Graph> collected_graphs[MAX_VERTICES]) const {
-  os << "Growth phase completed. State:\n";
+  os << "\n---------------------------------\n"
+     << "Growth phase completed. State:\n";
   for (int i = 0; i < Graph::N; i++) {
-    os << "  order=" << i << " : collected= " << collected_graphs[i].size() << "\n";
+    os << "    order=" << i << " : collected= " << collected_graphs[i].size() << "\n";
   }
-  os << "\nStarting final enumeration phase...\n";
+  os << "---------------------------------\n\nStarting final enumeration phase...\n";
 }
 void Grower::print_config(std::ostream& os) const {
   os << "Searching for all T_k-free k-PDGs\n    K= " << Graph::K
      << " (number of vertices in each edge)\n    N= " << Graph::N
-     << " (total number of vertices in each graph)\n    E= " << MAX_EDGES
      << " (maximum possible number of edges in each graph)\n";
 }

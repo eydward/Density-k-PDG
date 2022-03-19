@@ -21,11 +21,11 @@ uint64 Counters::graph_permute_canonical_ops = 0;
 std::chrono::time_point<std::chrono::steady_clock> Counters::start_time;
 std::chrono::time_point<std::chrono::steady_clock> Counters::last_print_time;
 std::ofstream* Counters::log = nullptr;
-bool Counters::has_printed = false;
 uint64 Counters::growth_vertex_count = 0;
 uint64 Counters::growth_total_graphs_in_current_step = 0;
 uint64 Counters::growth_accumulated_canonicals_in_current_step = 0;
 uint64 Counters::growth_num_base_graphs_in_final_step = 0;
+bool Counters::in_final_step = false;
 
 void Counters::initialize(std::ofstream* log_stream) {
   min_theta = Fraction(1E8, 1);
@@ -53,6 +53,7 @@ void Counters::new_growth_step(uint64 vertex_count, uint64 total_graphs_in_curre
 }
 
 void Counters::enter_final_step(uint64 num_base_graphs) {
+  in_final_step = true;
   growth_num_base_graphs_in_final_step = num_base_graphs;
   growth_processed_graphs_in_current_step = 0;
 }
@@ -60,10 +61,7 @@ void Counters::enter_final_step(uint64 num_base_graphs) {
 void Counters::print_at_time_interval() {
   const auto now = std::chrono::steady_clock::now();
   int seconds = std::chrono::duration_cast<std::chrono::seconds>(now - last_print_time).count();
-  if (!has_printed && seconds >= 10) {
-    print_counters();
-    has_printed = true;
-  } else if (seconds >= 100) {
+  if (seconds >= 100) {
     print_counters();
     last_print_time = now;
   }
@@ -82,25 +80,25 @@ void Counters::print_counters_to_stream(std::ostream& os) {
 
   os << "\n--------Wall clock time:  "
      << std::chrono::duration_cast<std::chrono::milliseconds>(end - start_time).count() << "ms"
-     << "\nCurrent minimum theta = " << min_theta.n << " / " << min_theta.d
-     << "\nProduced by graph: ";
+     << "\n    Current minimum theta = " << min_theta.n << " / " << min_theta.d
+     << "\n    Produced by graph: ";
   min_theta_graph.print_concise(os, false);
 
-  if (growth_num_base_graphs_in_final_step > 0) {
-    os << "Base graphs processed / total = " << growth_processed_graphs_in_current_step << " / "
-       << growth_num_base_graphs_in_final_step << ". Ops (copies, T_k, processed)= ("
-       << graph_copies << ", " << graph_contains_Tk_tests << ", "
-       << growth_accumulated_canonicals_in_current_step << ")\n";
+  if (in_final_step) {
+    os << "    Base graphs processed / total = " << growth_processed_graphs_in_current_step << " / "
+       << growth_num_base_graphs_in_final_step << ". Ops (copies, T_k, free)= (" << graph_copies
+       << ", " << graph_contains_Tk_tests << ", " << growth_accumulated_canonicals_in_current_step
+       << ")\n";
   } else {
-    os << "\nAccumulated canonicals\t= " << graph_accumulated_canonicals
-       << "\nOps (vertex sig, copies, canonicalize, permute, T_k)= (" << compute_vertex_signatures
-       << ", " << graph_copies << ", " << graph_canonicalize_ops << ", "
-       << graph_permute_canonical_ops << ", " << graph_contains_Tk_tests << ")"
-       << "\nIsomorphic tests (total, true, expensive, false w/ =hash, identical, codeg_diff)= "
-       << "\n                 (" << graph_isomorphic_tests << ", " << graph_isomorphic_true << ", "
-       << graph_isomorphic_expensive << ", " << graph_isomorphic_hash_no << ", "
+    os << "    Accumulated canonicals\t= " << graph_accumulated_canonicals
+       << "\n    Ops (vertex sig, copies, canonicalize, permute, T_k)= ("
+       << compute_vertex_signatures << ", " << graph_copies << ", " << graph_canonicalize_ops
+       << ", " << graph_permute_canonical_ops << ", " << graph_contains_Tk_tests << ")"
+       << "\n    Isomorphic tests (total, true, expensive, false w/ =hash, identical, codeg_diff)= "
+       << "\n                     (" << graph_isomorphic_tests << ", " << graph_isomorphic_true
+       << ", " << graph_isomorphic_expensive << ", " << graph_isomorphic_hash_no << ", "
        << graph_identical_tests << ", " << graph_isomorphic_codeg_diff << ")"
-       << "\nGrowth stats(vertex count, total in step, processed in step, accumulated in step)= ("
+       << "\n    Growth stats(vertices, total in step, processed in step, accumulated in step)= ("
        << growth_vertex_count << ", " << growth_total_graphs_in_current_step << ", "
        << growth_processed_graphs_in_current_step << ", "
        << growth_accumulated_canonicals_in_current_step << ")\n";
