@@ -35,25 +35,26 @@ where `start_idx` and `end_idx` specify the range of base graph ids in the final
    ... 
    kPDG K N T 25000 30000
 ```
-Note the `end_idx` is allowed to be larger than the number of available base graphs for convenience. To see how many base graphs are there, just run the program for a short period of time, and observe the output saying `Growth phase completed. State:` and take the last `collected` value. 
+Note the `end_idx` is allowed to be larger than the number of available base graphs for convenience. To see how many base graphs there are, just run the program for a short period of time, and observe the output saying `Growth phase completed. State:` and take the last `collected` value. 
 
 ## Development Environment Setup
-* In order to build and run the code, c++ 20 compatible compiler is required. My environment uses `gcc (Rev8, Built by MSYS2 project) 11.2.0`, but any recent release of gcc should work. To install gcc on Windows, follow instructions in this [section](https://code.visualstudio.com/docs/languages/cpp#_example-install-mingwx64), On Linux just run `sudo apt install build-essential`.
-* It also requires bazel (see https://bazel.build/install). My global bazel config is the following (will be different if you use Linux instead of Windows)
+* In order to build and run the code, c++ 20 compatible compiler is required. My environment uses `gcc (Rev8, Built by MSYS2 project) 11.2.0`, but any `gcc-11` release  should work. 
+    - To install gcc on Windows, follow instructions in this [section](https://code.visualstudio.com/docs/languages/cpp#_example-install-mingwx64)
+    - On Linux just run `sudo apt install build-essential`. Note Ubuntu doesn't have gcc-11 in the default repo, follow the instruction [here](https://stackoverflow.com/questions/67298443/when-gcc-11-will-appear-in-ubuntu-repositories) to install `gcc-11`.
+* It also requires bazel (see https://bazel.build/install). My global bazel config is the following (this is not required on Linux)
 ```
 startup --host_jvm_args=--add-opens=java.base/java.nio=ALL-UNNAMED --host_jvm_args=--add-opens=java.base/java.lang=ALL-UNNAMED
 build --compiler=mingw-gcc --action_env=BAZEL_CXXOPTS="-std=c++20"
 test --test_output=errors
 ```
 
-## Usage
-Run all commands in the project root directory. 
+Once the necessary installs are done, you can do the following. Run all commands in the project root directory. 
 * To execute all unit tests: `bazel test ...`
 * To run the program in DEBUG mode (slow, for debugging only): `bazel run -c dbg src:kPDG <K> <N> <T>` 
 * To run the program in OPTIMIZED mode (fast): `bazel run -c opt src:kPDG <K> <N> <T>`
 * Alternatively, run `bazel build -c opt ...` and then find the executable in `bazel-out\src\` and execute it manually with `kPDG <K> <N> <T>`.
-* 
-`K` and `N` are defined above. `T` is the number worker threads (to maximimze throughput, use the number of CPUs on the computer).
+ 
+We cannot use static linking on Linux. On Windows, it's not necessary to use static linking if you use the same computer to build and run. But if you plan to use one computer to build, and another to run, then the most convenient way is to use static linking. Use this command `bazel build -c opt --features fully_static_link ...`.
 
 ## Testing and Verification
 We use the following steps to verify the correctness of the algorithm:
