@@ -11,7 +11,7 @@ Permutator::Permutator(std::vector<std::pair<int, int>>&& psets) : perm_sets(pse
 }
 
 bool Permutator::next() {
-  for (int i = 0; i < perm_sets.size(); i++) {
+  for (size_t i = 0; i < perm_sets.size(); i++) {
     bool valid = std::next_permutation(p + perm_sets[i].first, p + perm_sets[i].second);
     if (valid) return true;
   }

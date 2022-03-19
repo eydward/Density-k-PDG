@@ -160,7 +160,6 @@ void Graph::compute_vertex_signature() {
   // Note we can't update the signatures in the structure during the computation, so use
   // a working copy first.
   for (int v = 0; v < N; v++) {
-    int neighbor_count = 0;
     hash_neighbors(neighbors_undirected[v], vertices[v].neighbor_hash);
     hash_neighbors(neighbors_head[v], vertices[v].neighbor_hash);
     hash_neighbors(neighbors_tail[v], vertices[v].neighbor_hash);
@@ -412,7 +411,7 @@ bool Graph::is_identical(const Graph& other) const {
 // from B, by repeatedly (1) delete a vertex (2) delete an edge (3) forget the direction of
 // an edge.
 bool Graph::contains_Tk(int v) const {
-  uint64 counter = Counters::increment_graph_contains_Tk_tests();
+  Counters::increment_graph_contains_Tk_tests();
 
   // There are two possibilities that $v \in T_k \subseteq H$.
   // (1) v is in the "triangle with stem cut off". Namely:

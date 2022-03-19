@@ -30,13 +30,13 @@ Graph parse_edges(const std::string& text) {
   throw_assert(text[text.length() - 1] == '}');
   std::string s = text.substr(1, text.length() - 2);
   Graph g;
-  int prev_pos = 0;
+  size_t prev_pos = 0;
   while (s.length() != 0) {
-    int pos = s.find(',', prev_pos);
+    size_t pos = s.find(',', prev_pos);
     std::string e = pos == s.npos ? s.substr(prev_pos) : s.substr(prev_pos, pos - prev_pos);
     uint8 vertex_set = 0;
     uint8 head = UNDIRECTED;
-    for (int i = 0; i < e.length(); i++) {
+    for (size_t i = 0; i < e.length(); i++) {
       char c = e[i];
       if (c == ' ') continue;
       if ('0' <= c && c <= '6') {

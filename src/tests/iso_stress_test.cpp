@@ -91,8 +91,8 @@ void IsomorphismStressTest::run() {
       graphs.push_back(get_one_graph(edge_state));
     } while (next_edge_state(edge_state));
 
-    for (int i = 0; i < graphs.size(); i++) {
-      for (int j = i + 1; j < graphs.size(); j++) {
+    for (size_t i = 0; i < graphs.size(); i++) {
+      for (size_t j = i + 1; j < graphs.size(); j++) {
         verify_graphs(graphs[i], graphs[j]);
       }
     }
@@ -109,7 +109,7 @@ void IsomorphismStressTest::run() {
       uint8 edge_state[MAX_EDGES]{0};
       for (int i = 0; i < edge_count; i++) {
         int edge_id = edges_id_random(random_engine);
-        edge_state[i] = head_random(random_engine);
+        edge_state[edge_id] = head_random(random_engine);
       }
       for (int i = 0; i < 200; i++) {
         if (!next_edge_state(edge_state)) {
