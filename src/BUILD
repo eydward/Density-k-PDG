@@ -28,9 +28,6 @@ cc_binary(
     copts=["-std=c++20"],
     linkopts=["-lpthread"],
     linkstatic=True,
-    features=[
-        "fully_static_link",
-    ],
 )
 
 cc_library(

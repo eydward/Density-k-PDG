@@ -14,8 +14,6 @@ class Grower {
   // The log files.
   std::ostream* const log;
   std::ostream* const log_detail;
-  // The worker threads used in the final enumeration phase.
-  std::vector<std::thread> worker_threads;
 
   // Returns a collection of graphs with n vertices that are T_k-free, one in each
   // isomorphism class. Note all edges added in this step contains vertex (n-1).

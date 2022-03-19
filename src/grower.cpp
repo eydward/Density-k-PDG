@@ -101,10 +101,14 @@ void Grower::enumerate_final_step(const std::vector<Graph>& base_graphs) {
   if (num_worker_threads == 0) {
     worker_thread_main(0);
   } else {
+    // The worker threads used in the final enumeration phase.
+    std::vector<std::thread> worker_threads;
+
     // Start the threads.
     for (int i = 0; i < num_worker_threads; i++) {
       worker_threads.push_back(std::thread(&Grower::worker_thread_main, this, i + 1));
     }
+
     // Wait for them to finish.
     for (std::thread& t : worker_threads) {
       t.join();
