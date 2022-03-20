@@ -23,7 +23,8 @@ For `K=4, N=7`, the program has found a graph with `theta=7/4`, the enumeration 
 {
   0125>5, 0135>5, 0235>5, 1235>5, 0145>5, 0245>5, 1245>5, 0345>5, 1345>5, 2345>5, 
   0126>6, 0136>6, 0236>6, 1236>6, 0146>6, 0246>6, 1246>6, 0346>6, 1346>6, 2346>6
-}```
+}
+```
 
 ## Running the program
 The easiest way to run is to get the binaries from either `bin-linux` or `bin-windows` directories. Alternatively, you can build from source, see next section for details. To run the program:
