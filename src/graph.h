@@ -137,6 +137,8 @@ struct Graph {
     assert(is_canonical);
     return graph_hash;
   }
+  uint8 get_edge_count() const { return edge_count; }
+  uint8 get_directed_edge_count() const { return edge_count - undirected_edge_count; }
 
   // Returns true if the edge specified by the bitmask of the vertices in the edge is allowed
   // to be added to the graph (this vertex set does not yet exist in the edges).

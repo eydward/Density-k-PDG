@@ -2,6 +2,8 @@
 
 #include <bits/stdc++.h>
 
+constexpr int PRINT_EVERY_N_SECONDS = 100;
+
 Fraction Counters::min_theta(1E8, 1);
 Graph Counters::min_theta_graph{};
 uint64 Counters::compute_vertex_signatures = 0;
@@ -25,6 +27,11 @@ uint64 Counters::growth_vertex_count = 0;
 uint64 Counters::growth_total_graphs_in_current_step = 0;
 uint64 Counters::growth_accumulated_canonicals_in_current_step = 0;
 uint64 Counters::growth_num_base_graphs_in_final_step = 0;
+uint64 Counters::edgegen_tk_skip = 0;
+uint64 Counters::edgegen_theta_edges_skip = 0;
+uint64 Counters::edgegen_theta_directed_edges_skip = 0;
+uint64 Counters::edgegen_edge_sets = 0;
+
 bool Counters::in_final_step = false;
 
 void Counters::initialize(std::ofstream* log_stream) {
@@ -45,6 +52,14 @@ void Counters::observe_theta(const Graph& g, uint64 graphs_processed) {
   print_at_time_interval();
 }
 
+void Counters::observe_edgegen_stats(uint64 tk_skip, uint64 theta_edges_skip,
+                                     uint64 theta_directed_edges_skip, uint64 edge_sets) {
+  edgegen_tk_skip += tk_skip;
+  edgegen_theta_edges_skip += theta_edges_skip;
+  edgegen_theta_directed_edges_skip += theta_directed_edges_skip;
+  edgegen_edge_sets += edge_sets;
+}
+
 void Counters::new_growth_step(uint64 vertex_count, uint64 total_graphs_in_current_step) {
   growth_vertex_count = vertex_count;
   growth_total_graphs_in_current_step = total_graphs_in_current_step;
@@ -61,7 +76,7 @@ void Counters::enter_final_step(uint64 num_base_graphs) {
 void Counters::print_at_time_interval() {
   const auto now = std::chrono::steady_clock::now();
   int seconds = std::chrono::duration_cast<std::chrono::seconds>(now - last_print_time).count();
-  if (seconds >= 100) {
+  if (seconds >= PRINT_EVERY_N_SECONDS) {
     print_counters();
     last_print_time = now;
   }
@@ -88,7 +103,9 @@ void Counters::print_counters_to_stream(std::ostream& os) {
     os << "    Base graphs processed / total = " << growth_processed_graphs_in_current_step << " / "
        << growth_num_base_graphs_in_final_step << ". Ops (copies, T_k, free)= (" << graph_copies
        << ", " << graph_contains_Tk_tests << ", " << growth_accumulated_canonicals_in_current_step
-       << ")\n";
+       << ")\n    EdgeGen stats (tk-skip, theta_edge_skip, theta_dir_skip, sets)= ("
+       << edgegen_tk_skip << ", " << edgegen_theta_edges_skip << ", "
+       << edgegen_theta_directed_edges_skip << ", " << edgegen_edge_sets << ")\n";
   } else {
     os << "    Accumulated canonicals\t= " << graph_accumulated_canonicals
        << "\n    Ops (vertex sig, copies, canonicalize, permute, T_k)= ("

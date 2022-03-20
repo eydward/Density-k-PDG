@@ -124,6 +124,8 @@ void Grower::worker_thread_main(int thread_id) {
   Graph copy;
   Graph min_theta_graph;
 
+  auto last_check_time = std::chrono::steady_clock::now();
+
   while (true) {
     // The lock scope to safely get a graph from the queue.
     {
@@ -138,7 +140,23 @@ void Grower::worker_thread_main(int thread_id) {
     Fraction min_theta(1E8, 1);
     uint64 graphs_processed = 0;
     edge_gen.reset_enumeration();
-    while (edge_gen.next()) {
+    while (edge_gen.next(false, base.get_edge_count(), base.get_directed_edge_count(), min_theta)) {
+      // Thread 0 has the extra responsibility as time keeper,
+      // to periodically ask Counters to print.
+      if (thread_id == 0) {
+        if (edge_gen.stats_edge_sets % 100000 == 0) {
+          const auto now = std::chrono::steady_clock::now();
+          constexpr int CHECK_EVERY_N_SECONDS = 10;
+          int seconds =
+              std::chrono::duration_cast<std::chrono::seconds>(now - last_check_time).count();
+          if (seconds >= CHECK_EVERY_N_SECONDS) {
+            std::scoped_lock lock(counters_mutex);
+            Counters::print_at_time_interval();
+            last_check_time = now;
+          }
+        }
+      }
+
       base.copy_edges(copy);
       for (int i = 0; i < edge_gen.edge_count; i++) {
         copy.add_edge(edge_gen.edges[i]);
@@ -160,6 +178,9 @@ void Grower::worker_thread_main(int thread_id) {
     {
       std::scoped_lock lock(counters_mutex);
       Counters::observe_theta(min_theta_graph, graphs_processed);
+      Counters::observe_edgegen_stats(edge_gen.stats_tk_skip, edge_gen.stats_theta_edges_skip,
+                                      edge_gen.stats_theta_directed_edges_skip,
+                                      edge_gen.stats_edge_sets);
       if (log_detail != nullptr) {
         *log_detail << "---- G[" << base_graph_id << "] T[" << thread_id
                     << "]: min_theta = " << min_theta.n << " / " << min_theta.d << " :\n  ";
