@@ -31,10 +31,6 @@ class EdgeGenerator {
   OptResult perform_min_theta_optimization(int base_edge_count, int base_directed_edge_count,
                                            Fraction known_min_theta);
 
-  // The generated edges in the current state.
-  uint8 edge_count;
-  Edge edges[MAX_EDGES];
-
  public:
   uint64 stats_tk_skip;           // How many notify_contain_tk_skip().
   uint64 stats_tk_skip_bits;      // How many bits in total did notify_contain_tk_skip() skip.

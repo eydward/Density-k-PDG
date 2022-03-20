@@ -10,7 +10,6 @@ EdgeGenerator::EdgeGenerator(int vertex_count, const Graph& base_graph)
       n(vertex_count),
       high_idx_non_zero_enum_state(0),
       edge_candidate_count(0),
-      edge_count(0),
       stats_tk_skip(0),
       stats_tk_skip_bits(0),
       stats_theta_edges_skip(0),
@@ -98,20 +97,12 @@ bool EdgeGenerator::next(Graph& copy, bool use_known_min_theta_opt, int base_edg
       continue;
   }
 
-  // We found a new valid enumeration state. Collect info into edges array.
-  uint32 current_candidate_mask = 0;
-  edge_count = 0;
+  // We found a new valid enumeration state. Generate a new graph into `copy`.
+  base.copy_edges(copy);
   for (uint8 j = 0; j <= high_idx_non_zero_enum_state; j++) {
     if (enum_state[j] != 0) {
-      edges[edge_count].vertex_set = edge_candidates[j];
-      edges[edge_count].head_vertex = edge_candidates_vidx[j][enum_state[j]];
-      ++edge_count;
-      current_candidate_mask |= (1 << j);
+      copy.add_edge(Edge(edge_candidates[j], edge_candidates_vidx[j][enum_state[j]]));
     }
-  }
-  base.copy_edges(copy);
-  for (int i = 0; i < edge_count; i++) {
-    copy.add_edge(edges[i]);
   }
 
   ++stats_edge_sets;
