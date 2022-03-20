@@ -28,6 +28,7 @@ uint64 Counters::growth_total_graphs_in_current_step = 0;
 uint64 Counters::growth_accumulated_canonicals_in_current_step = 0;
 uint64 Counters::growth_num_base_graphs_in_final_step = 0;
 uint64 Counters::edgegen_tk_skip = 0;
+uint64 Counters::edgegen_tk_skip_bits = 0;
 uint64 Counters::edgegen_theta_edges_skip = 0;
 uint64 Counters::edgegen_theta_directed_edges_skip = 0;
 uint64 Counters::edgegen_edge_sets = 0;
@@ -52,9 +53,10 @@ void Counters::observe_theta(const Graph& g, uint64 graphs_processed) {
   print_at_time_interval();
 }
 
-void Counters::observe_edgegen_stats(uint64 tk_skip, uint64 theta_edges_skip,
+void Counters::observe_edgegen_stats(uint64 tk_skip, uint64 tk_skip_bits, uint64 theta_edges_skip,
                                      uint64 theta_directed_edges_skip, uint64 edge_sets) {
   edgegen_tk_skip += tk_skip;
+  edgegen_tk_skip_bits += tk_skip_bits;
   edgegen_theta_edges_skip += theta_edges_skip;
   edgegen_theta_directed_edges_skip += theta_directed_edges_skip;
   edgegen_edge_sets += edge_sets;
@@ -90,34 +92,46 @@ void Counters::print_counters() {
   }
 }
 
+// Helper function: print large numbers in a more readable format with a ` at the 10^6 position.
+std::string fmt(uint64 value) {
+  constexpr uint64 M = 1000000;
+  if (value < M)
+    return std::to_string(value);
+  else
+    return std::to_string(value / M) + "`" + std::to_string(value % M);
+}
 void Counters::print_counters_to_stream(std::ostream& os) {
   const auto end = std::chrono::steady_clock::now();
 
   os << "\n--------Wall clock time:  "
-     << std::chrono::duration_cast<std::chrono::milliseconds>(end - start_time).count() << "ms"
+     << fmt(std::chrono::duration_cast<std::chrono::milliseconds>(end - start_time).count()) << "ms"
      << "\n    Current minimum theta = " << min_theta.n << " / " << min_theta.d
      << "\n    Produced by graph: ";
   min_theta_graph.print_concise(os, false);
 
   if (in_final_step) {
-    os << "    Base graphs processed / total = " << growth_processed_graphs_in_current_step << " / "
-       << growth_num_base_graphs_in_final_step << ". Ops (copies, T_k, free)= (" << graph_copies
-       << ", " << graph_contains_Tk_tests << ", " << growth_accumulated_canonicals_in_current_step
-       << ")\n    EdgeGen stats (tk-skip, theta_edge_skip, theta_dir_skip, sets)= ("
-       << edgegen_tk_skip << ", " << edgegen_theta_edges_skip << ", "
-       << edgegen_theta_directed_edges_skip << ", " << edgegen_edge_sets << ")\n";
+    os << "    Base graphs processed / total = " << fmt(growth_processed_graphs_in_current_step)
+       << " / " << fmt(growth_num_base_graphs_in_final_step) << ". Ops (copies, T_k, free)= ("
+       << fmt(graph_copies) << ", " << fmt(graph_contains_Tk_tests) << ", "
+       << fmt(growth_accumulated_canonicals_in_current_step)
+       << ")\n    EdgeGen stats (tk-skip, bits, theta_edge_skip, theta_dir_skip, sets)= ("
+       << fmt(edgegen_tk_skip) << ", " << fmt(edgegen_tk_skip_bits) << ", "
+       << fmt(edgegen_theta_edges_skip) << ", " << fmt(edgegen_theta_directed_edges_skip) << ", "
+       << fmt(edgegen_edge_sets) << ")\n";
   } else {
-    os << "    Accumulated canonicals\t= " << graph_accumulated_canonicals
+    os << "    Accumulated canonicals\t= " << fmt(graph_accumulated_canonicals)
        << "\n    Ops (vertex sig, copies, canonicalize, permute, T_k)= ("
-       << compute_vertex_signatures << ", " << graph_copies << ", " << graph_canonicalize_ops
-       << ", " << graph_permute_canonical_ops << ", " << graph_contains_Tk_tests << ")"
+       << fmt(compute_vertex_signatures) << ", " << fmt(graph_copies) << ", "
+       << fmt(graph_canonicalize_ops) << ", " << fmt(graph_permute_canonical_ops) << ", "
+       << fmt(graph_contains_Tk_tests) << ")"
        << "\n    Isomorphic tests (total, true, expensive, false w/ =hash, identical, codeg_diff)= "
-       << "\n                     (" << graph_isomorphic_tests << ", " << graph_isomorphic_true
-       << ", " << graph_isomorphic_expensive << ", " << graph_isomorphic_hash_no << ", "
-       << graph_identical_tests << ", " << graph_isomorphic_codeg_diff << ")"
+       << "\n                     (" << fmt(graph_isomorphic_tests) << ", "
+       << fmt(graph_isomorphic_true) << ", " << fmt(graph_isomorphic_expensive) << ", "
+       << fmt(graph_isomorphic_hash_no) << ", " << fmt(graph_identical_tests) << ", "
+       << fmt(graph_isomorphic_codeg_diff) << ")"
        << "\n    Growth stats(vertices, total in step, processed in step, accumulated in step)= ("
-       << growth_vertex_count << ", " << growth_total_graphs_in_current_step << ", "
-       << growth_processed_graphs_in_current_step << ", "
-       << growth_accumulated_canonicals_in_current_step << ")\n";
+       << fmt(growth_vertex_count) << ", " << fmt(growth_total_graphs_in_current_step) << ", "
+       << fmt(growth_processed_graphs_in_current_step) << ", "
+       << fmt(growth_accumulated_canonicals_in_current_step) << ")\n";
   }
 }

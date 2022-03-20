@@ -44,6 +44,7 @@ class Counters {
   static uint64 growth_accumulated_canonicals_in_current_step;
   static uint64 growth_num_base_graphs_in_final_step;
   static uint64 edgegen_tk_skip;           // How many notify_contain_tk_skip().
+  static uint64 edgegen_tk_skip_bits;      // How many bits did notify_contain_tk_skip() skip.
   static uint64 edgegen_theta_edges_skip;  // How many skips due to min_theta opt, not enough edges.
   static uint64 edgegen_theta_directed_edges_skip;  // How many skips min_theta opt, directed.
   static uint64 edgegen_edge_sets;  // How many edge sets returned from this generator.
@@ -77,7 +78,7 @@ class Counters {
   // If the given graph's theta is less than min_theta, assign it to min_theta.
   static void observe_theta(const Graph& g, uint64 graphs_processed = 1);
 
-  static void observe_edgegen_stats(uint64 tk_skip, uint64 theta_edges_skip,
+  static void observe_edgegen_stats(uint64 tk_skip, uint64 tk_skip_bits, uint64 theta_edges_skip,
                                     uint64 theta_directed_edges_skip, uint64 edge_sets);
 
   // Resets all values to 0, and starts the stopwatch, which will be used

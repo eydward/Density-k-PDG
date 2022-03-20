@@ -13,6 +13,7 @@ EdgeGenerator::EdgeGenerator(int k_value, int vertex_count)
       edge_candidate_count(0),
       edge_count(0),
       stats_tk_skip(0),
+      stats_tk_skip_bits(0),
       stats_theta_edges_skip(0),
       stats_theta_directed_edges_skip(0),
       stats_edge_sets(0) {
@@ -34,7 +35,10 @@ EdgeGenerator::EdgeGenerator(int k_value, int vertex_count)
   assert(edge_candidate_count == compute_binom(n - 1, k - 1));
   reset_enumeration();
 }
-
+void EdgeGenerator::clear_stats() {
+  stats_tk_skip = stats_tk_skip_bits = stats_theta_edges_skip = stats_theta_directed_edges_skip =
+      stats_edge_sets = 0;
+}
 void EdgeGenerator::reset_enumeration() {
   edge_count = 0;
   high_idx_non_zero_enum_state = 0;
@@ -60,32 +64,13 @@ void EdgeGenerator::reset_enumeration() {
 // it won't give us a better min_theta value regardless whether the graph is T_k free.
 bool EdgeGenerator::next(bool use_known_min_theta_opt, int base_edge_count,
                          int base_directed_edge_count, Fraction known_min_theta) {
-  // Assert that we are using min_theta optimization only in the final enumeration phase.
-  int new_edge_threshold = 0;
-  bool debug_print = false;
   if (use_known_min_theta_opt) {
+    // Assert that we are using min_theta optimization only in the final enumeration phase.
     assert(k == Graph::K);
     assert(n == Graph::N);
     assert(base_edge_count >= 0);
     assert(base_directed_edge_count >= 0);
     assert(known_min_theta >= Fraction(1, 1));
-
-    // The number of new edges must satisfy the following inequality in order
-    // for it to be interesting:
-    //    base_edge_count + known_min_theta * (base_directed_edges + new_edges) > binom_nk
-    // because otherwise, even if all new edges are directed, the theta produced would still
-    // be >= min_theta. Rewrite the inequility as
-    //    new_edges > (binom_nk - base_edge_count) / known_min_theta - base_directed_edges
-    // Thus
-    //    new_edges >= floor((binom_nk - base_edge_count) / known_min_theta) - base_directed_edges
-    new_edge_threshold = (binom_nk - base_edge_count) * known_min_theta.d / known_min_theta.n -
-                         base_directed_edge_count;
-    // debug_print = stats_edge_sets % 99999 == 0;
-    // if (debug_print) {
-    //   std::cout << "\n**** " << new_edge_threshold << "binom=" << (int)binom_nk
-    //             << ", t=" << known_min_theta.n << "/" << known_min_theta.d
-    //             << ", b=" << base_edge_count << ", " << base_directed_edge_count << "\n";
-    // }
   }
 
   while (true) {
@@ -108,67 +93,14 @@ bool EdgeGenerator::next(bool use_known_min_theta_opt, int base_edge_count,
     if (!use_known_min_theta_opt) break;
 
     // Next we perform the min_theta optimization.
-    std::tuple<uint8, uint8, uint8, uint8> new_edge_info = count_edges();
-    uint8 new_edges = std::get<0>(new_edge_info);
-    uint8 new_directed_edges = std::get<1>(new_edge_info);
-    uint8 low_non_edge_idx = std::get<2>(new_edge_info);
-    uint8 low_non_directed_idx = std::get<3>(new_edge_info);
-
-    // if (debug_print) {
-    //   std::cout << "New Edges " << (int)new_edges << ", " << (int)new_directed_edges << ", "
-    //             << (int)low_non_edge_idx << ", " << (int)low_non_directed_idx << "\n";
-    // }
-
-    // First step: check number of new edges. Details of this inequality check are described above
-    // in the `new_edge_threshold` calculation.
-    if (new_edges < new_edge_threshold) {
-      ++stats_theta_edges_skip;
-      // Here we can jump forward, to the state where it's ready to add another edge.
-      // For example if the current enum state is [3, 0, 0, 1, 1, 1], and there are not
-      // enough new edges, then the next enum state that may have enough new edges
-      // is NOT [3, 0, 0, 1, 1, 2] (the normal increment), but rather, [3, 0, 1, 1, 1, 1].
-      // Since the begin of the for loop above does increment, we put the enum state to
-      // [3, 0, 1, 1, 1, 0], to prepare for the for loop increment to do the job.
-      if (low_non_edge_idx >= edge_candidate_count) {
-        // In this case, all edges are present and we still don't have enough edges, simply
-        // return false to terminate the generation.
-        return false;
-      }
-      for (uint8 i = 1; i <= low_non_edge_idx; i++) {
-        enum_state[i] = 1;
-      }
-      enum_state[0] = 0;
-      continue;  // Continue the while loop.
-    }
-    // If we get here, we have enough number of edges. But there still may not be enough number
-    // of directed edges. So just compute.
-    int total_directed = new_directed_edges + base_directed_edge_count;
-    int total_undirected =
-        new_edges - new_directed_edges + base_edge_count - base_directed_edge_count;
-    if (total_directed == 0 ||
-        known_min_theta <= Fraction(binom_nk - total_undirected, total_directed)) {
-      ++stats_theta_directed_edges_skip;
-      // Here we can jump forward similar to above when we don't have enough total edges,
-      // to the state where it's ready to add another directed edge.
-      // For example if the current enum state is [3, 0, 0, 2, 2, 2], and there are not
-      // enough directed edges, then the next enum state that may have enough new edges
-      // is NOT [3, 0, 0, 2, 2, 3] (the normal increment), but rather, [3, 0, 2, 2, 2, 2].
-      // Since the begin of the for loop above does increment, we put the enum state to
-      // [3, 0, 2, 2, 2, 1], to prepare for the for loop increment to do the job.
-      if (low_non_directed_idx >= edge_candidate_count) {
-        // In this case, all edges are present and directed and we still don't have enough directed
-        // edges, simply return false to terminate the generation.
-        return false;
-      }
-      for (uint8 i = 1; i <= low_non_directed_idx; i++) {
-        enum_state[i] = 2;
-      }
-      enum_state[0] = 1;
-      continue;  // Continue the while loop.
-    }
-
-    // Reaching here means we passed the min_theta optimization check, we have a winner.
-    break;
+    OptResult opt =
+        perform_min_theta_optimization(base_edge_count, base_directed_edge_count, known_min_theta);
+    if (opt == OptResult::FOUND_CANDIDATE)
+      break;  // Passed the min_theta optimization check, we have a winner.
+    else if (opt == OptResult::DONE)
+      return false;
+    else
+      continue;
   }
 
   // We found a new valid enumeration state. Collect info into edges array.
@@ -186,9 +118,93 @@ bool EdgeGenerator::next(bool use_known_min_theta_opt, int base_edge_count,
   return true;
 }
 
+EdgeGenerator::OptResult EdgeGenerator::perform_min_theta_optimization(int base_edge_count,
+                                                                       int base_directed_edge_count,
+                                                                       Fraction known_min_theta) {
+  // The number of new edges must satisfy the following inequality in order
+  // for it to be interesting:
+  //    base_edge_count + known_min_theta * (base_directed_edges + new_edges) > binom_nk
+  // because otherwise, even if all new edges are directed, the theta produced would still
+  // be >= min_theta. Rewrite the inequility as
+  //    new_edges > (binom_nk - base_edge_count) / known_min_theta - base_directed_edges
+  // Thus
+  //    new_edges > floor((binom_nk - base_edge_count) / known_min_theta) - base_directed_edges
+  int new_edge_threshold = (binom_nk - base_edge_count) * known_min_theta.d / known_min_theta.n -
+                           base_directed_edge_count;
+  // bool debug_print = true;
+  // if (debug_print) {
+  //   std::cout << "\n**** threshold=" << new_edge_threshold << ", binom=" << (int)binom_nk
+  //             << ", t=" << known_min_theta.n << "/" << known_min_theta.d
+  //             << ", b=" << base_edge_count << ", " << base_directed_edge_count << "\n";
+  // }
+
+  std::tuple<uint8, uint8, uint8, uint8> new_edge_info = count_edges();
+  uint8 new_edges = std::get<0>(new_edge_info);
+  uint8 new_directed_edges = std::get<1>(new_edge_info);
+  uint8 low_non_edge_idx = std::get<2>(new_edge_info);
+  uint8 low_non_directed_idx = std::get<3>(new_edge_info);
+
+  // if (debug_print) {
+  //   std::cout << "New Edges " << (int)new_edges << ", " << (int)new_directed_edges << ", "
+  //             << (int)low_non_edge_idx << ", " << (int)low_non_directed_idx << "\n";
+  // }
+
+  // First step: check number of new edges. Details of this inequality check are described above
+  // in the `new_edge_threshold` calculation.
+  if (new_edges <= new_edge_threshold) {
+    ++stats_theta_edges_skip;
+    // Here we can jump forward, to the state where it's ready to add another edge.
+    // For example if the current enum state is [3, 0, 0, 1, 1, 1], and there are not
+    // enough new edges, then the next enum state that may have enough new edges
+    // is NOT [3, 0, 0, 1, 1, 2] (the normal increment), but rather, [3, 0, 1, 1, 1, 1].
+    // Since the begin of the for loop above does increment, we put the enum state to
+    // [3, 0, 1, 1, 1, 0], to prepare for the for loop increment to do the job.
+    if (low_non_edge_idx >= edge_candidate_count) {
+      // In this case, all edges are present and we still don't have enough edges, simply
+      // return DONE to terminate the generation.
+      return OptResult::DONE;
+    }
+    for (uint8 i = 1; i <= low_non_edge_idx; i++) {
+      enum_state[i] = 1;
+    }
+    enum_state[0] = 0;
+    return OptResult::CONTINUE_SEARCH;
+  }
+  // If we get here, we have enough number of edges. But there still may not be enough number
+  // of directed edges. So just compute.
+  int total_directed = new_directed_edges + base_directed_edge_count;
+  int total_undirected =
+      new_edges - new_directed_edges + base_edge_count - base_directed_edge_count;
+  if (total_directed == 0 ||
+      known_min_theta <= Fraction(binom_nk - total_undirected, total_directed)) {
+    ++stats_theta_directed_edges_skip;
+    // Here we can jump forward similar to above when we don't have enough total edges,
+    // to the state where it's ready to add another directed edge.
+    // For example if the current enum state is [3, 0, 0, 2, 2, 2], and there are not
+    // enough directed edges, then the next enum state that may have enough new edges
+    // is NOT [3, 0, 0, 2, 2, 3] (the normal increment), but rather, [3, 0, 2, 2, 2, 2].
+    // Since the begin of the for loop above does increment, we put the enum state to
+    // [3, 0, 2, 2, 2, 1], to prepare for the for loop increment to do the job.
+    if (low_non_directed_idx >= edge_candidate_count) {
+      // In this case, all edges are present and directed and we still don't have enough directed
+      // edges, simply return DONE to terminate the generation.
+      return OptResult::DONE;
+    }
+    for (uint8 i = 1; i <= low_non_directed_idx; i++) {
+      enum_state[i] = 2;
+    }
+    enum_state[0] = 1;
+    return OptResult::CONTINUE_SEARCH;
+  }
+
+  // Reaching this point means we passed the check and have a valid candidate.
+  return OptResult::FOUND_CANDIDATE;
+}
+
 // Notify the generator about the fact that adding the current edge set to the graph
 // makes it contain T_k, and therefore we can skip edge sets that are supersets of the current.
 void EdgeGenerator::notify_contain_tk_skip() {
+  ++stats_tk_skip;
   // Find the lowest non-zero enum state, and change everything below
   // it to the final state. Then the next() call will bump the lowest non-zero enum state.
   // For example, if the enum state is [3,0,0,1,0,0,0], update it to [3,0,0,1,k+1,k+1,k+1]
@@ -196,8 +212,8 @@ void EdgeGenerator::notify_contain_tk_skip() {
   for (uint8 i = 0; i < edge_candidate_count; i++) {
     if (enum_state[i] != 0) return;
     enum_state[i] = k + 1;
+    ++stats_tk_skip_bits;
   }
-  ++stats_tk_skip;
 }
 
 // Returns a tuple:
@@ -228,13 +244,20 @@ std::tuple<uint8, uint8, uint8, uint8> EdgeGenerator::count_edges() const {
   return std::make_tuple(edges, directed, first_non_edge, first_non_directed_edge);
 }
 
-void EdgeGenerator::print_debug() const {
+void EdgeGenerator::print_debug(bool print_candidates) const {
   std::cout << "EdgeGen[" << static_cast<int>(k) << ", " << static_cast<int>(n)
             << ", cand_count=" << static_cast<int>(edge_candidate_count)
-            << ", high_idx=" << static_cast<int>(high_idx_non_zero_enum_state) << ",\n  EC={";
+            << ", high_idx=" << static_cast<int>(high_idx_non_zero_enum_state) << ", state=";
   for (int e = 0; e < edge_candidate_count; e++) {
-    if (e > 0) std::cout << ", ";
-    std::cout << std::bitset<8>(edge_candidates[e]);
+    std::cout << static_cast<int>(enum_state[e]);
   }
-  std::cout << "}]\n";
+  if (print_candidates) {
+    std::cout << "\n  EC={";
+    for (int e = 0; e < edge_candidate_count; e++) {
+      if (e > 0) std::cout << ", ";
+      std::cout << std::bitset<8>(edge_candidates[e]);
+    }
+    std::cout << "}";
+  }
+  std::cout << "]\n";
 }

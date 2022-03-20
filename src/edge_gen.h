@@ -17,6 +17,7 @@ class EdgeGenerator {
   // [2] to [k+1] are the vertices in the corresponding edge.
   uint8 edge_candidates_vidx[MAX_EDGES][10];
 
+ public:
   // This array represents the current enumeration state.
   // The values are indices into the edge_candidates_vidx arrays.
   uint8 enum_state[MAX_EDGES];
@@ -28,18 +29,23 @@ class EdgeGenerator {
   //    forth = lowest index in enum_state where the edge is undirected or not in the set.
   std::tuple<uint8, uint8, uint8, uint8> count_edges() const;
 
-  // Print the current state of this class to console for debugging purpose.
-  void print_debug() const;
+  enum class OptResult { FOUND_CANDIDATE = 0, CONTINUE_SEARCH = 1, DONE = 2 };
+  OptResult perform_min_theta_optimization(int base_edge_count, int base_directed_edge_count,
+                                           Fraction known_min_theta);
 
- public:
+  // Print the current state of this class to console for debugging purpose.
+  void print_debug(bool print_candidates) const;
+
   // The generated edges in the current state.
   uint8 edge_count;
   Edge edges[MAX_EDGES];
 
-  uint64 stats_tk_skip;                    // How many notify_contain_tk_skip().
-  uint64 stats_theta_edges_skip;           // How many skips due to min_theta opt, not enough edges.
+  uint64 stats_tk_skip;           // How many notify_contain_tk_skip().
+  uint64 stats_tk_skip_bits;      // How many bits in total did notify_contain_tk_skip() skip.
+  uint64 stats_theta_edges_skip;  // How many skips due to min_theta opt, not enough edges.
   uint64 stats_theta_directed_edges_skip;  // How many skips due to min_theta opt, directed.
   uint64 stats_edge_sets;                  // How many edge sets returned from this generator.
+  void clear_stats();                      // Clear the above stats.
 
   // Initializes the generator for the given new vertex count.
   // k = number of vertices in each edge.

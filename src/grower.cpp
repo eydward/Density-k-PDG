@@ -151,8 +151,16 @@ void Grower::worker_thread_main(int thread_id) {
               std::chrono::duration_cast<std::chrono::seconds>(now - last_check_time).count();
           if (seconds >= CHECK_EVERY_N_SECONDS) {
             std::scoped_lock lock(counters_mutex);
-            Counters::print_at_time_interval();
+            // Counters::print_at_time_interval();
             last_check_time = now;
+
+            // edge_gen.print_debug(false);
+            Counters::observe_edgegen_stats(edge_gen.stats_tk_skip, edge_gen.stats_tk_skip_bits,
+                                            edge_gen.stats_theta_edges_skip,
+                                            edge_gen.stats_theta_directed_edges_skip,
+                                            edge_gen.stats_edge_sets);
+            edge_gen.clear_stats();
+            Counters::print_at_time_interval();
           }
         }
       }
@@ -178,9 +186,9 @@ void Grower::worker_thread_main(int thread_id) {
     {
       std::scoped_lock lock(counters_mutex);
       Counters::observe_theta(min_theta_graph, graphs_processed);
-      Counters::observe_edgegen_stats(edge_gen.stats_tk_skip, edge_gen.stats_theta_edges_skip,
-                                      edge_gen.stats_theta_directed_edges_skip,
-                                      edge_gen.stats_edge_sets);
+      Counters::observe_edgegen_stats(
+          edge_gen.stats_tk_skip, edge_gen.stats_tk_skip_bits, edge_gen.stats_theta_edges_skip,
+          edge_gen.stats_theta_directed_edges_skip, edge_gen.stats_edge_sets);
       if (log_detail != nullptr) {
         *log_detail << "---- G[" << base_graph_id << "] T[" << thread_id
                     << "]: min_theta = " << min_theta.n << " / " << min_theta.d << " :\n  ";
