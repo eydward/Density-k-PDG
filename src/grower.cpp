@@ -51,7 +51,6 @@ void Grower::grow() {
 // Note all edges added in this step contains vertex (n-1).
 std::vector<Graph> Grower::grow_step(int n, const std::vector<Graph>& base_graphs) {
   assert(n < Graph::N);
-  EdgeGenerator edge_gen(Graph::K, n);
   Counters::new_growth_step(n, base_graphs.size());
   std::unordered_set<Graph, GraphHasher, GraphComparer> results;
 
@@ -60,15 +59,11 @@ std::vector<Graph> Grower::grow_step(int n, const std::vector<Graph>& base_graph
 
   for (const Graph& g : base_graphs) {
     Counters::increment_growth_processed_graphs_in_current_step();
-    edge_gen.reset_enumeration();
+    EdgeGenerator edge_gen(n, g);
 
     // Loop through all ((K+1)^\binom{n-1}{k-1} - 1) edge combinations, add them to g, and check
     // add to canonicals unless it's isomorphic to an existing one.
-    while (edge_gen.next()) {
-      g.copy_edges(copy);
-      for (int i = 0; i < edge_gen.edge_count; i++) {
-        copy.add_edge(edge_gen.edges[i]);
-      }
+    while (edge_gen.next(copy)) {
       if (copy.contains_Tk(n - 1)) {
         edge_gen.notify_contain_tk_skip();
         continue;
@@ -117,7 +112,6 @@ void Grower::enumerate_final_step(const std::vector<Graph>& base_graphs) {
 }
 
 void Grower::worker_thread_main(int thread_id) {
-  EdgeGenerator edge_gen(Graph::K, Graph::N);
   // These instances will be reused when processing the graphs.
   Graph base;
   int base_graph_id;
@@ -139,8 +133,9 @@ void Grower::worker_thread_main(int thread_id) {
 
     Fraction min_theta(1E8, 1);
     uint64 graphs_processed = 0;
-    edge_gen.reset_enumeration();
-    while (edge_gen.next(true, base.get_edge_count(), base.get_directed_edge_count(), min_theta)) {
+    EdgeGenerator edge_gen(Graph::N, base);
+    while (edge_gen.next(copy, true, base.get_edge_count(), base.get_directed_edge_count(),
+                         min_theta)) {
       // Thread 0 has the extra responsibility as time keeper,
       // to periodically ask Counters to print.
       if (thread_id == 0) {
@@ -164,10 +159,6 @@ void Grower::worker_thread_main(int thread_id) {
         }
       }
 
-      base.copy_edges(copy);
-      for (int i = 0; i < edge_gen.edge_count; i++) {
-        copy.add_edge(edge_gen.edges[i]);
-      }
       if (copy.contains_Tk(Graph::N - 1)) {
         edge_gen.notify_contain_tk_skip();
         continue;

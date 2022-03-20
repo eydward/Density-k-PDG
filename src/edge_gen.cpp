@@ -4,12 +4,11 @@
 constexpr uint8 NOT_IN_SET = 0xEE;
 
 // Initializes the generator for the given new vertex count.
-// k = number of vertices in each edge.
 // vertex_count = number of vertices to grow to in each new graph.
-EdgeGenerator::EdgeGenerator(int k_value, int vertex_count)
-    : k(k_value),
+EdgeGenerator::EdgeGenerator(int vertex_count, const Graph& base_graph)
+    : base(base_graph),
       n(vertex_count),
-      binom_nk(compute_binom(n, k)),
+      high_idx_non_zero_enum_state(0),
       edge_candidate_count(0),
       edge_count(0),
       stats_tk_skip(0),
@@ -18,7 +17,7 @@ EdgeGenerator::EdgeGenerator(int k_value, int vertex_count)
       stats_theta_directed_edges_skip(0),
       stats_edge_sets(0) {
   for (uint8 mask = 0; mask < (1 << (n - 1)); mask++) {
-    if (__builtin_popcount(mask) == k - 1) {
+    if (__builtin_popcount(mask) == Graph::K - 1) {
       edge_candidates[edge_candidate_count] = (mask | (1 << (n - 1)));
       int vidx = 0;
       edge_candidates_vidx[edge_candidate_count][vidx++] = NOT_IN_SET;
@@ -28,26 +27,23 @@ EdgeGenerator::EdgeGenerator(int k_value, int vertex_count)
           edge_candidates_vidx[edge_candidate_count][vidx++] = i;
         }
       }
-      assert(vidx == k + 2);
+      assert(vidx == Graph::K + 2);
       ++edge_candidate_count;
     }
   }
-  assert(edge_candidate_count == compute_binom(n - 1, k - 1));
-  reset_enumeration();
+  assert(edge_candidate_count == compute_binom(n - 1, Graph::K - 1));
+  for (uint8 i = 0; i < edge_candidate_count; i++) {
+    enum_state[i] = 0;
+  }
 }
 void EdgeGenerator::clear_stats() {
   stats_tk_skip = stats_tk_skip_bits = stats_theta_edges_skip = stats_theta_directed_edges_skip =
       stats_edge_sets = 0;
 }
-void EdgeGenerator::reset_enumeration() {
-  edge_count = 0;
-  high_idx_non_zero_enum_state = 0;
-  for (uint8 i = 0; i < edge_candidate_count; i++) {
-    enum_state[i] = 0;
-  }
-}
 
-// Generates the next edge set. Returns true if the next edge set is available in `edges`.
+// Generates the next edge set. Returns true enumeration should proceed,
+// in which case `copy` is the newly generated graph. (`copy` doesn't need to be clean before
+// calling this function, all its state will be reset.)
 // Returns false if all possibilities have already been enumerated.
 //
 // use_known_min_theta_opt = whether min_theta optimization should be used. If false,
@@ -62,11 +58,10 @@ void EdgeGenerator::reset_enumeration() {
 // The idea is, if the graph is too sparse, then its theta is guaranteed to be larger than
 // the currently known min_theta value, in which case we don't care about this graph since
 // it won't give us a better min_theta value regardless whether the graph is T_k free.
-bool EdgeGenerator::next(bool use_known_min_theta_opt, int base_edge_count,
+bool EdgeGenerator::next(Graph& copy, bool use_known_min_theta_opt, int base_edge_count,
                          int base_directed_edge_count, Fraction known_min_theta) {
   if (use_known_min_theta_opt) {
     // Assert that we are using min_theta optimization only in the final enumeration phase.
-    assert(k == Graph::K);
     assert(n == Graph::N);
     assert(base_edge_count >= 0);
     assert(base_directed_edge_count >= 0);
@@ -78,7 +73,7 @@ bool EdgeGenerator::next(bool use_known_min_theta_opt, int base_edge_count,
     for (uint8 i = 0; i < edge_candidate_count; i++) {
       ++enum_state[i];
       high_idx_non_zero_enum_state = std::max(high_idx_non_zero_enum_state, i);
-      if (enum_state[i] != k + 2) {
+      if (enum_state[i] != Graph::K + 2) {
         has_valid_candidate = true;
         break;
       }
@@ -114,6 +109,11 @@ bool EdgeGenerator::next(bool use_known_min_theta_opt, int base_edge_count,
       current_candidate_mask |= (1 << j);
     }
   }
+  base.copy_edges(copy);
+  for (int i = 0; i < edge_count; i++) {
+    copy.add_edge(edges[i]);
+  }
+
   ++stats_edge_sets;
   return true;
 }
@@ -129,8 +129,9 @@ EdgeGenerator::OptResult EdgeGenerator::perform_min_theta_optimization(int base_
   //    new_edges > (binom_nk - base_edge_count) / known_min_theta - base_directed_edges
   // Thus
   //    new_edges > floor((binom_nk - base_edge_count) / known_min_theta) - base_directed_edges
-  int new_edge_threshold = (binom_nk - base_edge_count) * known_min_theta.d / known_min_theta.n -
-                           base_directed_edge_count;
+  int new_edge_threshold =
+      (Graph::TOTAL_EDGES - base_edge_count) * known_min_theta.d / known_min_theta.n -
+      base_directed_edge_count;
   // bool debug_print = true;
   // if (debug_print) {
   //   std::cout << "\n**** threshold=" << new_edge_threshold << ", binom=" << (int)binom_nk
@@ -183,7 +184,7 @@ EdgeGenerator::OptResult EdgeGenerator::perform_min_theta_optimization(int base_
   int total_undirected =
       new_edges - new_directed_edges + base_edge_count - base_directed_edge_count;
   if (total_directed == 0 ||
-      known_min_theta <= Fraction(binom_nk - total_undirected, total_directed)) {
+      known_min_theta <= Fraction(Graph::TOTAL_EDGES - total_undirected, total_directed)) {
     ++stats_theta_directed_edges_skip;
     // Here we can jump forward similar to above when we don't have enough total edges,
     // to the state where it's ready to add another directed edge.
@@ -225,7 +226,7 @@ void EdgeGenerator::notify_contain_tk_skip() {
   // then the next call will get to [3,0,0,2,0,0,0].
   for (uint8 i = 0; i < edge_candidate_count; i++) {
     if (enum_state[i] != 0) return;
-    enum_state[i] = k + 1;
+    enum_state[i] = Graph::K + 1;
     ++stats_tk_skip_bits;
   }
 }
@@ -259,7 +260,7 @@ std::tuple<uint8, uint8, uint8, uint8> EdgeGenerator::count_edges() const {
 }
 
 void EdgeGenerator::print_debug(bool print_candidates) const {
-  std::cout << "    EdgeGen[" << static_cast<int>(k) << ", " << static_cast<int>(n)
+  std::cout << "    EdgeGen[" << static_cast<int>(n)
             << ", cand_count=" << static_cast<int>(edge_candidate_count)
             << ", high_idx=" << static_cast<int>(high_idx_non_zero_enum_state) << ", state=";
   for (int e = 0; e < edge_candidate_count; e++) {

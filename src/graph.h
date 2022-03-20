@@ -236,6 +236,11 @@ struct Graph {
   FRIEND_TEST(GraphTest, Isomorphic_C);
   FRIEND_TEST(GraphTest, GraphDataStructure);
   FRIEND_TEST(GraphTest, T3);
+  FRIEND_TEST(EdgeGeneratorTest, Generate22);
+  FRIEND_TEST(EdgeGeneratorTest, Generate23);
+  FRIEND_TEST(EdgeGeneratorTest, Generate23WithSkip);
+  FRIEND_TEST(EdgeGeneratorTest, Generate33);
+  FRIEND_TEST(EdgeGeneratorTest, Generate45);
   friend class IsomorphismStressTest;
 };
 static_assert(sizeof(Graph) == 136);
