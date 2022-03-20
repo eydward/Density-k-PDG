@@ -164,11 +164,18 @@ EdgeGenerator::OptResult EdgeGenerator::perform_min_theta_optimization(int base_
       // return DONE to terminate the generation.
       return OptResult::DONE;
     }
-    for (uint8 i = 1; i <= low_non_edge_idx; i++) {
-      enum_state[i] = 1;
+    // for (uint8 i = 1; i <= low_non_edge_idx; i++) {
+    //   enum_state[i] = 1;
+    // }
+    // enum_state[0] = 0;
+    // return OptResult::CONTINUE_SEARCH;
+    if (low_non_edge_idx > 0) {
+      enum_state[low_non_edge_idx] = 1;
+      for (uint8 i = 0; i < low_non_edge_idx; i++) {
+        enum_state[i] = 0;
+      }
     }
-    enum_state[0] = 0;
-    return OptResult::CONTINUE_SEARCH;
+    return OptResult::FOUND_CANDIDATE;
   }
   // If we get here, we have enough number of edges. But there still may not be enough number
   // of directed edges. So just compute.
@@ -190,11 +197,18 @@ EdgeGenerator::OptResult EdgeGenerator::perform_min_theta_optimization(int base_
       // edges, simply return DONE to terminate the generation.
       return OptResult::DONE;
     }
-    for (uint8 i = 1; i <= low_non_directed_idx; i++) {
-      enum_state[i] = 2;
+    // for (uint8 i = 1; i <= low_non_directed_idx; i++) {
+    //   enum_state[i] = 2;
+    // }
+    // enum_state[0] = 1;
+    // return OptResult::CONTINUE_SEARCH;
+    if (low_non_directed_idx > 0) {
+      enum_state[low_non_directed_idx] = 2;
+      for (uint8 i = 0; i < low_non_directed_idx; i++) {
+        enum_state[i] = 0;
+      }
     }
-    enum_state[0] = 1;
-    return OptResult::CONTINUE_SEARCH;
+    return OptResult::FOUND_CANDIDATE;
   }
 
   // Reaching this point means we passed the check and have a valid candidate.
@@ -245,17 +259,17 @@ std::tuple<uint8, uint8, uint8, uint8> EdgeGenerator::count_edges() const {
 }
 
 void EdgeGenerator::print_debug(bool print_candidates) const {
-  std::cout << "EdgeGen[" << static_cast<int>(k) << ", " << static_cast<int>(n)
+  std::cout << "    EdgeGen[" << static_cast<int>(k) << ", " << static_cast<int>(n)
             << ", cand_count=" << static_cast<int>(edge_candidate_count)
             << ", high_idx=" << static_cast<int>(high_idx_non_zero_enum_state) << ", state=";
   for (int e = 0; e < edge_candidate_count; e++) {
     std::cout << static_cast<int>(enum_state[e]);
   }
   if (print_candidates) {
-    std::cout << "\n  EC={";
+    std::cout << "\n      EC={";
     for (int e = 0; e < edge_candidate_count; e++) {
       if (e > 0) std::cout << ", ";
-      std::cout << std::bitset<8>(edge_candidates[e]);
+      std::cout << std::bitset<MAX_VERTICES>(edge_candidates[e]);
     }
     std::cout << "}";
   }
