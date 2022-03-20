@@ -95,10 +95,13 @@ void Counters::print_counters() {
 // Helper function: print large numbers in a more readable format with a ` at the 10^6 position.
 std::string fmt(uint64 value) {
   constexpr uint64 M = 1000000;
-  if (value < M)
+  if (value < M) {
     return std::to_string(value);
-  else
-    return std::to_string(value / M) + "`" + std::to_string(value % M);
+  } else {
+    std::string tail = std::to_string(value % M);
+    return std::to_string(value / M) + "`" +
+           std::string(6 - std::min(6, static_cast<int>(tail.length())), '0') + tail;
+  }
 }
 void Counters::print_counters_to_stream(std::ostream& os) {
   const auto end = std::chrono::steady_clock::now();
