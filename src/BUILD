@@ -18,14 +18,14 @@ cc_library(
         "grower.cpp",
         "permutator.cpp",
     ],
-    copts=["-std=c++20"],
+    copts=["-std=c++17"],
 )
 
 cc_binary(
     name="kPDG",
     srcs=["kPDG.cpp"],
     deps=[":graph"],
-    copts=["-std=c++20"],
+    copts=["-std=c++17"],
     linkopts=["-lpthread"],
     linkstatic=True,
 )
@@ -35,14 +35,14 @@ cc_library(
     hdrs=["tests/iso_stress_test.h"],
     srcs=["tests/iso_stress_test.cpp"],
     deps=[":graph"],
-    copts=["-std=c++20"],
+    copts=["-std=c++17"],
 )
 
 cc_binary(
     name="isostress",
     srcs=["tests/isostress.cpp"],
     deps=[":iso_stress_test"],
-    copts=["-std=c++20"],
+    copts=["-std=c++17"],
     linkstatic=True,
 )
 
@@ -61,6 +61,6 @@ cc_test(
         "@gtest//:gtest",
         "@gtest//:gtest_main",
     ],
-    copts=["-std=c++20"],
+    copts=["-std=c++17"],
     linkopts=["-lpthread"],
 )

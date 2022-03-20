@@ -76,7 +76,7 @@ std::vector<Graph> Grower::grow_step(int n, const std::vector<Graph>& base_graph
 
       copy.canonicalize();
 
-      if (!results.contains(copy)) {
+      if (results.find(copy) == results.cend()) {
         results.insert(copy);
         Counters::observe_theta(copy);
       }
