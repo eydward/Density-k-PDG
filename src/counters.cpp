@@ -111,9 +111,6 @@ std::string fmt(uint64 value) {
 }
 void Counters::print_counters_to_stream(std::ostream& os) {
   const auto end = std::chrono::steady_clock::now();
-  os << "FMT 123 => " << fmt(123) << "     1001234 ==> " << fmt(1001234)
-     << "      123456789012 ==> " << fmt(123456789012ull) << "    1230001230456789 => "
-     << fmt(1230001230456789ull) << "\n";
   os << "\n--------Wall clock time:  "
      << fmt(std::chrono::duration_cast<std::chrono::milliseconds>(end - start_time).count()) << "ms"
      << "\n    Current minimum theta = " << min_theta.n << " / " << min_theta.d
