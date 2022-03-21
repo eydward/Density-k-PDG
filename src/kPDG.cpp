@@ -45,7 +45,7 @@ int main(int argc, char* argv[]) {
 
   Graph::set_global_graph_info(k, n);
 
-  std::string log_file_name = "kPDG_v7_" + std::to_string(Graph::K) + "_" +
+  std::string log_file_name = "kPDG_v8_" + std::to_string(Graph::K) + "_" +
                               std::to_string(Graph::N) + "_" + std::to_string(t) + "_" +
                               std::to_string(start_idx) + "_" + std::to_string(end_idx) + "_" +
                               get_current_time();
