@@ -70,6 +70,6 @@ class EdgeGenerator {
   // makes it contain T_k, and therefore we can skip edge sets that are supersets of the current.
   void notify_contain_tk_skip();
 
-  // Print the current state of this class to console for debugging purpose.
-  void print_debug(bool print_candidates) const;
+  // Print the current state of this class to the given stream for debugging purpose.
+  void print_debug(std::ostream& os, bool print_candidates) const;
 };

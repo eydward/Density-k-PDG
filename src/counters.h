@@ -70,6 +70,8 @@ class Counters {
     ++growth_processed_graphs_in_current_step;
   }
 
+  static std::ofstream* get_log() { return log; }
+
   // Starting a new step in growth.
   static void new_growth_step(uint64 vertex_count, uint64 total_graphs_in_current_step);
 

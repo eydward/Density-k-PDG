@@ -264,20 +264,20 @@ std::tuple<uint8, uint8, uint8, uint8> EdgeGenerator::count_edges() const {
   return std::make_tuple(edges, directed, first_non_edge, first_non_directed_edge);
 }
 
-void EdgeGenerator::print_debug(bool print_candidates) const {
-  std::cout << "    EdgeGen[" << static_cast<int>(n)
-            << ", cand_count=" << static_cast<int>(edge_candidate_count)
-            << ", high_idx=" << static_cast<int>(high_idx_non_zero_enum_state) << ", state=";
+void EdgeGenerator::print_debug(std::ostream& os, bool print_candidates) const {
+  os << "    EdgeGen[" << static_cast<int>(n)
+     << ", cand_count=" << static_cast<int>(edge_candidate_count)
+     << ", high_idx=" << static_cast<int>(high_idx_non_zero_enum_state) << ", state=";
   for (int e = 0; e < edge_candidate_count; e++) {
-    std::cout << static_cast<int>(enum_state[e]);
+    os << static_cast<int>(enum_state[e]);
   }
   if (print_candidates) {
-    std::cout << "\n      EC={";
+    os << "\n      EC={";
     for (int e = 0; e < edge_candidate_count; e++) {
-      if (e > 0) std::cout << ", ";
-      std::cout << std::bitset<MAX_VERTICES>(edge_candidates[e]);
+      if (e > 0) os << ", ";
+      os << std::bitset<MAX_VERTICES>(edge_candidates[e]);
     }
-    std::cout << "}";
+    os << "}";
   }
-  std::cout << "]\n";
+  os << "]\n";
 }
