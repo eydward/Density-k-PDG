@@ -27,11 +27,14 @@ class EdgeGenerator {
   //    forth = lowest index in enum_state where the edge is undirected or not in the set.
   std::tuple<uint8, uint8, uint8, uint8> count_edges() const;
 
+  void generate_graph(Graph& copy, int skip_front) const;
+
   enum class OptResult { FOUND_CANDIDATE = 0, CONTINUE_SEARCH = 1, DONE = 2 };
   OptResult perform_min_theta_optimization(int base_edge_count, int base_directed_edge_count,
                                            Fraction known_min_theta);
 
  public:
+  // Some performance counters used to monitor the edge gen behavior.
   uint64 stats_tk_skip;           // How many notify_contain_tk_skip().
   uint64 stats_tk_skip_bits;      // How many bits in total did notify_contain_tk_skip() skip.
   uint64 stats_theta_edges_skip;  // How many skips due to min_theta opt, not enough edges.

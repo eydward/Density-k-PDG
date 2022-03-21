@@ -98,15 +98,17 @@ bool EdgeGenerator::next(Graph& copy, bool use_known_min_theta_opt, int base_edg
   }
 
   // We found a new valid enumeration state. Generate a new graph into `copy`.
+  generate_graph(copy, 0);
+  ++stats_edge_sets;
+  return true;
+}
+void EdgeGenerator::generate_graph(Graph& copy, int skip_front) const {
   base.copy_edges(copy);
-  for (uint8 j = 0; j <= high_idx_non_zero_enum_state; j++) {
+  for (uint8 j = skip_front; j <= high_idx_non_zero_enum_state; j++) {
     if (enum_state[j] != 0) {
       copy.add_edge(Edge(edge_candidates[j], edge_candidates_vidx[j][enum_state[j]]));
     }
   }
-
-  ++stats_edge_sets;
-  return true;
 }
 
 EdgeGenerator::OptResult EdgeGenerator::perform_min_theta_optimization(int base_edge_count,
@@ -156,18 +158,18 @@ EdgeGenerator::OptResult EdgeGenerator::perform_min_theta_optimization(int base_
       // return DONE to terminate the generation.
       return OptResult::DONE;
     }
-    // for (uint8 i = 1; i <= low_non_edge_idx; i++) {
-    //   enum_state[i] = 1;
-    // }
-    // enum_state[0] = 0;
-    // return OptResult::CONTINUE_SEARCH;
-    if (low_non_edge_idx > 0) {
-      enum_state[low_non_edge_idx] = 1;
-      for (uint8 i = 0; i < low_non_edge_idx; i++) {
-        enum_state[i] = 0;
-      }
+    for (uint8 i = 1; i <= low_non_edge_idx; i++) {
+      enum_state[i] = 1;
     }
-    return OptResult::FOUND_CANDIDATE;
+    enum_state[0] = 0;
+    return OptResult::CONTINUE_SEARCH;
+    // if (low_non_edge_idx > 0) {
+    //   enum_state[low_non_edge_idx] = 1;
+    //   for (uint8 i = 0; i < low_non_edge_idx; i++) {
+    //     enum_state[i] = 0;
+    //   }
+    // }
+    // return OptResult::FOUND_CANDIDATE;
   }
   // If we get here, we have enough number of edges. But there still may not be enough number
   // of directed edges. So just compute.
@@ -189,18 +191,18 @@ EdgeGenerator::OptResult EdgeGenerator::perform_min_theta_optimization(int base_
       // edges, simply return DONE to terminate the generation.
       return OptResult::DONE;
     }
-    // for (uint8 i = 1; i <= low_non_directed_idx; i++) {
-    //   enum_state[i] = 2;
-    // }
-    // enum_state[0] = 1;
-    // return OptResult::CONTINUE_SEARCH;
-    if (low_non_directed_idx > 0) {
-      enum_state[low_non_directed_idx] = 2;
-      for (uint8 i = 0; i < low_non_directed_idx; i++) {
-        enum_state[i] = 0;
-      }
+    for (uint8 i = 1; i <= low_non_directed_idx; i++) {
+      enum_state[i] = 2;
     }
-    return OptResult::FOUND_CANDIDATE;
+    enum_state[0] = 1;
+    return OptResult::CONTINUE_SEARCH;
+    // if (low_non_directed_idx > 0) {
+    //   enum_state[low_non_directed_idx] = 2;
+    //   for (uint8 i = 0; i < low_non_directed_idx; i++) {
+    //     enum_state[i] = 0;
+    //   }
+    // }
+    // return OptResult::FOUND_CANDIDATE;
   }
 
   // Reaching this point means we passed the check and have a valid candidate.
@@ -211,14 +213,26 @@ EdgeGenerator::OptResult EdgeGenerator::perform_min_theta_optimization(int base_
 // makes it contain T_k, and therefore we can skip edge sets that are supersets of the current.
 void EdgeGenerator::notify_contain_tk_skip() {
   ++stats_tk_skip;
-  // Find the lowest non-zero enum state, and change everything below
-  // it to the final state. Then the next() call will bump the lowest non-zero enum state.
-  // For example, if the enum state is [3,0,0,1,0,0,0], update it to [3,0,0,1,k+1,k+1,k+1]
-  // then the next call will get to [3,0,0,2,0,0,0].
-  for (uint8 i = 0; i < edge_candidate_count; i++) {
-    if (enum_state[i] != 0) return;
-    enum_state[i] = Graph::K + 1;
-    ++stats_tk_skip_bits;
+  if (enum_state[0] == 0) {
+    // Find the lowest non-zero enum state, and change everything below
+    // it to the final state. Then the next() call will bump the lowest non-zero enum state.
+    // For example, if the enum state is [3,0,0,1,0,0,0], update it to [3,0,0,1,k+1,k+1,k+1]
+    // then the next call will get to [3,0,0,2,0,0,0].
+    for (uint8 i = 0; i < edge_candidate_count; i++) {
+      if (enum_state[i] != 0) return;
+      enum_state[i] = Graph::K + 1;
+      ++stats_tk_skip_bits;
+    }
+  } else if (n == Graph::N) {
+    Graph copy;
+    for (int skip_front = 1; skip_front < edge_candidate_count; skip_front++) {
+      generate_graph(copy, skip_front);
+      if (copy.get_edge_count() == base.get_edge_count()) return;
+      if (copy.contains_Tk(Graph::N - 1)) {
+        enum_state[skip_front - 1] = Graph::K + 1;
+        ++stats_tk_skip_bits;
+      }
+    }
   }
 }
 
