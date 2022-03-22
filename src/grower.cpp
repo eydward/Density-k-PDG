@@ -11,9 +11,10 @@ struct GraphComparer {
   bool operator()(const Graph& g, const Graph& h) const { return g.is_isomorphic(h); }
 };
 
-Grower::Grower(int num_worker_threads_, int start_idx_, int end_idx_, std::ostream* log_,
-               std::ostream* log_detail_)
+Grower::Grower(int num_worker_threads_, int skip_final_enum_, int start_idx_, int end_idx_,
+               std::ostream* log_, std::ostream* log_detail_)
     : num_worker_threads(num_worker_threads_),
+      skip_final_enum(skip_final_enum_),
       start_idx(start_idx_),
       end_idx(end_idx_),
       log(log_),
@@ -41,8 +42,13 @@ void Grower::grow() {
   }
   Counters::print_counters();
   print_before_final(collected_graphs);
-  // Finally, enumerate all graphs with N vertices, no need to store graphs.
-  enumerate_final_step(collected_graphs[Graph::N - 1]);
+
+  if (!skip_final_enum) {
+    // Finally, enumerate all graphs with N vertices, no need to store graphs.
+    enumerate_final_step(collected_graphs[Graph::N - 1]);
+  } else {
+    std::cout << "Skipped.\n";
+  }
 }
 
 // Constructs all non-isomorphic graphs with n vertices that are T_k-free,
@@ -219,7 +225,14 @@ void Grower::print_state_to_stream(std::ostream& os,
   os << "\n---------------------------------\n"
      << "Growth phase completed. State:\n";
   for (int i = 0; i < Graph::N; i++) {
-    os << "    order=" << i << " : collected= " << collected_graphs[i].size() << "\n";
+    int all_directed = 0;
+    for (const Graph& g : collected_graphs[i]) {
+      if (g.get_directed_edge_count() == g.get_edge_count()) {
+        ++all_directed;
+      }
+    }
+    os << "    order=" << i << " : collected= " << collected_graphs[i].size()
+       << ", all_edge_directed= " << all_directed << "\n";
   }
   os << "---------------------------------\n\nStarting final enumeration phase...\n";
 }

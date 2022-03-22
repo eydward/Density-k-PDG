@@ -8,6 +8,8 @@ class Grower {
  private:
   // The number of worker threads to use in the final enumeration step.
   const int num_worker_threads;
+  // If true, stop after the growing phase but don't perform the final enumeration phase.
+  const bool skip_final_enum;
   // The start index and end index in the final enumeration phase.
   const int start_idx;
   const int end_idx;
@@ -52,8 +54,8 @@ class Grower {
  public:
   // Constructs the Grower object.
   // log_stream is used for status reporting and debugging purpose.
-  Grower(int num_worker_threads_, int start_idx_, int end_idx_, std::ostream* log_ = nullptr,
-         std::ostream* log_detail_ = nullptr);
+  Grower(int num_worker_threads_, int skip_final_enum_, int start_idx_, int end_idx_,
+         std::ostream* log_ = nullptr, std::ostream* log_detail_ = nullptr);
 
   // Finds all canonical isomorphism class representations with up to max_n vertices.
   void grow();

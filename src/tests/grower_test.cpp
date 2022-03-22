@@ -10,7 +10,7 @@ void verify_growth_result(int k, int n, Fraction min_theta) {
   Graph::set_global_graph_info(k, n);
   Counters::initialize();
   for (int num_threads = 0; num_threads < 10; num_threads++) {
-    Grower s(num_threads, 0, 0);
+    Grower s(num_threads, false, 0, 0);
     s.grow();
     EXPECT_TRUE(Counters::get_min_theta() == min_theta);
   }

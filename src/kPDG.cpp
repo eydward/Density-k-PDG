@@ -7,7 +7,8 @@ void print_usage() {
             << "  Each argument is an integer, K and N are required, others optional.\n"
             << "  K = Number of vertices in each edge.\n"
             << "  N = Total number of vertices in a graph.  2 <= K <= N <= 7.\n"
-            << "  T = Number of worker threads. (0 means don't use threads).\n"
+            << "  T = Number of worker threads. (0 means don't use threads,\n"
+            << "                                 -1 means no final phase).\n"
             << "  (optional) start_idx and end_index: the range of graph indices in the final\n"
             << "    enumeration phase (inclusive on both ends), allowing the search to run on\n"
             << "    multiple computers independently. They must be both omitted or both included\n"
@@ -36,6 +37,11 @@ int main(int argc, char* argv[]) {
     start_idx = atoi(argv[4]);
     end_idx = atoi(argv[5]);
   }
+  bool skip_final_enum = false;
+  if (t < 0) {
+    skip_final_enum = true;
+    t = 0;
+  }
 
   if (k < 2 || n > 7 || k > n || t < 0 || t > 128 || start_idx < 0 || end_idx < start_idx) {
     std::cout << "Invalid command line arguments. See usage for details.\n";
@@ -62,7 +68,7 @@ int main(int argc, char* argv[]) {
 
   Counters::initialize(&log);
 
-  Grower s(t, start_idx, end_idx, &log, &detail_log);
+  Grower s(t, skip_final_enum, start_idx, end_idx, &log, &detail_log);
   s.grow();
 
   const std::string done_msg = "\n\n***************************\nALL DONE. Final result:\n";
