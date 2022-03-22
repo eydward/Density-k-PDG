@@ -65,8 +65,9 @@ int main(int argc, char* argv[]) {
   Grower s(t, start_idx, end_idx, &log, &detail_log);
   s.grow();
 
-  std::cout << "\nALL DONE. Final result:\n";
-  log << "ALL DONE. Final result:\n";
+  const std::string done_msg = "\n\n***************************\nALL DONE. Final result:\n";
+  std::cout << done_msg;
+  log << done_msg;
   Counters::print_counters();
   log.flush();
   log.close();

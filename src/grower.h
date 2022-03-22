@@ -23,18 +23,20 @@ class Grower {
   // This function is called repeatedly to grow all graphs up to N-1 vertices.
   std::vector<Graph> grow_step(int n, const std::vector<Graph>&);
 
-  // Enumerate all graphs in the final step where all graphs have N vertices.
+  // Enumerates all graphs in the final step where all graphs have N vertices.
   // We don't need to collect any graph in this step.
   // The parameter is the collection of graphs collected from the last grow_step()
   // with (N-1) vertices.
   void enumerate_final_step(const std::vector<Graph>&);
 
-  // Print the content of the canonicals after the growth to console and log files.
+  // Prints the content of the canonicals after the growth to console and log files.
   void print_before_final(const std::vector<Graph> collected_graphs[MAX_VERTICES]) const;
   void print_state_to_stream(std::ostream& os,
                              const std::vector<Graph> collected_graphs[MAX_VERTICES]) const;
+  // Prints the configuration to the given output stream.
   void print_config(std::ostream& os) const;
 
+  // The entry point of the worker thread, used in the final enumeration phase.
   void worker_thread_main(int thread_id);
 
   // The mutex to protect the counters under multi-threading.
@@ -53,6 +55,6 @@ class Grower {
   Grower(int num_worker_threads_, int start_idx_, int end_idx_, std::ostream* log_ = nullptr,
          std::ostream* log_detail_ = nullptr);
 
-  // Find all canonical isomorphism class representations with up to max_n vertices.
+  // Finds all canonical isomorphism class representations with up to max_n vertices.
   void grow();
 };

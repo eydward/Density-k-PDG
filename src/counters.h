@@ -75,11 +75,13 @@ class Counters {
   // Starting a new step in growth.
   static void new_growth_step(uint64 vertex_count, uint64 total_graphs_in_current_step);
 
+  // Starting the final enumeration phase.
   static void enter_final_step(uint64 num_base_graphs);
 
   // If the given graph's theta is less than min_theta, assign it to min_theta.
   static void observe_theta(const Graph& g, uint64 graphs_processed = 1);
 
+  // Adds the edge gen stats to the counters.
   static void observe_edgegen_stats(uint64 tk_skip, uint64 tk_skip_bits, uint64 theta_edges_skip,
                                     uint64 theta_directed_edges_skip, uint64 edge_sets);
 

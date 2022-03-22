@@ -111,6 +111,17 @@ void EdgeGenerator::generate_graph(Graph& copy, int skip_front) const {
   }
 }
 
+// Performs the min_theta optimization, and returns one of the three results.
+//
+// Idea of the min_theta optimization: given the base graph and the current enum state,
+// we know what theta value of the new graph, without generating the new graph. If the
+// theta value is >= the currently known min_theta value, then the new graph is not interesting
+// to us, regardless whether it's T_k free, because it won't be able to lower the min_theta
+// value anyway. So in such case, we can advance the enumeration state to the next possible
+// state that may give us a smaller theta value, skipping many states to make the algorithm
+// computationally feasible. This is very important when the base graph is very sparse
+// and therefore the new graphs are less likely to contain T_k, making the
+// `notify_contain_tk_skip` optimization less effective.
 EdgeGenerator::OptResult EdgeGenerator::perform_min_theta_optimization(int base_edge_count,
                                                                        int base_directed_edge_count,
                                                                        Fraction known_min_theta) {
