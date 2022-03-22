@@ -67,8 +67,8 @@ struct VertexSignature {
 
   // Utility function to print an degree info array to the output stream, for debugging purpose.
   uint32 get_degrees() const {
-    return static_cast<uint32>(degree_undirected) | (static_cast<uint32>(degree_head) << 8) |
-           (static_cast<uint32>(degree_tail) << 16);
+    return static_cast<uint32>(degree_undirected) << 16 | (static_cast<uint32>(degree_head) << 8) |
+           (static_cast<uint32>(degree_tail));
   }
 
   // Returns a 32-bit hash code to represent the data.
