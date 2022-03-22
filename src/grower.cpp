@@ -60,6 +60,13 @@ std::vector<Graph> Grower::grow_step(int n, const std::vector<Graph>& base_graph
   Counters::new_growth_step(n, base_graphs.size());
   std::unordered_set<Graph, GraphHasher, GraphComparer> results;
 
+  // Add all non-empty graphs from the previous step to the results.
+  for (const Graph& g : base_graphs) {
+    if (g.get_edge_count() > 0) {
+      results.insert(g);
+    }
+  }
+
   // This data structure will be reused when processing the graphs.
   Graph copy;
 
