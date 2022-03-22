@@ -87,5 +87,5 @@ class EdgeGenerator {
   void notify_contain_tk_skip();
 
   // Print the current state of this class to the given stream for debugging purpose.
-  void print_debug(std::ostream& os, bool print_candidates) const;
+  void print_debug(std::ostream& os, bool print_candidates, int base_graph_id) const;
 };

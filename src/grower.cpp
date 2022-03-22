@@ -154,9 +154,9 @@ void Grower::worker_thread_main(int thread_id) {
                                             edge_gen.stats_edge_sets);
             edge_gen.clear_stats();
             Counters::print_at_time_interval();
-            edge_gen.print_debug(std::cout, false);
+            edge_gen.print_debug(std::cout, false, base_graph_id);
             if (Counters::get_log() != nullptr) {
-              edge_gen.print_debug(*Counters::get_log(), false);
+              edge_gen.print_debug(*Counters::get_log(), false, base_graph_id);
             }
           }
         }

@@ -275,9 +275,8 @@ std::tuple<uint8, uint8, uint8, uint8> EdgeGenerator::count_edges() const {
   return std::make_tuple(edges, directed, first_non_edge, first_non_directed_edge);
 }
 
-void EdgeGenerator::print_debug(std::ostream& os, bool print_candidates) const {
-  os << "    EdgeGen[" << static_cast<int>(n)
-     << ", cand_count=" << static_cast<int>(edge_candidate_count)
+void EdgeGenerator::print_debug(std::ostream& os, bool print_candidates, int base_graph_id) const {
+  os << "    EdgeGen[" << base_graph_id
      << ", high_idx=" << static_cast<int>(high_idx_non_zero_enum_state) << ", state=";
   for (int e = 0; e < edge_candidate_count; e++) {
     os << static_cast<int>(enum_state[e]);
