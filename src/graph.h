@@ -44,24 +44,18 @@ static_assert(sizeof(Edge) == 2);
 // Represent the characteristics of a vertex.
 // Both get_degrees() and get_hash() are invariant under graph isomorphisms.
 struct VertexSignature {
-  // Combined hash code of the signatures (excluding hashes) of neighbors. Algorithm:
-  // Let N_u, N_h, N_t be the neighboring vertex sets that correspond to the 3 degree counts above.
-  // Within each set, sort by the signature values (without neighbor_hash value) of the vertices.
-  // Then combine the hash with this given order.
-  uint32 neighbor_hash;
-
-  // Number of undirected edges through the give vertex set.
-  uint8 degree_undirected;
-  // Number of directed edges through the given vertex set, with the head in the given vertex head.
-  uint8 degree_head;
   // Number of directed edges through the given vertex set, with the head not in the set.
   uint8 degree_tail;
+  // Number of directed edges through the given vertex set, with the head in the given vertex head.
+  uint8 degree_head;
+  // Number of undirected edges through the give vertex set.
+  uint8 degree_undirected;
   // The vertex id. This is not used in get_hash() in order to maintain invariant property.
   uint8 vertex_id;
 
   // Reset all data fields to 0, except setting the vertex_id using the given vid value.
   void reset(int vid) {
-    neighbor_hash = degree_undirected = degree_head = degree_tail = 0;
+    degree_undirected = degree_head = degree_tail = 0;
     vertex_id = vid;
   }
 
@@ -71,14 +65,11 @@ struct VertexSignature {
            (static_cast<uint32>(degree_tail));
   }
 
-  // Returns a 32-bit hash code to represent the data.
-  uint64 get_hash() const { return neighbor_hash | (static_cast<uint64>(get_degrees()) << 32); }
-
   // Utility function to print an array of VertexSignatures to the given output stream,
   // for debugging purpose.
   static void print_vertices(std::ostream& os, const VertexSignature vertices[MAX_VERTICES]);
 };
-static_assert(sizeof(VertexSignature) == 8);
+static_assert(sizeof(VertexSignature) == 4);
 
 // Represents the bitmasks of vertices, used to in various computations such as codegree info.
 // Each VertexMask struct instance holds all valid vertex bitmasks for a given k value.
@@ -201,9 +192,6 @@ struct Graph {
   // The result is in the given array.
   void compute_vertex_signature();
 
-  // Computes the hash code from the vertice degree info of the neighboring vertices.
-  void hash_neighbors(uint8 neighbors, uint32& hash_code) const;
-
   // Perform a permutation of the vertices of this graph according to the p array, put in `g`.
   // Only set the data in the edges array in `g` without touching other fields.
   void permute_edges(int p[], Graph& g) const;
@@ -243,4 +231,4 @@ struct Graph {
   FRIEND_TEST(EdgeGeneratorTest, Generate45);
   friend class IsomorphismStressTest;
 };
-static_assert(sizeof(Graph) == 136);
+static_assert(sizeof(Graph) == 108);

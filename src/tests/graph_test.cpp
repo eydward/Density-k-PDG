@@ -79,33 +79,34 @@ TEST(GraphTest, GraphDataStructure) {
   EXPECT_EQ(serialize_edges(g), "{234, 156>5, 123>2, 013}");
 
   g.canonicalize();
-  EXPECT_EQ(g.vertices[0].degree_tail, 2);
+  EXPECT_EQ(serialize_edges(g), "{012>1, 023, 014, 256>5}");
+  EXPECT_EQ(g.vertices[0].degree_undirected, 2);
   EXPECT_EQ(g.vertices[0].degree_head, 0);
-  EXPECT_EQ(g.vertices[0].degree_undirected, 1);
+  EXPECT_EQ(g.vertices[0].degree_tail, 1);
 
-  EXPECT_EQ(g.vertices[1].degree_tail, 1);
-  EXPECT_EQ(g.vertices[1].degree_head, 0);
-  EXPECT_EQ(g.vertices[1].degree_undirected, 2);
+  EXPECT_EQ(g.vertices[1].degree_undirected, 1);
+  EXPECT_EQ(g.vertices[1].degree_head, 1);
+  EXPECT_EQ(g.vertices[1].degree_tail, 0);
 
-  EXPECT_EQ(g.vertices[2].degree_tail, 1);
+  EXPECT_EQ(g.vertices[2].degree_undirected, 1);
   EXPECT_EQ(g.vertices[2].degree_head, 0);
-  EXPECT_EQ(g.vertices[2].degree_undirected, 0);
+  EXPECT_EQ(g.vertices[2].degree_tail, 2);
 
-  EXPECT_EQ(g.vertices[3].degree_tail, 0);
-  EXPECT_EQ(g.vertices[3].degree_head, 1);
   EXPECT_EQ(g.vertices[3].degree_undirected, 1);
+  EXPECT_EQ(g.vertices[3].degree_head, 0);
+  EXPECT_EQ(g.vertices[3].degree_tail, 0);
 
+  EXPECT_EQ(g.vertices[4].degree_undirected, 1);
+  EXPECT_EQ(g.vertices[4].degree_head, 0);
   EXPECT_EQ(g.vertices[4].degree_tail, 0);
-  EXPECT_EQ(g.vertices[4].degree_head, 1);
-  EXPECT_EQ(g.vertices[4].degree_undirected, 0);
 
+  EXPECT_EQ(g.vertices[5].degree_undirected, 0);
+  EXPECT_EQ(g.vertices[5].degree_head, 1);
   EXPECT_EQ(g.vertices[5].degree_tail, 0);
-  EXPECT_EQ(g.vertices[5].degree_head, 0);
-  EXPECT_EQ(g.vertices[5].degree_undirected, 1);
 
-  EXPECT_EQ(g.vertices[6].degree_tail, 0);
+  EXPECT_EQ(g.vertices[6].degree_undirected, 0);
   EXPECT_EQ(g.vertices[6].degree_head, 0);
-  EXPECT_EQ(g.vertices[6].degree_undirected, 1);
+  EXPECT_EQ(g.vertices[6].degree_tail, 1);
 }
 
 // Utility function to create and initialize T_3.
@@ -120,16 +121,16 @@ TEST(GraphTest, T3) {
   Graph g = get_T3();
 
   EXPECT_EQ(4, g.edge_count);
-  // Canonicalization: 1->1, 2->3, 3-> 0, 4->2, 0->4.
-  EXPECT_EQ(g.edges[0].vertex_set, 0b1011);  // 013>3
-  EXPECT_EQ(g.edges[0].head_vertex, 3);
-  EXPECT_EQ(g.edges[1].vertex_set, 0b1101);  // 023>3
-  EXPECT_EQ(g.edges[1].head_vertex, 3);
-  EXPECT_EQ(g.edges[2].vertex_set, 0b10011);  // 014
-  EXPECT_EQ(g.edges[2].head_vertex, UNDIRECTED);
-  EXPECT_EQ(g.edges[3].vertex_set, 0b11001);  // 034
-  EXPECT_EQ(g.edges[3].head_vertex, UNDIRECTED);
-  EXPECT_EQ(serialize_edges(g), "{013>3, 023>3, 014, 034}");
+  // Canonicalization: 0->1, 1->3, 2->2, 3->0, 4->4.
+  EXPECT_EQ(g.edges[0].vertex_set, 0b0111);  // 012
+  EXPECT_EQ(g.edges[0].head_vertex, UNDIRECTED);
+  EXPECT_EQ(g.edges[1].vertex_set, 0b1011);  // 013
+  EXPECT_EQ(g.edges[1].head_vertex, UNDIRECTED);
+  EXPECT_EQ(g.edges[2].vertex_set, 0b01101);  // 023>2
+  EXPECT_EQ(g.edges[2].head_vertex, 2);
+  EXPECT_EQ(g.edges[3].vertex_set, 0b10101);  // 024>2
+  EXPECT_EQ(g.edges[3].head_vertex, 2);
+  EXPECT_EQ(serialize_edges(g), "{012, 013, 023>2, 024>2}");
 
   g.canonicalize();
 
@@ -137,21 +138,21 @@ TEST(GraphTest, T3) {
   EXPECT_EQ(g.vertices[0].degree_head, 0);
   EXPECT_EQ(g.vertices[0].degree_tail, 2);
 
-  EXPECT_EQ(g.vertices[1].degree_undirected, 1);
+  EXPECT_EQ(g.vertices[1].degree_undirected, 2);
   EXPECT_EQ(g.vertices[1].degree_head, 0);
-  EXPECT_EQ(g.vertices[1].degree_tail, 1);
+  EXPECT_EQ(g.vertices[1].degree_tail, 0);
 
-  EXPECT_EQ(g.vertices[2].degree_undirected, 0);
-  EXPECT_EQ(g.vertices[2].degree_head, 0);
-  EXPECT_EQ(g.vertices[2].degree_tail, 1);
+  EXPECT_EQ(g.vertices[2].degree_undirected, 1);
+  EXPECT_EQ(g.vertices[2].degree_head, 2);
+  EXPECT_EQ(g.vertices[2].degree_tail, 0);
 
   EXPECT_EQ(g.vertices[3].degree_undirected, 1);
-  EXPECT_EQ(g.vertices[3].degree_head, 2);
-  EXPECT_EQ(g.vertices[3].degree_tail, 0);
+  EXPECT_EQ(g.vertices[3].degree_head, 0);
+  EXPECT_EQ(g.vertices[3].degree_tail, 1);
 
-  EXPECT_EQ(g.vertices[4].degree_undirected, 2);
+  EXPECT_EQ(g.vertices[4].degree_undirected, 0);
   EXPECT_EQ(g.vertices[4].degree_head, 0);
-  EXPECT_EQ(g.vertices[4].degree_tail, 0);
+  EXPECT_EQ(g.vertices[4].degree_tail, 1);
 }
 
 TEST(GraphTest, IsomorphicSlow) {
@@ -208,7 +209,7 @@ TEST(GraphTest, PermuteCanonical2) {
 TEST(GraphTest, Canonicalize) {
   Graph g = get_T3();
   for (int v = 0; v < 4; v++) {
-    EXPECT_GE(g.vertices[v].get_hash(), g.vertices[v + 1].get_hash());
+    EXPECT_GE(g.vertices[v].get_degrees(), g.vertices[v + 1].get_degrees());
   }
 
   Graph h = get_T3();
@@ -232,12 +233,13 @@ TEST(GraphTest, Canonicalize2) {
   Graph::set_global_graph_info(3, 7);
   Graph g = parse_edges("{235, 345>4, 245, 456>4}");
   g.canonicalize();
+  EXPECT_EQ(serialize_edges(g), "{012, 013, 023>2, 024>2}");
 
   EXPECT_EQ(g.vertices[0].get_degrees(), 0x020002);
-  EXPECT_EQ(g.vertices[1].get_degrees(), 0x010001);
-  EXPECT_EQ(g.vertices[2].get_degrees(), 0x010000);
-  EXPECT_EQ(g.vertices[3].get_degrees(), 0x000201);
-  EXPECT_EQ(g.vertices[4].get_degrees(), 0x000002);
+  EXPECT_EQ(g.vertices[1].get_degrees(), 0x020000);
+  EXPECT_EQ(g.vertices[2].get_degrees(), 0x010200);
+  EXPECT_EQ(g.vertices[3].get_degrees(), 0x010001);
+  EXPECT_EQ(g.vertices[4].get_degrees(), 0x000001);
 
   Graph h = g;
   h.canonicalize();
@@ -271,7 +273,7 @@ Graph get_G4() {
 
 TEST(GraphTest, Copy) {
   Graph g = get_T3();
-  g.add_edge(Edge(0b0111, UNDIRECTED));
+  g.add_edge(Edge(0b011001, UNDIRECTED));
 
   g.canonicalize();
   Graph h;
@@ -324,7 +326,7 @@ TEST(GraphTest, IsomorphicWithSameHash) {
   g.canonicalize();
   h.canonicalize();
   EXPECT_EQ(g.get_graph_hash(), h.get_graph_hash());
-  EXPECT_TRUE(g.is_identical(h));
+  EXPECT_FALSE(g.is_identical(h));
   EXPECT_TRUE(h.is_isomorphic(g));
 }
 
@@ -371,10 +373,10 @@ TEST(GraphTest, ContainsT3) {
   do {
     g.permute_for_testing(p, h);
     EXPECT_TRUE(h.contains_Tk(p[0]));
-    EXPECT_TRUE(h.contains_Tk(p[1]));
-    EXPECT_FALSE(h.contains_Tk(p[2]));
     EXPECT_TRUE(h.contains_Tk(p[3]));
-    EXPECT_TRUE(h.contains_Tk(p[4]));
+    EXPECT_FALSE(h.contains_Tk(p[4]));
+    EXPECT_TRUE(h.contains_Tk(p[2]));
+    EXPECT_TRUE(h.contains_Tk(p[1]));
   } while (std::next_permutation(p, p + 5));
 }
 

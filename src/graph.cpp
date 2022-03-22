@@ -59,8 +59,7 @@ void VertexSignature::print_vertices(std::ostream& os,
          << static_cast<int>(vertices[v].degree_undirected) << ", "
          << static_cast<int>(vertices[v].degree_head) << ", "
          << static_cast<int>(vertices[v].degree_tail) << ", " << std::hex
-         << vertices[v].get_degrees() << ", " << vertices[v].neighbor_hash << ", " << std::hex
-         << vertices[v].get_hash() << std::dec << ")";
+         << vertices[v].get_degrees() << ", " << std::dec << ")";
     }
   }
   os << "}\n";
@@ -129,16 +128,11 @@ void Graph::add_edge(Edge edge) {
 void Graph::compute_vertex_signature() {
   Counters::increment_compute_vertex_signatures();
 
-  static_assert(sizeof(VertexSignature) == 8);
+  static_assert(sizeof(VertexSignature) == 4);
   for (int v = 0; v < MAX_VERTICES; v++) {
     vertices[v].reset(v);
   }
-  // Compute signatures of vertices, first pass (degrees, but not hash code).
-  // As a side product, also gather the neighbor vertex sets of each vertex.
-  uint8 neighbors_undirected[MAX_VERTICES]{0};
-  uint8 neighbors_head[MAX_VERTICES]{0};  // neighbors_head[i]: head vertex is i.
-  uint8 neighbors_tail[MAX_VERTICES]{0};
-
+  // Compute signatures of vertices, loop through the edges to calculate vertice degree info.
   for (int i = 0; i < edge_count; i++) {
     uint8 head = edges[i].head_vertex;
     for (int v = 0; v < N; v++) {
@@ -146,48 +140,12 @@ void Graph::compute_vertex_signature() {
       if ((edges[i].vertex_set & mask) != 0) {
         if (head == UNDIRECTED) {
           vertices[v].degree_undirected++;
-          neighbors_undirected[v] |= (edges[i].vertex_set & ~(1 << v));
         } else if (head == v) {
           vertices[v].degree_head++;
-          neighbors_head[v] |= (edges[i].vertex_set & ~(1 << v));
         } else {
           vertices[v].degree_tail++;
-          neighbors_tail[v] |= (edges[i].vertex_set & ~(1 << v));
         }
       }
-    }
-  }
-
-  // Compute signature of vertices, second pass (neighbor hash).
-  // Note we can't update the signatures in the structure during the computation, so use
-  // a working copy first.
-  for (int v = 0; v < N; v++) {
-    hash_neighbors(neighbors_undirected[v], vertices[v].neighbor_hash);
-    hash_neighbors(neighbors_head[v], vertices[v].neighbor_hash);
-    hash_neighbors(neighbors_tail[v], vertices[v].neighbor_hash);
-  }
-}
-
-void Graph::hash_neighbors(uint8 neighbors, uint32& hash_code) const {
-  // The working buffer to compute hash in deterministic order.
-  uint32 signatures[MAX_VERTICES];
-  if (neighbors == 0) {
-    hash_code = hash_combine32(hash_code, 0x12345678);
-  } else {
-    int neighbor_count = 0;
-    for (int i = 0; neighbors != 0; i++) {
-      if ((neighbors & 0x1) != 0) {
-        signatures[neighbor_count++] = vertices[i].get_degrees();
-      }
-      neighbors >>= 1;
-    }
-
-    // Sort to make hash combination process invariant to isomorphisms.
-    if (neighbor_count > 1) {
-      std::sort(signatures, signatures + neighbor_count);
-    }
-    for (int i = 0; i < neighbor_count; i++) {
-      hash_code = hash_combine32(hash_code, signatures[i]);
     }
   }
 }
@@ -268,7 +226,7 @@ void Graph::canonicalize() {
   // First get sorted vertex indices by the vertex signatures.
   // Note we sort by descreasing order, to push vertices to lower indices.
   std::sort(vertices, vertices + N, [this](const VertexSignature& a, const VertexSignature& b) {
-    return a.get_hash() > b.get_hash();
+    return a.get_degrees() > b.get_degrees();
   });
 
   // Now compute the inverse, which gives the permutation used to canonicalize.
@@ -279,7 +237,7 @@ void Graph::canonicalize() {
 
   uint64 hash = 0;
   for (int v = 0; v < N; v++) {
-    hash = hash_combine64(hash, vertices[v].get_hash());
+    hash = hash_combine64(hash, vertices[v].get_degrees());
   }
   graph_hash = (hash >> 32) ^ hash;
 
@@ -342,9 +300,9 @@ bool Graph::is_isomorphic(const Graph& other) const {
 
   std::vector<std::pair<int, int>> perm_sets;
   for (int v = 0; v < N - 1 && vertices[v].get_degrees() > 0; v++) {
-    if (vertices[v + 1].get_hash() == vertices[v].get_hash()) {
+    if (vertices[v + 1].get_degrees() == vertices[v].get_degrees()) {
       int t = v;
-      while (t < N && vertices[t].get_hash() == vertices[v].get_hash()) {
+      while (t < N && vertices[t].get_degrees() == vertices[v].get_degrees()) {
         t++;
       }
       perm_sets.push_back(std::make_pair(v, t));
