@@ -19,12 +19,12 @@ TEST(EdgeGeneratorTest, Generate22) {
   Graph copy;
 
   // 3 edges: {01} {01>0} {01>1}
-  for (int i = -1; i <= 1; i++) {
-    EXPECT_TRUE(edge_gen.next(copy));
-    EXPECT_EQ(copy.edge_count, 1);
-    EXPECT_EQ(copy.edges[0].vertex_set, 0b11);
-    EXPECT_EQ(copy.edges[0].head_vertex, static_cast<uint8>(i));
-  }
+  EXPECT_TRUE(edge_gen.next(copy));
+  EXPECT_EQ(copy.serialize_edges(), "{01}");
+  EXPECT_TRUE(edge_gen.next(copy));
+  EXPECT_EQ(copy.serialize_edges(), "{01>0}");
+  EXPECT_TRUE(edge_gen.next(copy));
+  EXPECT_EQ(copy.serialize_edges(), "{01>1}");
 
   // The enumeration has completed.
   EXPECT_FALSE(edge_gen.next(copy));
@@ -49,12 +49,12 @@ TEST(EdgeGeneratorTest, Generate23) {
   Graph copy;
 
   // First 3: {02} {02>0} {02>2}
-  for (int i = -1; i <= 1; i++) {
-    EXPECT_TRUE(edge_gen.next(copy));
-    EXPECT_EQ(copy.edge_count, 1);
-    EXPECT_EQ(copy.edges[0].vertex_set, 0b101);
-    EXPECT_EQ(copy.edges[0].head_vertex, static_cast<uint8>(i == 1 ? 2 : i));
-  }
+  EXPECT_TRUE(edge_gen.next(copy));
+  EXPECT_EQ(copy.serialize_edges(), "{02}");
+  EXPECT_TRUE(edge_gen.next(copy));
+  EXPECT_EQ(copy.serialize_edges(), "{02>0}");
+  EXPECT_TRUE(edge_gen.next(copy));
+  EXPECT_EQ(copy.serialize_edges(), "{02>2}");
 
   // Next 12: {12} {02, 12} {02>0, 12} {02>2, 12}
   //          {12>1} {02, 12>1} {02>0, 12>1} {02>2, 12>1}
@@ -85,12 +85,12 @@ TEST(EdgeGeneratorTest, Generate23WithSkip) {
   Graph copy;
 
   // First 3: {02} {02>0} {02>2}
-  for (int i = -1; i <= 1; i++) {
-    EXPECT_TRUE(edge_gen.next(copy));
-    EXPECT_EQ(copy.edge_count, 1);
-    EXPECT_EQ(copy.edges[0].vertex_set, 0b101);
-    EXPECT_EQ(copy.edges[0].head_vertex, static_cast<uint8>(i == 1 ? 2 : i));
-  }
+  EXPECT_TRUE(edge_gen.next(copy));
+  EXPECT_EQ(copy.serialize_edges(), "{02}");
+  EXPECT_TRUE(edge_gen.next(copy));
+  EXPECT_EQ(copy.serialize_edges(), "{02>0}");
+  EXPECT_TRUE(edge_gen.next(copy));
+  EXPECT_EQ(copy.serialize_edges(), "{02>2}");
 
   // Next: {12}
   EXPECT_TRUE(edge_gen.next(copy));
@@ -142,13 +142,17 @@ TEST(EdgeGeneratorTest, Generate33) {
   EdgeGenerator edge_gen(ec, Graph());
   Graph copy;
 
-  // First 3: {012} {012>0} {012>1} {012>2}
-  for (int i = -1; i <= 2; i++) {
-    EXPECT_TRUE(edge_gen.next(copy));
-    EXPECT_EQ(copy.edge_count, 1);
-    EXPECT_EQ(copy.edges[0].vertex_set, 0b111);
-    EXPECT_EQ(copy.edges[0].head_vertex, static_cast<uint8>(i));
-  }
+  // 4 edges: {012} {012>0} {012>1} {012>2}
+  EXPECT_TRUE(edge_gen.next(copy));
+  EXPECT_EQ(copy.serialize_edges(), "{012}");
+  EXPECT_TRUE(edge_gen.next(copy));
+  EXPECT_EQ(copy.serialize_edges(), "{012>0}");
+  EXPECT_TRUE(edge_gen.next(copy));
+  EXPECT_EQ(copy.serialize_edges(), "{012>1}");
+  EXPECT_TRUE(edge_gen.next(copy));
+  EXPECT_EQ(copy.serialize_edges(), "{012>2}");
+
+  EXPECT_FALSE(edge_gen.next(copy));
 }
 
 TEST(EdgeGeneratorTest, Generate35) {
@@ -260,4 +264,42 @@ TEST(EdgeGeneratorTest, Generate45) {
       EXPECT_EQ(copy.edges[1].head_vertex, static_cast<uint8>(i1 >= 2 ? i1 + 1 : i1));
     }
   }
+}
+
+TEST(EdgeGeneratorTest, ContainsTk) {
+  Graph::set_global_graph_info(2, 6);
+  EdgeCandidates ec(6);
+  Graph base;
+  EXPECT_TRUE(Graph::parse_edges("{23>2}", base));
+  EdgeGenerator edge_gen(ec, base);
+
+  Graph copy;
+  // Skip generated graphs that don't contain T_k
+  for (int i = 1; i < 4 * 4 * 4 + 4 * 4; i++) {
+    EXPECT_TRUE(edge_gen.next(copy, false));
+    EXPECT_FALSE(copy.contains_Tk(5));
+  }
+
+  // The next one contains T_k
+  EXPECT_TRUE(edge_gen.next(copy, false));
+  EXPECT_TRUE(copy.contains_Tk(5));
+  EXPECT_EQ(copy.serialize_edges(), "{23>2, 25, 35}");
+
+  // Notify contains T_k, it should skip over a bunch of graphs.
+  edge_gen.notify_contain_tk_skip();
+  EXPECT_TRUE(edge_gen.next(copy, false));
+  EXPECT_EQ(copy.serialize_edges(), "{23>2, 25>2, 35}");
+  EXPECT_TRUE(copy.contains_Tk(5));
+
+  // Again.
+  edge_gen.notify_contain_tk_skip();
+  EXPECT_TRUE(edge_gen.next(copy, false));
+  EXPECT_EQ(copy.serialize_edges(), "{23>2, 25>5, 35}");
+  EXPECT_TRUE(copy.contains_Tk(5));
+
+  // Again.
+  edge_gen.notify_contain_tk_skip();
+  EXPECT_TRUE(edge_gen.next(copy, false));
+  EXPECT_EQ(copy.serialize_edges(), "{23>2, 35>3}");
+  EXPECT_FALSE(copy.contains_Tk(5));
 }

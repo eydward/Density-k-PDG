@@ -10,15 +10,6 @@ using namespace testing;
 #define throw_assert(c) \
   if (!(c)) throw std::invalid_argument(#c);
 
-// Returns the text representation of the edges in the graph.
-std::string serialize_edges(const Graph& g) {
-  std::stringstream oss;
-  g.print_concise(oss, false);
-  std::string text = oss.str();
-  throw_assert(text[text.length() - 1] == '\n');
-  return text.substr(0, text.length() - 1);
-}
-
 // Returns a graph, constructed from the text representation of the edges. For example from input
 //    "{123>2, 013}"
 // A 3-graph with 2 edges will be constructed, the first edge is directed with 2 as the head,
@@ -26,37 +17,10 @@ std::string serialize_edges(const Graph& g) {
 //
 // This is used to facilitate unit tests.
 Graph parse_edges(const std::string& text) {
-  throw_assert(text[0] == '{');
-  throw_assert(text[text.length() - 1] == '}');
-  std::string s = text.substr(1, text.length() - 2);
   Graph g;
-  size_t prev_pos = 0;
-  while (s.length() != 0) {
-    size_t pos = s.find(',', prev_pos);
-    std::string e = pos == s.npos ? s.substr(prev_pos) : s.substr(prev_pos, pos - prev_pos);
-    uint8 vertex_set = 0;
-    uint8 head = UNDIRECTED;
-    for (size_t i = 0; i < e.length(); i++) {
-      char c = e[i];
-      if (c == ' ') continue;
-      if ('0' <= c && c <= '6') {
-        vertex_set |= (1 << (c - '0'));
-      }
-      if (c == '>') {
-        throw_assert(i == e.length() - 2);
-        c = e[i + 1];
-        throw_assert('0' <= c && c <= '6');
-        head = c - '0';
-        throw_assert((vertex_set & (1 << head)) != 0);
-      }
-    }
-    throw_assert(__builtin_popcount(vertex_set) == Graph::K);
-    g.add_edge(Edge(vertex_set, head));
-    if (pos == s.npos) break;
-    prev_pos = pos + 1;
-  }
+  throw_assert(Graph::parse_edges(text, g));
   // Verify the parse produced the same graph as the input.
-  throw_assert(serialize_edges(g) == text);
+  throw_assert(g.serialize_edges() == text);
   return g;
 }
 
@@ -76,10 +40,10 @@ TEST(GraphTest, GraphDataStructure) {
   EXPECT_EQ(g.edges[2].head_vertex, 2);
   EXPECT_EQ(g.edges[3].vertex_set, 0b1011);
   EXPECT_EQ(g.edges[3].head_vertex, UNDIRECTED);
-  EXPECT_EQ(serialize_edges(g), "{234, 156>5, 123>2, 013}");
+  EXPECT_EQ(g.serialize_edges(), "{234, 156>5, 123>2, 013}");
 
   g.canonicalize();
-  EXPECT_EQ(serialize_edges(g), "{012>1, 023, 014, 256>5}");
+  EXPECT_EQ(g.serialize_edges(), "{012>1, 023, 014, 256>5}");
   EXPECT_EQ(g.vertices[0].degree_undirected, 2);
   EXPECT_EQ(g.vertices[0].degree_head, 0);
   EXPECT_EQ(g.vertices[0].degree_tail, 1);
@@ -130,7 +94,7 @@ TEST(GraphTest, T3) {
   EXPECT_EQ(g.edges[2].head_vertex, 2);
   EXPECT_EQ(g.edges[3].vertex_set, 0b10101);  // 024>2
   EXPECT_EQ(g.edges[3].head_vertex, 2);
-  EXPECT_EQ(serialize_edges(g), "{012, 013, 023>2, 024>2}");
+  EXPECT_EQ(g.serialize_edges(), "{012, 013, 023>2, 024>2}");
 
   g.canonicalize();
 
@@ -233,7 +197,7 @@ TEST(GraphTest, Canonicalize2) {
   Graph::set_global_graph_info(3, 7);
   Graph g = parse_edges("{235, 345>4, 245, 456>4}");
   g.canonicalize();
-  EXPECT_EQ(serialize_edges(g), "{012, 013, 023>2, 024>2}");
+  EXPECT_EQ(g.serialize_edges(), "{012, 013, 023>2, 024>2}");
 
   EXPECT_EQ(g.vertices[0].get_degrees(), 0x020002);
   EXPECT_EQ(g.vertices[1].get_degrees(), 0x020000);

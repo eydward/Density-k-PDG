@@ -455,3 +455,47 @@ void Graph::print() const {
   print_concise(std::cout, true);
   VertexSignature::print_vertices(std::cout, vertices);
 }
+
+std::string Graph::serialize_edges() const {
+  std::stringstream oss;
+  print_concise(oss, false);
+  std::string text = oss.str();
+  return text.substr(0, text.length() - 1);  // Removes the tailing line return.
+}
+
+bool Graph::parse_edges(const std::string& edge_representation, Graph& result) {
+  result.is_canonical = false;
+  result.edge_count = result.undirected_edge_count = 0;
+
+  if (edge_representation.length() < 2) return false;
+  if (edge_representation[0] != '{') return false;
+  if (edge_representation[edge_representation.length() - 1] != '}') return false;
+
+  std::string s = edge_representation.substr(1, edge_representation.length() - 2);
+  size_t prev_pos = 0;
+  while (s.length() != 0) {
+    size_t pos = s.find(',', prev_pos);
+    std::string e = pos == s.npos ? s.substr(prev_pos) : s.substr(prev_pos, pos - prev_pos);
+    uint8 vertex_set = 0;
+    uint8 head = UNDIRECTED;
+    for (size_t i = 0; i < e.length(); i++) {
+      char c = e[i];
+      if (c == ' ') continue;
+      if ('0' <= c && c <= '6') {
+        vertex_set |= (1 << (c - '0'));
+      }
+      if (c == '>') {
+        if (i != e.length() - 2) return false;
+        c = e[i + 1];
+        if ('0' > c || c > '6') return false;
+        head = c - '0';
+        if ((vertex_set & (1 << head)) == 0) return false;
+      }
+    }
+    if (__builtin_popcount(vertex_set) != Graph::K) return false;
+    result.add_edge(Edge(vertex_set, head));
+    if (pos == s.npos) break;
+    prev_pos = pos + 1;
+  }
+  return true;
+}

@@ -84,6 +84,7 @@ struct VertexMask {
 // Represents a k-PDG, with the data structure optimized for computing isomorphisms.
 // The n vertices in this graph: 0, 1, ..., n-1.
 struct Graph {
+ public:
   // Global to all graph instances: number of vertices in each edge.
   static int K;
   // Global to all graph instances: total number of vertices in each graph.
@@ -96,6 +97,10 @@ struct Graph {
 
   // Set the values of K, N, and TOTAL_EDGES.
   static void set_global_graph_info(int k, int n);
+
+  // Parses the edge representation into a Graph object. Returns true if successful.
+  // Used for testing purpose.
+  static bool parse_edges(const std::string& edge_representation, Graph& result);
 
  private:
   // The hash code is invariant under isomorphisms.
@@ -179,6 +184,8 @@ struct Graph {
   void print_concise(std::ostream& os, bool aligned) const;
   // Print the graph to the console for debugging purpose.
   void print() const;
+  // Returns the edge representation of this graph, for testing purpose.
+  std::string serialize_edges() const;
 
   // Used to establish a deterministic order when growing the search tree.
   bool operator<(const Graph& other) const;
