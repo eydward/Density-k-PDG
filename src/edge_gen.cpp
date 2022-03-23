@@ -1,40 +1,49 @@
 #include "edge_gen.h"
 
 #include "counters.h"
-constexpr uint8 NOT_IN_SET = 0xEE;
 
 // Initializes the generator for the given new vertex count.
 // vertex_count = number of vertices to grow to in each new graph.
-EdgeGenerator::EdgeGenerator(int vertex_count, const Graph& base_graph)
-    : base(base_graph),
-      n(vertex_count),
+EdgeCandidates::EdgeCandidates(int vertex_count) : n(vertex_count), edge_candidate_count(0) {
+  // First gather all edges, where (n-1) is one vertex in the edge, and the other K-1 vertices
+  // come from {1,2,...,n-2}.
+  for (uint8 mask = 0; mask < (1 << (n - 1)); mask++) {
+    if (__builtin_popcount(mask) == Graph::K - 1) {
+      edge_candidates[edge_candidate_count] = (mask | (1 << (n - 1)));
+      ++edge_candidate_count;
+    }
+  }
+  assert(edge_candidate_count == compute_binom(n - 1, Graph::K - 1));
+
+  // Now construct the heads array, where each element is a valid head in the corresponding
+  // edge candidate vertex set.
+  for (int e = 0; e < edge_candidate_count; e++) {
+    int vidx = 0;
+    edge_candidates_heads[e][vidx++] = NOT_IN_SET;
+    edge_candidates_heads[e][vidx++] = UNDIRECTED;
+    for (uint8 i = 0; i <= n - 1; i++) {
+      if ((edge_candidates[e] & (1 << i)) != 0) {
+        edge_candidates_heads[e][vidx++] = i;
+      }
+    }
+    assert(vidx == Graph::K + 2);
+  }
+}
+
+EdgeGenerator::EdgeGenerator(const EdgeCandidates& edge_candidates, const Graph& base_graph)
+    : candidates(edge_candidates),
+      base(base_graph),
       high_idx_non_zero_enum_state(0),
-      edge_candidate_count(0),
       stats_tk_skip(0),
       stats_tk_skip_bits(0),
       stats_theta_edges_skip(0),
       stats_theta_directed_edges_skip(0),
       stats_edge_sets(0) {
-  for (uint8 mask = 0; mask < (1 << (n - 1)); mask++) {
-    if (__builtin_popcount(mask) == Graph::K - 1) {
-      edge_candidates[edge_candidate_count] = (mask | (1 << (n - 1)));
-      int vidx = 0;
-      edge_candidates_vidx[edge_candidate_count][vidx++] = NOT_IN_SET;
-      edge_candidates_vidx[edge_candidate_count][vidx++] = UNDIRECTED;
-      for (uint8 i = 0; i <= n - 1; i++) {
-        if ((edge_candidates[edge_candidate_count] & (1 << i)) != 0) {
-          edge_candidates_vidx[edge_candidate_count][vidx++] = i;
-        }
-      }
-      assert(vidx == Graph::K + 2);
-      ++edge_candidate_count;
-    }
-  }
-  assert(edge_candidate_count == compute_binom(n - 1, Graph::K - 1));
-  for (uint8 i = 0; i < edge_candidate_count; i++) {
+  for (uint8 i = 0; i < candidates.edge_candidate_count; i++) {
     enum_state[i] = 0;
   }
 }
+
 void EdgeGenerator::clear_stats() {
   stats_tk_skip = stats_tk_skip_bits = stats_theta_edges_skip = stats_theta_directed_edges_skip =
       stats_edge_sets = 0;
@@ -58,13 +67,13 @@ void EdgeGenerator::clear_stats() {
 bool EdgeGenerator::next(Graph& copy, bool use_known_min_theta_opt, Fraction known_min_theta) {
   if (use_known_min_theta_opt) {
     // Assert that we are using min_theta optimization only in the final enumeration phase.
-    assert(n == Graph::N);
+    assert(candidates.n == Graph::N);
     assert(known_min_theta >= Fraction(1, 1));
   }
 
   while (true) {
     bool has_valid_candidate = false;
-    for (uint8 i = 0; i < edge_candidate_count; i++) {
+    for (uint8 i = 0; i < candidates.edge_candidate_count; i++) {
       ++enum_state[i];
       high_idx_non_zero_enum_state = std::max(high_idx_non_zero_enum_state, i);
       if (enum_state[i] != Graph::K + 2) {
@@ -100,7 +109,8 @@ void EdgeGenerator::generate_graph(Graph& copy, int skip_front) const {
   base.copy_edges(copy);
   for (uint8 j = skip_front; j <= high_idx_non_zero_enum_state; j++) {
     if (enum_state[j] != 0) {
-      copy.add_edge(Edge(edge_candidates[j], edge_candidates_vidx[j][enum_state[j]]));
+      copy.add_edge(
+          Edge(candidates.edge_candidates[j], candidates.edge_candidates_heads[j][enum_state[j]]));
     }
   }
 }
@@ -156,7 +166,7 @@ EdgeGenerator::OptResult EdgeGenerator::perform_min_theta_optimization(Fraction 
     // is NOT [3, 0, 0, 1, 1, 2] (the normal increment), but rather, [3, 0, 1, 1, 1, 1].
     // Since the begin of the for loop above does increment, we put the enum state to
     // [3, 0, 1, 1, 1, 0], to prepare for the for loop increment to do the job.
-    if (low_non_edge_idx >= edge_candidate_count) {
+    if (low_non_edge_idx >= candidates.edge_candidate_count) {
       // In this case, all edges are present and we still don't have enough edges, simply
       // return DONE to terminate the generation.
       return OptResult::DONE;
@@ -188,7 +198,7 @@ EdgeGenerator::OptResult EdgeGenerator::perform_min_theta_optimization(Fraction 
     // is NOT [3, 0, 0, 2, 2, 3] (the normal increment), but rather, [3, 0, 2, 2, 2, 2].
     // Since the begin of the for loop above does increment, we put the enum state to
     // [3, 0, 2, 2, 2, 1], to prepare for the for loop increment to do the job.
-    if (low_non_directed_idx >= edge_candidate_count) {
+    if (low_non_directed_idx >= candidates.edge_candidate_count) {
       // In this case, all edges are present and directed and we still don't have enough directed
       // edges, simply return DONE to terminate the generation.
       return OptResult::DONE;
@@ -220,14 +230,14 @@ void EdgeGenerator::notify_contain_tk_skip() {
     // it to the final state. Then the next() call will bump the lowest non-zero enum state.
     // For example, if the enum state is [3,0,0,1,0,0,0], update it to [3,0,0,1,k+1,k+1,k+1]
     // then the next call will get to [3,0,0,2,0,0,0].
-    for (uint8 i = 0; i < edge_candidate_count; i++) {
+    for (uint8 i = 0; i < candidates.edge_candidate_count; i++) {
       if (enum_state[i] != 0) return;
       enum_state[i] = Graph::K + 1;
       ++stats_tk_skip_bits;
     }
-  } else if (n == Graph::N) {
+  } else if (candidates.n == Graph::N) {
     Graph copy;
-    for (int skip_front = 1; skip_front < edge_candidate_count; skip_front++) {
+    for (int skip_front = 1; skip_front < candidates.edge_candidate_count; skip_front++) {
       generate_graph(copy, skip_front);
       if (copy.get_edge_count() == base.get_edge_count()) return;
       if (copy.contains_Tk(Graph::N - 1)) {
@@ -246,19 +256,19 @@ void EdgeGenerator::notify_contain_tk_skip() {
 std::tuple<uint8, uint8, uint8, uint8> EdgeGenerator::count_edges() const {
   uint8 edges = 0;
   uint8 directed = 0;
-  uint8 first_non_edge = edge_candidate_count;
-  uint8 first_non_directed_edge = edge_candidate_count;
-  for (int i = 0; i < edge_candidate_count; i++) {
+  uint8 first_non_edge = candidates.edge_candidate_count;
+  uint8 first_non_directed_edge = candidates.edge_candidate_count;
+  for (int i = 0; i < candidates.edge_candidate_count; i++) {
     if (enum_state[i] != 0) {
       ++edges;
       if (enum_state[i] != 1) {
         ++directed;
       }
-    } else if (first_non_edge == edge_candidate_count) {
+    } else if (first_non_edge == candidates.edge_candidate_count) {
       first_non_edge = i;
     }
 
-    if (first_non_directed_edge == edge_candidate_count &&
+    if (first_non_directed_edge == candidates.edge_candidate_count &&
         (enum_state[i] == 0 || enum_state[i] == 1)) {
       first_non_directed_edge = i;
     }
@@ -269,14 +279,14 @@ std::tuple<uint8, uint8, uint8, uint8> EdgeGenerator::count_edges() const {
 void EdgeGenerator::print_debug(std::ostream& os, bool print_candidates, int base_graph_id) const {
   os << "    EdgeGen[" << base_graph_id
      << ", high_idx=" << static_cast<int>(high_idx_non_zero_enum_state) << ", state=";
-  for (int e = 0; e < edge_candidate_count; e++) {
+  for (int e = 0; e < candidates.edge_candidate_count; e++) {
     os << static_cast<int>(enum_state[e]);
   }
   if (print_candidates) {
     os << "\n      EC={";
-    for (int e = 0; e < edge_candidate_count; e++) {
+    for (int e = 0; e < candidates.edge_candidate_count; e++) {
       if (e > 0) os << ", ";
-      os << std::bitset<MAX_VERTICES>(edge_candidates[e]);
+      os << std::bitset<MAX_VERTICES>(candidates.edge_candidates[e]);
     }
     os << "}";
   }

@@ -7,7 +7,15 @@ using namespace testing;
 
 TEST(EdgeGeneratorTest, Generate22) {
   Graph::set_global_graph_info(2, 2);
-  EdgeGenerator edge_gen(2, Graph());
+  EdgeCandidates ec(2);
+  EXPECT_EQ(ec.edge_candidate_count, 1);
+  EXPECT_EQ(ec.edge_candidates[0], 0b11);
+  EXPECT_EQ(ec.edge_candidates_heads[0][0], NOT_IN_SET);
+  EXPECT_EQ(ec.edge_candidates_heads[0][1], UNDIRECTED);
+  EXPECT_EQ(ec.edge_candidates_heads[0][2], 0);
+  EXPECT_EQ(ec.edge_candidates_heads[0][3], 1);
+
+  EdgeGenerator edge_gen(ec, Graph());
   Graph copy;
 
   // 3 edges: {01} {01>0} {01>1}
@@ -24,7 +32,20 @@ TEST(EdgeGeneratorTest, Generate22) {
 
 TEST(EdgeGeneratorTest, Generate23) {
   Graph::set_global_graph_info(2, 3);
-  EdgeGenerator edge_gen(3, Graph());
+  EdgeCandidates ec(3);
+  EXPECT_EQ(ec.edge_candidate_count, 2);
+  EXPECT_EQ(ec.edge_candidates[0], 0b101);
+  EXPECT_EQ(ec.edge_candidates[1], 0b110);
+  EXPECT_EQ(ec.edge_candidates_heads[0][0], NOT_IN_SET);
+  EXPECT_EQ(ec.edge_candidates_heads[0][1], UNDIRECTED);
+  EXPECT_EQ(ec.edge_candidates_heads[0][2], 0);
+  EXPECT_EQ(ec.edge_candidates_heads[0][3], 2);
+  EXPECT_EQ(ec.edge_candidates_heads[1][0], NOT_IN_SET);
+  EXPECT_EQ(ec.edge_candidates_heads[1][1], UNDIRECTED);
+  EXPECT_EQ(ec.edge_candidates_heads[1][2], 1);
+  EXPECT_EQ(ec.edge_candidates_heads[1][3], 2);
+
+  EdgeGenerator edge_gen(ec, Graph());
   Graph copy;
 
   // First 3: {02} {02>0} {02>2}
@@ -59,7 +80,8 @@ TEST(EdgeGeneratorTest, Generate23) {
 
 TEST(EdgeGeneratorTest, Generate23WithSkip) {
   Graph::set_global_graph_info(2, 3);
-  EdgeGenerator edge_gen(3, Graph());
+  EdgeCandidates ec(3);
+  EdgeGenerator edge_gen(ec, Graph());
   Graph copy;
 
   // First 3: {02} {02>0} {02>2}
@@ -108,7 +130,16 @@ TEST(EdgeGeneratorTest, Generate23WithSkip) {
 
 TEST(EdgeGeneratorTest, Generate33) {
   Graph::set_global_graph_info(3, 3);
-  EdgeGenerator edge_gen(3, Graph());
+  EdgeCandidates ec(3);
+  EXPECT_EQ(ec.edge_candidate_count, 1);
+  EXPECT_EQ(ec.edge_candidates[0], 0b0111);
+  EXPECT_EQ(ec.edge_candidates_heads[0][0], NOT_IN_SET);
+  EXPECT_EQ(ec.edge_candidates_heads[0][1], UNDIRECTED);
+  EXPECT_EQ(ec.edge_candidates_heads[0][2], 0);
+  EXPECT_EQ(ec.edge_candidates_heads[0][3], 1);
+  EXPECT_EQ(ec.edge_candidates_heads[0][4], 2);
+
+  EdgeGenerator edge_gen(ec, Graph());
   Graph copy;
 
   // First 3: {012} {012>0} {012>1} {012>2}
@@ -122,7 +153,39 @@ TEST(EdgeGeneratorTest, Generate33) {
 
 TEST(EdgeGeneratorTest, Generate35) {
   Graph::set_global_graph_info(3, 5);
-  EdgeGenerator edge_gen(5, Graph());
+  EdgeCandidates ec(5);
+  EXPECT_EQ(ec.edge_candidate_count, 6);
+  EXPECT_EQ(ec.edge_candidates[0], 0b0010011);
+  EXPECT_EQ(ec.edge_candidates[1], 0b0010101);
+  EXPECT_EQ(ec.edge_candidates[2], 0b0010110);
+  EXPECT_EQ(ec.edge_candidates[3], 0b0011001);
+  EXPECT_EQ(ec.edge_candidates[4], 0b0011010);
+  EXPECT_EQ(ec.edge_candidates[5], 0b0011100);
+  for (int v = 0; v < 6; v++) {
+    EXPECT_EQ(ec.edge_candidates_heads[v][0], NOT_IN_SET);
+    EXPECT_EQ(ec.edge_candidates_heads[v][1], UNDIRECTED);
+  }
+  EXPECT_EQ(ec.edge_candidates_heads[0][2], 0);
+  EXPECT_EQ(ec.edge_candidates_heads[0][3], 1);
+  EXPECT_EQ(ec.edge_candidates_heads[0][4], 4);
+  EXPECT_EQ(ec.edge_candidates_heads[1][2], 0);
+  EXPECT_EQ(ec.edge_candidates_heads[1][3], 2);
+  EXPECT_EQ(ec.edge_candidates_heads[1][4], 4);
+  EXPECT_EQ(ec.edge_candidates_heads[2][2], 1);
+  EXPECT_EQ(ec.edge_candidates_heads[2][3], 2);
+  EXPECT_EQ(ec.edge_candidates_heads[2][4], 4);
+  EXPECT_EQ(ec.edge_candidates_heads[3][2], 0);
+  EXPECT_EQ(ec.edge_candidates_heads[3][3], 3);
+  EXPECT_EQ(ec.edge_candidates_heads[3][4], 4);
+  EXPECT_EQ(ec.edge_candidates_heads[4][2], 1);
+  EXPECT_EQ(ec.edge_candidates_heads[4][3], 3);
+  EXPECT_EQ(ec.edge_candidates_heads[4][4], 4);
+  EXPECT_EQ(ec.edge_candidates_heads[5][2], 2);
+  EXPECT_EQ(ec.edge_candidates_heads[5][3], 3);
+  EXPECT_EQ(ec.edge_candidates_heads[5][4], 4);
+
+  EdgeGenerator edge_gen(ec, Graph());
+  edge_gen.print_debug(std::cout, true, 0);
   Graph copy;
 
   int count = 0;
@@ -136,7 +199,22 @@ TEST(EdgeGeneratorTest, Generate35) {
 
 TEST(EdgeGeneratorTest, Generate27) {
   Graph::set_global_graph_info(2, 7);
-  EdgeGenerator edge_gen(7, Graph());
+  EdgeCandidates ec(7);
+  EXPECT_EQ(ec.edge_candidate_count, 6);
+  EXPECT_EQ(ec.edge_candidates[0], 0b01000001);
+  EXPECT_EQ(ec.edge_candidates[1], 0b01000010);
+  EXPECT_EQ(ec.edge_candidates[2], 0b01000100);
+  EXPECT_EQ(ec.edge_candidates[3], 0b01001000);
+  EXPECT_EQ(ec.edge_candidates[4], 0b01010000);
+  EXPECT_EQ(ec.edge_candidates[5], 0b01100000);
+  for (int v = 0; v < 6; v++) {
+    EXPECT_EQ(ec.edge_candidates_heads[v][0], NOT_IN_SET);
+    EXPECT_EQ(ec.edge_candidates_heads[v][1], UNDIRECTED);
+    EXPECT_EQ(ec.edge_candidates_heads[v][2], v);
+    EXPECT_EQ(ec.edge_candidates_heads[v][3], 6);
+  }
+
+  EdgeGenerator edge_gen(ec, Graph());
   Graph copy;
 
   int count = 0;
@@ -150,7 +228,8 @@ TEST(EdgeGeneratorTest, Generate27) {
 
 TEST(EdgeGeneratorTest, Generate45) {
   Graph::set_global_graph_info(4, 5);
-  EdgeGenerator edge_gen(5, Graph());
+  EdgeCandidates ec(5);
+  EdgeGenerator edge_gen(ec, Graph());
   Graph copy;
 
   // First 5: {0124} {0124>0} {0124>1} {0124>2} {0124>4}

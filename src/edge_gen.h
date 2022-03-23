@@ -1,23 +1,31 @@
 #pragma once
 #include "graph.h"
 
-// A helper struct to generate all edge sets to add, when a new vertex is added to an existing
-// graph.
-class EdgeGenerator {
- private:
-  const Graph& base;                   // The base graph to grow from.
-  const uint8 n;                       // Number of vertices after adding the new vertex.
-  uint8 high_idx_non_zero_enum_state;  // The highest index of the non-zero element in enum_state.
-  uint8 edge_candidate_count;          // Number of edge candidates in the next array.
-  uint8 edge_candidates[MAX_EDGES];    // All possible edges going through the new vertex.
+constexpr uint8 NOT_IN_SET = 0xEE;
 
-  // The vertex indices in the corresponding edge candidate.
+// This struct holds all edge candidates that contain vertex (n-1).
+struct EdgeCandidates {
+  const uint8 n;                     // Number of vertices after adding the new vertex.
+  uint8 edge_candidate_count;        // Number of edge candidates in the next array.
+  uint8 edge_candidates[MAX_EDGES];  // All possible edges going through the new vertex.
+
+  // The possible head vertex in the corresponding edge candidate.
   // [0] is always NOT_IN_SET, [1] is always UNDIRECTED,
   // [2] to [k+1] are the vertices in the corresponding edge.
-  uint8 edge_candidates_vidx[MAX_EDGES][10];
+  uint8 edge_candidates_heads[MAX_EDGES][MAX_VERTICES + 2];
+
+  explicit EdgeCandidates(int num_vertices);
+};
+
+// A helper class to generate all edge sets to add, when a new vertex is added to an existing graph.
+class EdgeGenerator {
+ private:
+  const EdgeCandidates& candidates;    // The edge candidates used in generation.
+  const Graph& base;                   // The base graph to grow from.
+  uint8 high_idx_non_zero_enum_state;  // The highest index of the non-zero element in enum_state.
 
   // This array represents the current enumeration state.
-  // The values are indices into the edge_candidates_vidx arrays.
+  // The values are indices into the edge_candidates_heads arrays.
   uint8 enum_state[MAX_EDGES];
 
   // Returns a tuple:
@@ -59,7 +67,7 @@ class EdgeGenerator {
 
   // Initializes the generator for the given new vertex count.
   // vertex_count = number of vertices to grow to in each new graph.
-  EdgeGenerator(int vertex_count, const Graph& base_graph);
+  EdgeGenerator(const EdgeCandidates& edge_candidates, const Graph& base_graph);
 
   // Generates the next edge set. Returns true enumeration should proceed,
   // in which case `copy` is the newly generated graph. (`copy` doesn't need to be clean before

@@ -57,6 +57,7 @@ void Grower::grow() {
 // Note all edges added in this step contains vertex (n-1).
 std::vector<Graph> Grower::grow_step(int n, const std::vector<Graph>& base_graphs) {
   assert(n < Graph::N);
+  EdgeCandidates edge_candidates(n);
   Counters::new_growth_step(n, base_graphs.size());
   std::unordered_set<Graph, GraphHasher, GraphComparer> results;
 
@@ -72,7 +73,7 @@ std::vector<Graph> Grower::grow_step(int n, const std::vector<Graph>& base_graph
 
   for (const Graph& g : base_graphs) {
     Counters::increment_growth_processed_graphs_in_current_step();
-    EdgeGenerator edge_gen(n, g);
+    EdgeGenerator edge_gen(edge_candidates, g);
 
     // Loop through all ((K+1)^\binom{n-1}{k-1} - 1) edge combinations, add them to g, and check
     // add to canonicals unless it's isomorphic to an existing one.
@@ -130,6 +131,7 @@ void Grower::worker_thread_main(int thread_id) {
   int base_graph_id;
   Graph copy;
   Graph min_theta_graph;
+  EdgeCandidates edge_candidates(Graph::N);
 
   auto last_check_time = std::chrono::steady_clock::now();
 
@@ -146,7 +148,7 @@ void Grower::worker_thread_main(int thread_id) {
 
     Fraction min_theta(1E8, 1);
     uint64 graphs_processed = 0;
-    EdgeGenerator edge_gen(Graph::N, base);
+    EdgeGenerator edge_gen(edge_candidates, base);
     while (edge_gen.next(copy, true, min_theta)) {
       // Thread 0 has the extra responsibility as time keeper,
       // to periodically ask Counters to print.
