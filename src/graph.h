@@ -129,6 +129,7 @@ struct Graph {
     return graph_hash;
   }
   uint8 get_edge_count() const { return edge_count; }
+  uint8 get_undirected_edge_count() const { return undirected_edge_count; }
   uint8 get_directed_edge_count() const { return edge_count - undirected_edge_count; }
 
   // Returns true if the edge specified by the bitmask of the vertices in the edge is allowed

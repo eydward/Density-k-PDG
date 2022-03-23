@@ -46,8 +46,7 @@ class EdgeGenerator {
   // and therefore the new graphs are less likely to contain T_k, making the
   // `notify_contain_tk_skip` optimization less effective.
   enum class OptResult { FOUND_CANDIDATE = 0, CONTINUE_SEARCH = 1, DONE = 2 };
-  OptResult perform_min_theta_optimization(int base_edge_count, int base_directed_edge_count,
-                                           Fraction known_min_theta);
+  OptResult perform_min_theta_optimization(Fraction known_min_theta);
 
  public:
   // Some performance counters used to monitor the edge gen behavior.
@@ -69,8 +68,6 @@ class EdgeGenerator {
   //
   // use_known_min_theta_opt = whether min_theta optimization should be used. If false,
   //    the rest of the paramters are all ignored.
-  // base_edge_count = number of edges in the base graph.
-  // base_directed_edge_count = number of directed edges in the base graph.
   // known_min_theta = the currently know min_theta value.
   //
   // The min_theta optimization: this should only be used in the final enumeration phase, not
@@ -79,8 +76,8 @@ class EdgeGenerator {
   // The idea is, if the graph is too sparse, then its theta is guaranteed to be larger than
   // the currently known min_theta value, in which case we don't care about this graph since
   // it won't give us a better min_theta value regardless whether the graph is T_k free.
-  bool next(Graph& copy, bool use_known_min_theta_opt = false, int base_edge_count = -1,
-            int base_directed_edge_count = -1, Fraction known_min_theta = Fraction(0, 1));
+  bool next(Graph& copy, bool use_known_min_theta_opt = false,
+            Fraction known_min_theta = Fraction(0, 1));
 
   // Notify the generator about the fact that adding the current edge set to the graph
   // makes it contain T_k, and therefore we can skip edge sets that are supersets of the current.

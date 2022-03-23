@@ -47,8 +47,6 @@ void EdgeGenerator::clear_stats() {
 //
 // use_known_min_theta_opt = whether min_theta optimization should be used. If false,
 //    the rest of the paramters are all ignored.
-// base_edge_count = number of edges in the base graph.
-// base_directed_edge_count = number of directed edges in the base graph.
 // known_min_theta = the currently know min_theta value.
 //
 // The min_theta optimization: this should only be used in the final enumeration phase, not
@@ -57,13 +55,10 @@ void EdgeGenerator::clear_stats() {
 // The idea is, if the graph is too sparse, then its theta is guaranteed to be larger than
 // the currently known min_theta value, in which case we don't care about this graph since
 // it won't give us a better min_theta value regardless whether the graph is T_k free.
-bool EdgeGenerator::next(Graph& copy, bool use_known_min_theta_opt, int base_edge_count,
-                         int base_directed_edge_count, Fraction known_min_theta) {
+bool EdgeGenerator::next(Graph& copy, bool use_known_min_theta_opt, Fraction known_min_theta) {
   if (use_known_min_theta_opt) {
     // Assert that we are using min_theta optimization only in the final enumeration phase.
     assert(n == Graph::N);
-    assert(base_edge_count >= 0);
-    assert(base_directed_edge_count >= 0);
     assert(known_min_theta >= Fraction(1, 1));
   }
 
@@ -87,8 +82,7 @@ bool EdgeGenerator::next(Graph& copy, bool use_known_min_theta_opt, int base_edg
     if (!use_known_min_theta_opt) break;
 
     // Next we perform the min_theta optimization.
-    OptResult opt =
-        perform_min_theta_optimization(base_edge_count, base_directed_edge_count, known_min_theta);
+    OptResult opt = perform_min_theta_optimization(known_min_theta);
     if (opt == OptResult::FOUND_CANDIDATE)
       break;  // Passed the min_theta optimization check, we have a winner.
     else if (opt == OptResult::DONE)
@@ -122,20 +116,18 @@ void EdgeGenerator::generate_graph(Graph& copy, int skip_front) const {
 // computationally feasible. This is very important when the base graph is very sparse
 // and therefore the new graphs are less likely to contain T_k, making the
 // `notify_contain_tk_skip` optimization less effective.
-EdgeGenerator::OptResult EdgeGenerator::perform_min_theta_optimization(int base_edge_count,
-                                                                       int base_directed_edge_count,
-                                                                       Fraction known_min_theta) {
+EdgeGenerator::OptResult EdgeGenerator::perform_min_theta_optimization(Fraction known_min_theta) {
   // The number of new edges must satisfy the following inequality in order
   // for it to be interesting:
-  //    base_edge_count + known_min_theta * (base_directed_edges + new_edges) > binom_nk
+  //    base_undirected + known_min_theta * (base_directed + new_edges) > binom_nk
   // because otherwise, even if all new edges are directed, the theta produced would still
   // be >= min_theta. Rewrite the inequility as
-  //    new_edges > (binom_nk - base_edge_count) / known_min_theta - base_directed_edges
+  //    new_edges > (binom_nk - base_undirected) / known_min_theta - base_directed
   // Thus
-  //    new_edges > floor((binom_nk - base_edge_count) / known_min_theta) - base_directed_edges
-  int new_edge_threshold =
-      (Graph::TOTAL_EDGES - base_edge_count) * known_min_theta.d / known_min_theta.n -
-      base_directed_edge_count;
+  //    new_edges > floor((binom_nk - base_undirected) / known_min_theta) - base_directed
+  int new_edge_threshold = (Graph::TOTAL_EDGES - base.get_undirected_edge_count()) *
+                               known_min_theta.d / known_min_theta.n -
+                           base.get_directed_edge_count();
   // bool debug_print = true;
   // if (debug_print) {
   //   std::cout << "\n**** threshold=" << new_edge_threshold << ", binom=" << (int)binom_nk
@@ -184,9 +176,8 @@ EdgeGenerator::OptResult EdgeGenerator::perform_min_theta_optimization(int base_
   }
   // If we get here, we have enough number of edges. But there still may not be enough number
   // of directed edges. So just compute.
-  int total_directed = new_directed_edges + base_directed_edge_count;
-  int total_undirected =
-      new_edges - new_directed_edges + base_edge_count - base_directed_edge_count;
+  int total_directed = new_directed_edges + base.get_directed_edge_count();
+  int total_undirected = new_edges - new_directed_edges + base.get_undirected_edge_count();
   if (total_directed == 0 ||
       known_min_theta <= Fraction(Graph::TOTAL_EDGES - total_undirected, total_directed)) {
     ++stats_theta_directed_edges_skip;

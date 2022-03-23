@@ -147,8 +147,7 @@ void Grower::worker_thread_main(int thread_id) {
     Fraction min_theta(1E8, 1);
     uint64 graphs_processed = 0;
     EdgeGenerator edge_gen(Graph::N, base);
-    while (edge_gen.next(copy, true, base.get_edge_count(), base.get_directed_edge_count(),
-                         min_theta)) {
+    while (edge_gen.next(copy, true, min_theta)) {
       // Thread 0 has the extra responsibility as time keeper,
       // to periodically ask Counters to print.
       if (thread_id == 0) {
