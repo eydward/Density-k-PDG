@@ -266,7 +266,7 @@ TEST(EdgeGeneratorTest, Generate45) {
   }
 }
 
-TEST(EdgeGeneratorTest, ContainsTk) {
+TEST(EdgeGeneratorTest, ContainsT2) {
   Graph::set_global_graph_info(2, 6);
   EdgeCandidates ec(6);
   Graph base;
@@ -274,18 +274,18 @@ TEST(EdgeGeneratorTest, ContainsTk) {
   EdgeGenerator edge_gen(ec, base);
 
   Graph copy;
-  // Skip generated graphs that don't contain T_k
+  // Skip generated graphs that don't contain T_2
   for (int i = 1; i < 4 * 4 * 4 + 4 * 4; i++) {
     EXPECT_TRUE(edge_gen.next(copy, false));
     EXPECT_FALSE(copy.contains_Tk(5));
   }
 
-  // The next one contains T_k
+  // The next one contains T_2
   EXPECT_TRUE(edge_gen.next(copy, false));
   EXPECT_TRUE(copy.contains_Tk(5));
   EXPECT_EQ(copy.serialize_edges(), "{23>2, 25, 35}");
 
-  // Notify contains T_k, it should skip over a bunch of graphs.
+  // Notify contains T_2, it should skip over a bunch of graphs.
   edge_gen.notify_contain_tk_skip();
   EXPECT_TRUE(edge_gen.next(copy, false));
   EXPECT_EQ(copy.serialize_edges(), "{23>2, 25>2, 35}");
@@ -301,5 +301,79 @@ TEST(EdgeGeneratorTest, ContainsTk) {
   edge_gen.notify_contain_tk_skip();
   EXPECT_TRUE(edge_gen.next(copy, false));
   EXPECT_EQ(copy.serialize_edges(), "{23>2, 35>3}");
+  EXPECT_FALSE(copy.contains_Tk(5));
+}
+
+TEST(EdgeGeneratorTest, ContainsTk3) {
+  Graph::set_global_graph_info(3, 5);
+  EdgeCandidates ec(5);
+  Graph base;
+  EXPECT_TRUE(Graph::parse_edges("{123}", base));
+  EdgeGenerator edge_gen(ec, base);
+
+  Graph copy;
+  // Skip generated graphs that don't contain T_3
+  for (int i = 1; i < 32; i++) {
+    EXPECT_TRUE(edge_gen.next(copy, false));
+    EXPECT_FALSE(copy.contains_Tk(4));
+  }
+
+  // Next one contains T_3
+  EXPECT_TRUE(edge_gen.next(copy, false));
+  EXPECT_TRUE(copy.contains_Tk(4));
+  EXPECT_EQ(copy.serialize_edges(), "{123, 014>0, 024, 124}");
+
+  // Notify contains T_3, should be no-op
+  edge_gen.notify_contain_tk_skip();
+  EXPECT_TRUE(edge_gen.next(copy, false));
+  EXPECT_EQ(copy.serialize_edges(), "{123, 014>1, 024, 124}");
+  EXPECT_TRUE(copy.contains_Tk(4));
+  // Notify contains T_3, should be no-op again
+  edge_gen.notify_contain_tk_skip();
+  EXPECT_TRUE(edge_gen.next(copy, false));
+  EXPECT_EQ(copy.serialize_edges(), "{123, 014>4, 024, 124}");
+  EXPECT_FALSE(copy.contains_Tk(4));
+
+  EXPECT_TRUE(edge_gen.next(copy, false));
+  EXPECT_EQ(copy.serialize_edges(), "{123, 024>0, 124}");
+  EXPECT_FALSE(copy.contains_Tk(4));
+
+  EXPECT_TRUE(edge_gen.next(copy, false));
+  EXPECT_EQ(copy.serialize_edges(), "{123, 014, 024>0, 124}");
+  EXPECT_TRUE(copy.contains_Tk(4));
+
+  // Notify contains T_3, should be no-op again
+  edge_gen.notify_contain_tk_skip();
+  EXPECT_TRUE(edge_gen.next(copy, false));
+  EXPECT_EQ(copy.serialize_edges(), "{123, 014>0, 024>0, 124}");
+  EXPECT_TRUE(copy.contains_Tk(4));
+  // Notify contains T_3, should be no-op again
+  edge_gen.notify_contain_tk_skip();
+  EXPECT_TRUE(edge_gen.next(copy, false));
+  EXPECT_EQ(copy.serialize_edges(), "{123, 014>1, 024>0, 124}");
+  EXPECT_TRUE(copy.contains_Tk(4));
+  // Notify contains T_3, should be no-op again
+  edge_gen.notify_contain_tk_skip();
+  EXPECT_TRUE(edge_gen.next(copy, false));
+  EXPECT_EQ(copy.serialize_edges(), "{123, 014>4, 024>0, 124}");
+  EXPECT_TRUE(copy.contains_Tk(4));
+  // Notify contains T_3, should be no-op again
+  edge_gen.notify_contain_tk_skip();
+  EXPECT_TRUE(edge_gen.next(copy, false));
+  EXPECT_EQ(copy.serialize_edges(), "{123, 024>2, 124}");
+  EXPECT_FALSE(copy.contains_Tk(4));
+
+  // Skip a lot of graphs.
+  for (int i = 1; i < 5 * 5 * 5 * 5 * 5 + 5 * 5 * 5; i++) {
+    EXPECT_TRUE(edge_gen.next(copy, false));
+  }
+
+  EXPECT_TRUE(edge_gen.next(copy, false));
+  EXPECT_EQ(copy.serialize_edges(), "{123, 024>2, 124, 034, 234}");
+  EXPECT_TRUE(copy.contains_Tk(4));
+  // Notify contains T_3, it should skip over a bunch of graphs.
+  edge_gen.notify_contain_tk_skip();
+  EXPECT_TRUE(edge_gen.next(copy, false));
+  EXPECT_EQ(copy.serialize_edges(), "{123, 024>4, 124, 034, 234}");
   EXPECT_FALSE(copy.contains_Tk(5));
 }
