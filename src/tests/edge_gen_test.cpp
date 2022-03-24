@@ -266,7 +266,7 @@ TEST(EdgeGeneratorTest, Generate45) {
   }
 }
 
-TEST(EdgeGeneratorTest, ContainsT2) {
+TEST(EdgeGeneratorTest, NotifyContainsT2) {
   Graph::set_global_graph_info(2, 6);
   EdgeCandidates ec(6);
   Graph base;
@@ -304,7 +304,7 @@ TEST(EdgeGeneratorTest, ContainsT2) {
   EXPECT_FALSE(copy.contains_Tk(5));
 }
 
-TEST(EdgeGeneratorTest, ContainsTk3) {
+TEST(EdgeGeneratorTest, NotifyContainsTk3) {
   Graph::set_global_graph_info(3, 5);
   EdgeCandidates ec(5);
   Graph base;
@@ -376,4 +376,31 @@ TEST(EdgeGeneratorTest, ContainsTk3) {
   EXPECT_TRUE(edge_gen.next(copy, false));
   EXPECT_EQ(copy.serialize_edges(), "{123, 024>4, 124, 034, 234}");
   EXPECT_FALSE(copy.contains_Tk(5));
+}
+
+TEST(EdgeGeneratorTest, MinTheta2) {
+  for (int k = 2; k <= 4; k++) {
+    std::string edge;
+    switch (k) {
+      case 2:
+        edge = "{01}";
+        break;
+      case 3:
+        edge = "{012}";
+        break;
+      case 4:
+        edge = "{0123}";
+        break;
+    }
+    for (int n = k + 1; n <= 7; n++) {
+      Graph::set_global_graph_info(k, n);
+      Graph base;
+      EXPECT_TRUE(Graph::parse_edges(edge, base));
+      EdgeCandidates ec(n);
+      EdgeGenerator edge_gen(ec, base);
+
+      Graph copy;
+      EXPECT_FALSE(edge_gen.next(copy, true, Fraction(1, 1)));
+    }
+  }
 }
