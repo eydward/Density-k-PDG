@@ -46,6 +46,7 @@ void Grower::grow() {
   if (!skip_final_enum) {
     // Finally, enumerate all graphs with N vertices, no need to store graphs.
     enumerate_final_step(collected_graphs[Graph::N - 1]);
+    std::sort(results.begin(), results.end());
   } else {
     std::cout << "Skipped.\n";
   }
@@ -192,6 +193,7 @@ void Grower::worker_thread_main(int thread_id) {
     // The lock scope to add the min theta to the global Counters.
     {
       std::scoped_lock lock(counters_mutex);
+      results.push_back(std::make_tuple(base_graph_id, base, min_theta_graph));
       Counters::observe_theta(min_theta_graph, graphs_processed);
       Counters::observe_edgegen_stats(
           edge_gen.stats_tk_skip, edge_gen.stats_tk_skip_bits, edge_gen.stats_theta_edges_skip,

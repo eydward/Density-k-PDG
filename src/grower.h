@@ -43,11 +43,17 @@ class Grower {
 
   // The mutex to protect the counters under multi-threading.
   std::mutex counters_mutex;
-  // The mutex to protect the queue under multi-threading.
+  // The mutex to protect the queue and results under multi-threading.
   std::mutex queue_mutex;
   // The queue of base graphs to be processed in the final enumeration phase.
   // The worker threads will dequeue graphs from this queue to work on.
   std::queue<Graph> to_be_processed;
+  // The results of the final enumeration step.
+  // Values: 3-tuple (
+  //    id of the graph,
+  //    the base graph,
+  //    the graph with the minimum theta among all graphs generated from the base graph).
+  std::vector<std::tuple<int, Graph, Graph>> results;
   // The number of graphs that have been dequeued from the to_be_processed queue.
   int to_be_processed_id;
 

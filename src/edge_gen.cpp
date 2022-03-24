@@ -33,7 +33,6 @@ EdgeCandidates::EdgeCandidates(int vertex_count) : n(vertex_count), edge_candida
 EdgeGenerator::EdgeGenerator(const EdgeCandidates& edge_candidates, const Graph& base_graph)
     : candidates(edge_candidates),
       base(base_graph),
-      high_idx_non_zero_enum_state(0),
       stats_tk_skip(0),
       stats_tk_skip_bits(0),
       stats_theta_edges_skip(0),
@@ -65,6 +64,9 @@ void EdgeGenerator::clear_stats() {
 // the currently known min_theta value, in which case we don't care about this graph since
 // it won't give us a better min_theta value regardless whether the graph is T_k free.
 bool EdgeGenerator::next(Graph& copy, bool use_known_min_theta_opt, Fraction known_min_theta) {
+  // std::cout << "BEGIN ";
+  // print_debug(std::cout, true, 0);
+
   if (use_known_min_theta_opt) {
     // Assert that we are using min_theta optimization only in the final enumeration phase.
     assert(candidates.n == Graph::N);
@@ -75,7 +77,6 @@ bool EdgeGenerator::next(Graph& copy, bool use_known_min_theta_opt, Fraction kno
     bool has_valid_candidate = false;
     for (uint8 i = 0; i < candidates.edge_candidate_count; i++) {
       ++enum_state[i];
-      high_idx_non_zero_enum_state = std::max(high_idx_non_zero_enum_state, i);
       if (enum_state[i] != Graph::K + 2) {
         has_valid_candidate = true;
         break;
@@ -85,6 +86,9 @@ bool EdgeGenerator::next(Graph& copy, bool use_known_min_theta_opt, Fraction kno
     // If we didn't find a valid candidate, the enumeration of all possible
     // edge combinations are done, we can return false.
     if (!has_valid_candidate) return false;
+
+    // std::cout << "MID ";
+    // print_debug(std::cout, false, 0);
 
     // If we are not using min_theta optimization, since we already have a candidate, break out
     // of the while loop to return the current candidate.
@@ -99,6 +103,8 @@ bool EdgeGenerator::next(Graph& copy, bool use_known_min_theta_opt, Fraction kno
     else
       continue;
   }
+  // std::cout << "END ";
+  // print_debug(std::cout, false, 0);
 
   // We found a new valid enumeration state. Generate a new graph into `copy`.
   generate_graph(copy, 0);
@@ -107,7 +113,7 @@ bool EdgeGenerator::next(Graph& copy, bool use_known_min_theta_opt, Fraction kno
 }
 void EdgeGenerator::generate_graph(Graph& copy, int skip_front) const {
   base.copy_edges(copy);
-  for (uint8 j = skip_front; j <= high_idx_non_zero_enum_state; j++) {
+  for (uint8 j = skip_front; j < candidates.edge_candidate_count; j++) {
     if (enum_state[j] != 0) {
       copy.add_edge(
           Edge(candidates.edge_candidates[j], candidates.edge_candidates_heads[j][enum_state[j]]));
@@ -140,9 +146,14 @@ EdgeGenerator::OptResult EdgeGenerator::perform_min_theta_optimization(Fraction 
                            base.get_directed_edge_count();
   // bool debug_print = true;
   // if (debug_print) {
-  //   std::cout << "\n**** threshold=" << new_edge_threshold << ", binom=" << (int)binom_nk
+  //   Graph c;
+  //   generate_graph(c, 0);
+  //   std::cout << "\n**** threshold=" << new_edge_threshold << ", binom=" <<
+  //   (int)Graph::TOTAL_EDGES
   //             << ", t=" << known_min_theta.n << "/" << known_min_theta.d
-  //             << ", b=" << base_edge_count << ", " << base_directed_edge_count << "\n";
+  //             << ", b=" << (int)base.get_edge_count() << ", " <<
+  //             (int)base.get_directed_edge_count()
+  //             << "\n  " << c.serialize_edges() << "\n";
   // }
 
   std::tuple<uint8, uint8, uint8, uint8> new_edge_info = count_edges();
@@ -154,6 +165,7 @@ EdgeGenerator::OptResult EdgeGenerator::perform_min_theta_optimization(Fraction 
   // if (debug_print) {
   //   std::cout << "New Edges " << (int)new_edges << ", " << (int)new_directed_edges << ", "
   //             << (int)low_non_edge_idx << ", " << (int)low_non_directed_idx << "\n";
+  //   print_debug(std::cout, false, 0);
   // }
 
   // First step: check number of new edges. Details of this inequality check are described above
@@ -277,9 +289,8 @@ std::tuple<uint8, uint8, uint8, uint8> EdgeGenerator::count_edges() const {
 }
 
 void EdgeGenerator::print_debug(std::ostream& os, bool print_candidates, int base_graph_id) const {
-  os << "    EdgeGen[" << base_graph_id
-     << ", high_idx=" << static_cast<int>(high_idx_non_zero_enum_state) << ", state=";
-  for (int e = 0; e < candidates.edge_candidate_count; e++) {
+  os << "    EdgeGen[" << base_graph_id << ", state=";
+  for (int e = candidates.edge_candidate_count - 1; e >= 0; e--) {
     os << static_cast<int>(enum_state[e]);
   }
   if (print_candidates) {

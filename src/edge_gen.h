@@ -20,9 +20,8 @@ struct EdgeCandidates {
 // A helper class to generate all edge sets to add, when a new vertex is added to an existing graph.
 class EdgeGenerator {
  private:
-  const EdgeCandidates& candidates;    // The edge candidates used in generation.
-  const Graph& base;                   // The base graph to grow from.
-  uint8 high_idx_non_zero_enum_state;  // The highest index of the non-zero element in enum_state.
+  const EdgeCandidates& candidates;  // The edge candidates used in generation.
+  const Graph& base;                 // The base graph to grow from.
 
   // This array represents the current enumeration state.
   // The values are indices into the edge_candidates_heads arrays.
