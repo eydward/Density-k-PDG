@@ -54,6 +54,7 @@ class Counters {
 
  public:
   static Fraction get_min_theta() { return min_theta; }
+  static const Graph& get_min_theta_graph() { return min_theta_graph; }
   static void increment_compute_vertex_signatures() { ++compute_vertex_signatures; }
   static void increment_graph_copies() { ++graph_copies; }
   static void increment_graph_canonicalize_ops() { ++graph_canonicalize_ops; }

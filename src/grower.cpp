@@ -11,10 +11,13 @@ struct GraphComparer {
   bool operator()(const Graph& g, const Graph& h) const { return g.is_isomorphic(h); }
 };
 
-Grower::Grower(int num_worker_threads_, int skip_final_enum_, int start_idx_, int end_idx_,
-               std::ostream* log_, std::ostream* log_detail_)
+Grower::Grower(int num_worker_threads_, bool skip_final_enum_, bool use_min_theta_opt_,
+               bool use_contains_Tk_opt_, int start_idx_, int end_idx_, std::ostream* log_,
+               std::ostream* log_detail_)
     : num_worker_threads(num_worker_threads_),
       skip_final_enum(skip_final_enum_),
+      use_min_theta_opt(use_min_theta_opt_),
+      use_contains_Tk_opt(use_contains_Tk_opt_),
       start_idx(start_idx_),
       end_idx(end_idx_),
       log(log_),
@@ -169,8 +172,8 @@ void Grower::worker_thread_main(int thread_id) {
                                             edge_gen.stats_edge_sets);
             edge_gen.clear_stats();
             Counters::print_at_time_interval();
-            edge_gen.print_debug(std::cout, false, base_graph_id);
             if (Counters::get_log() != nullptr) {
+              edge_gen.print_debug(std::cout, false, base_graph_id);
               edge_gen.print_debug(*Counters::get_log(), false, base_graph_id);
             }
           }
@@ -212,8 +215,8 @@ void Grower::worker_thread_main(int thread_id) {
 
 // Print the content of the collected graphs after the growth to console and log files.
 void Grower::print_before_final(const std::vector<Graph> collected_graphs[MAX_VERTICES]) const {
-  print_state_to_stream(std::cout, collected_graphs);
   if (log != nullptr) {
+    print_state_to_stream(std::cout, collected_graphs);
     print_state_to_stream(*log, collected_graphs);
     log->flush();
   }

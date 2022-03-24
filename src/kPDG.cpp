@@ -68,7 +68,7 @@ int main(int argc, char* argv[]) {
 
   Counters::initialize(&log);
 
-  Grower s(t, skip_final_enum, start_idx, end_idx, &log, &detail_log);
+  Grower s(t, skip_final_enum, true, true, start_idx, end_idx, &log, &detail_log);
   s.grow();
 
   const std::string done_msg = "\n\n***************************\nALL DONE. Final result:\n";

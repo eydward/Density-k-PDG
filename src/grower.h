@@ -10,9 +10,14 @@ class Grower {
   const int num_worker_threads;
   // If true, stop after the growing phase but don't perform the final enumeration phase.
   const bool skip_final_enum;
+  // If true, the min_theta optimization is enabled.
+  const bool use_min_theta_opt;
+  // If true, the contains T_k optimization is enabled.
+  const bool use_contains_Tk_opt;
   // The start index and end index in the final enumeration phase.
   const int start_idx;
   const int end_idx;
+
   // The log files.
   std::ostream* const log;
   std::ostream* const log_detail;
@@ -60,9 +65,13 @@ class Grower {
  public:
   // Constructs the Grower object.
   // log_stream is used for status reporting and debugging purpose.
-  Grower(int num_worker_threads_, int skip_final_enum_, int start_idx_, int end_idx_,
-         std::ostream* log_ = nullptr, std::ostream* log_detail_ = nullptr);
+  Grower(int num_worker_threads_, bool skip_final_enum_, bool use_min_theta_opt_,
+         bool use_contains_Tk_opt_, int start_idx_, int end_idx_, std::ostream* log_ = nullptr,
+         std::ostream* log_detail_ = nullptr);
 
   // Finds all canonical isomorphism class representations with up to max_n vertices.
   void grow();
+
+  // Returns the growth results.
+  const std::vector<std::tuple<int, Graph, Graph>>& get_results() const { return results; }
 };
