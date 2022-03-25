@@ -400,6 +400,8 @@ TEST(EdgeGeneratorTest, MinTheta1) {
       EdgeGenerator edge_gen(ec, base);
 
       Graph copy;
+      // Given the known theta is already 1, no graph can possibly do better than that,
+      // so we expect edge gen just optimize everything away and declare enumeration done.
       EXPECT_FALSE(edge_gen.next(copy, true, Fraction(1, 1)));
     }
   }
@@ -413,9 +415,53 @@ TEST(EdgeGeneratorTest, MinTheta2) {
   EdgeGenerator edge_gen(ec, base);
 
   Graph copy;
+  // Given that the know min_theta is 2, if we add one edge to the new graph, it won't produce
+  // a smaller theta, so it should have two new edges. In addition, if all edges in the new
+  // graph are undirected, the theta won't be smaller, therefore the first graph it generates
+  // should have two edges with one directed.
   EXPECT_TRUE(edge_gen.next(copy, true, Fraction(2, 1)));
   EXPECT_EQ(copy.serialize_edges(), "{01, 02>0, 12}");
 
+  // Generate the next one, doesn't skip anything.
   EXPECT_TRUE(edge_gen.next(copy, true, Fraction(2, 1)));
   EXPECT_EQ(copy.serialize_edges(), "{01, 02>2, 12}");
+  // Generate the next one, doesn't skip anything.
+  EXPECT_TRUE(edge_gen.next(copy, true, Fraction(2, 1)));
+  EXPECT_EQ(copy.serialize_edges(), "{01, 02, 12>1}");
+  // Generate the next one, doesn't skip anything.
+  EXPECT_TRUE(edge_gen.next(copy, true, Fraction(2, 1)));
+  EXPECT_EQ(copy.serialize_edges(), "{01, 02>0, 12>1}");
+
+  // Run to the end.
+  for (int i = 0; i < 4; i++) {
+    EXPECT_TRUE(edge_gen.next(copy, true, Fraction(2, 1)));
+  }
+  EXPECT_FALSE(edge_gen.next(copy, true, Fraction(2, 1)));
+}
+
+TEST(EdgeGeneratorTest, MinTheta3) {
+  Graph::set_global_graph_info(3, 4);
+  Graph base;
+  EXPECT_TRUE(Graph::parse_edges("{012>2}", base));
+  EdgeCandidates ec(4);
+  EdgeGenerator edge_gen(ec, base);
+
+  Graph copy;
+  // Given that the know min_theta is 3/2, if we add one edge to the new graph, it won't produce
+  // a smaller theta, so it should have two new edges. In addition, if either new edge in the new
+  // graph is undirected, the theta won't be smaller, therefore the first graph it generates
+  // should have 3 edges, all directed.
+  EXPECT_TRUE(edge_gen.next(copy, true, Fraction(3, 2)));
+  EXPECT_EQ(copy.serialize_edges(), "{012>2, 013>0, 023>0}");
+
+  // Next set, different head direction of the above.
+  for (int i = 0; i < 8; i++) {
+    EXPECT_TRUE(edge_gen.next(copy, true, Fraction(3, 2)));
+  }
+  EXPECT_EQ(copy.serialize_edges(), "{012>2, 013>3, 023>3}");
+
+  // Next should be "{012>2, 123}". But it doesn't produce smaller theta. So it should skip some,
+  // to get two directed edges.
+  EXPECT_TRUE(edge_gen.next(copy, true, Fraction(3, 2)));
+  EXPECT_EQ(copy.serialize_edges(), "{012>2, 013>0, 023>0, 123}");
 }

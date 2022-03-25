@@ -64,9 +64,6 @@ void EdgeGenerator::clear_stats() {
 // the currently known min_theta value, in which case we don't care about this graph since
 // it won't give us a better min_theta value regardless whether the graph is T_k free.
 bool EdgeGenerator::next(Graph& copy, bool use_known_min_theta_opt, Fraction known_min_theta) {
-  // std::cout << "BEGIN ";
-  // print_debug(std::cout, true, 0);
-
   if (use_known_min_theta_opt) {
     // Assert that we are using min_theta optimization only in the final enumeration phase.
     assert(candidates.n == Graph::N);
@@ -87,9 +84,6 @@ bool EdgeGenerator::next(Graph& copy, bool use_known_min_theta_opt, Fraction kno
     // edge combinations are done, we can return false.
     if (!has_valid_candidate) return false;
 
-    // std::cout << "MID ";
-    // print_debug(std::cout, false, 0);
-
     // If we are not using min_theta optimization, since we already have a candidate, break out
     // of the while loop to return the current candidate.
     if (!use_known_min_theta_opt) break;
@@ -103,8 +97,6 @@ bool EdgeGenerator::next(Graph& copy, bool use_known_min_theta_opt, Fraction kno
     else
       continue;
   }
-  // std::cout << "END ";
-  // print_debug(std::cout, false, 0);
 
   // We found a new valid enumeration state. Generate a new graph into `copy`.
   generate_graph(copy, 0);
@@ -144,29 +136,11 @@ EdgeGenerator::OptResult EdgeGenerator::perform_min_theta_optimization(Fraction 
   int new_edge_threshold = (Graph::TOTAL_EDGES - base.get_undirected_edge_count()) *
                                known_min_theta.d / known_min_theta.n -
                            base.get_directed_edge_count();
-  // bool debug_print = true;
-  // if (debug_print) {
-  //   Graph c;
-  //   generate_graph(c, 0);
-  //   std::cout << "\n**** threshold=" << new_edge_threshold << ", binom=" <<
-  //   (int)Graph::TOTAL_EDGES
-  //             << ", t=" << known_min_theta.n << "/" << known_min_theta.d
-  //             << ", b=" << (int)base.get_edge_count() << ", " <<
-  //             (int)base.get_directed_edge_count()
-  //             << "\n  " << c.serialize_edges() << "\n";
-  // }
-
   std::tuple<uint8, uint8, uint8, uint8> new_edge_info = count_edges();
   uint8 new_edges = std::get<0>(new_edge_info);
   uint8 new_directed_edges = std::get<1>(new_edge_info);
   uint8 low_non_edge_idx = std::get<2>(new_edge_info);
   uint8 low_non_directed_idx = std::get<3>(new_edge_info);
-
-  // if (debug_print) {
-  //   std::cout << "New Edges " << (int)new_edges << ", " << (int)new_directed_edges << ", "
-  //             << (int)low_non_edge_idx << ", " << (int)low_non_directed_idx << "\n";
-  //   print_debug(std::cout, false, 0);
-  // }
 
   // First step: check number of new edges. Details of this inequality check are described above
   // in the `new_edge_threshold` calculation.
@@ -290,14 +264,14 @@ std::tuple<uint8, uint8, uint8, uint8> EdgeGenerator::count_edges() const {
 
 void EdgeGenerator::print_debug(std::ostream& os, bool print_candidates, int base_graph_id) const {
   os << "    EdgeGen[" << base_graph_id << ", state=";
-  for (int e = candidates.edge_candidate_count - 1; e >= 0; e--) {
+  for (int e = static_cast<int>(candidates.edge_candidate_count) - 1; e >= 0; e--) {
     os << static_cast<int>(enum_state[e]);
   }
   if (print_candidates) {
     os << "\n      EC={";
-    for (int e = 0; e < candidates.edge_candidate_count; e++) {
-      if (e > 0) os << ", ";
+    for (int e = static_cast<int>(candidates.edge_candidate_count) - 1; e >= 0; e--) {
       os << std::bitset<MAX_VERTICES>(candidates.edge_candidates[e]);
+      if (e > 0) os << ", ";
     }
     os << "}";
   }
