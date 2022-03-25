@@ -13,7 +13,7 @@ struct GraphComparer {
 
 Grower::Grower(int num_worker_threads_, bool skip_final_enum_, bool use_min_theta_opt_,
                bool use_contains_Tk_opt_, int start_idx_, int end_idx_, std::ostream* log_,
-               std::ostream* log_detail_)
+               std::ostream* log_detail_, std::ostream* log_result_)
     : num_worker_threads(num_worker_threads_),
       skip_final_enum(skip_final_enum_),
       use_min_theta_opt(use_min_theta_opt_),
@@ -22,6 +22,7 @@ Grower::Grower(int num_worker_threads_, bool skip_final_enum_, bool use_min_thet
       end_idx(end_idx_),
       log(log_),
       log_detail(log_detail_),
+      log_result(log_result_),
       to_be_processed_id(start_idx_) {}
 
 // Find all canonical isomorphism class representations with up to max_n vertices.
@@ -50,6 +51,19 @@ void Grower::grow() {
     // Finally, enumerate all graphs with N vertices, no need to store graphs.
     enumerate_final_step(collected_graphs[Graph::N - 1]);
     std::sort(results.begin(), results.end());
+    if (log_result != nullptr) {
+      for (const auto& r : results) {
+        int base_graph_id = std::get<0>(r);
+        const Graph& base_graph = std::get<1>(r);
+        const Graph& min_theta_graph = std::get<2>(r);
+        *log_result << "G[" << base_graph_id << "] min_theta=" << min_theta_graph.get_theta().n
+                    << " / " << min_theta_graph.get_theta().d << "\n  ";
+        base_graph.print_concise(*log_result, true);
+        *log_result << "  ";
+        min_theta_graph.print_concise(*log_result, true);
+        log_result->flush();
+      }
+    }
   } else {
     std::cout << "Skipped.\n";
   }

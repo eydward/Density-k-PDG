@@ -51,7 +51,7 @@ int main(int argc, char* argv[]) {
 
   Graph::set_global_graph_info(k, n);
 
-  std::string log_file_name = "kPDG_v8_" + std::to_string(Graph::K) + "_" +
+  std::string log_file_name = "kPDG_v9_" + std::to_string(Graph::K) + "_" +
                               std::to_string(Graph::N) + "_" + std::to_string(t) + "_" +
                               std::to_string(start_idx) + "_" + std::to_string(end_idx) + "_" +
                               get_current_time();
@@ -59,16 +59,17 @@ int main(int argc, char* argv[]) {
       "kPDG run arguments: K=" + std::to_string(Graph::K) + ", N=" + std::to_string(Graph::N) +
       ", TOTAL_EDGES=" + std::to_string(Graph::TOTAL_EDGES) + ", THREADS=" + std::to_string(t) +
       ", idx_range=[" + std::to_string(start_idx) + ", " + std::to_string(end_idx) + "]\n\n";
-  std::cout << "Log file path: " << log_file_name + ".log, " << log_file_name + "_detail.log"
-            << "\n";
+  std::cout << "Log file path: " << log_file_name + ".log, " << log_file_name + "_detail.log, "
+            << log_file_name + "_result.log\n";
   std::ofstream log(log_file_name + ".log");
   std::ofstream detail_log(log_file_name + "_detail.log");
+  std::ofstream result_log(log_file_name + "_result.log");
   std::cout << arguments;
   log << arguments;
 
   Counters::initialize(&log);
 
-  Grower s(t, skip_final_enum, true, true, start_idx, end_idx, &log, &detail_log);
+  Grower s(t, skip_final_enum, true, true, start_idx, end_idx, &log, &detail_log, &result_log);
   s.grow();
 
   const std::string done_msg = "\n\n***************************\nALL DONE. Final result:\n";

@@ -71,6 +71,7 @@ void Counters::new_growth_step(uint64 vertex_count, uint64 total_graphs_in_curre
 
 void Counters::enter_final_step(uint64 num_base_graphs) {
   in_final_step = true;
+  min_theta = Fraction(1E8, 1);
   growth_num_base_graphs_in_final_step = num_base_graphs;
   growth_processed_graphs_in_current_step = 0;
 }
