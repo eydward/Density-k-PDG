@@ -46,6 +46,14 @@ cc_binary(
     linkstatic=True,
 )
 
+cc_binary(
+    name="edgegenstress",
+    srcs=["tests/edgegenstress.cpp"],
+    deps=[":graph"],
+    copts=["-std=c++17"],
+    linkstatic=True,
+)
+
 cc_test(
     name="graph_test",
     srcs=[
