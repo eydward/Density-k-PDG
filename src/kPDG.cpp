@@ -80,5 +80,6 @@ int main(int argc, char* argv[]) {
   log.close();
   detail_log.flush();
   detail_log.close();
+  result_log.close();
   return 0;
 }

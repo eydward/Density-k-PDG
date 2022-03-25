@@ -61,8 +61,8 @@ void Grower::grow() {
         base_graph.print_concise(*log_result, true);
         *log_result << "  ";
         min_theta_graph.print_concise(*log_result, true);
-        log_result->flush();
       }
+      log_result->flush();
     }
   } else {
     std::cout << "Skipped.\n";
