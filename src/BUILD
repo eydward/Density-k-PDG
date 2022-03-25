@@ -51,6 +51,7 @@ cc_binary(
     srcs=["tests/edgegenstress.cpp"],
     deps=[":graph"],
     copts=["-std=c++17"],
+    linkopts=["-lpthread"],
     linkstatic=True,
 )
 
