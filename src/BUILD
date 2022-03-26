@@ -15,7 +15,7 @@ cc_library(
         "edge_gen.cpp",
         "fraction.cpp",
         "graph.cpp",
-        "graph_K4.cpp",
+        "k4problem/graph_K4.cpp",
         "grower.cpp",
         "permutator.cpp",
     ],
@@ -25,6 +25,19 @@ cc_library(
 cc_binary(
     name="kPDG",
     srcs=["kPDG.cpp"],
+    deps=[":graph"],
+    copts=["-std=c++17"],
+    linkopts=["-lpthread"],
+    linkstatic=True,
+)
+
+cc_binary(
+    name="k4problem",
+    srcs=[
+        "k4problem/k4problem.cpp",
+        "k4problem/grower_K4.cpp",
+        "k4problem/grower_K4.h",
+    ],
     deps=[":graph"],
     copts=["-std=c++17"],
     linkopts=["-lpthread"],

@@ -1,4 +1,4 @@
-#include "graph.h"
+#include "../graph.h"
 
 // Return true if the graphs contains a complete graph with 4 vertices with at least
 // one directed edge. Only works for 2-PDG. The given vertex v must be in the complete graph.
@@ -46,9 +46,6 @@ bool Graph::contains_K4(int v) const {
         if (has_ij && has_jk && has_ki &&
             (directed_ij || directed_jk || directed_ki || neighbors_directed[i] ||
              neighbors_directed[j] || neighbors_directed[k])) {
-          std::cout << "v=" << v << ", (ijk)=(" << neighbors[i] << neighbors[j] << neighbors[k]
-                    << "), (eijk)=(" << std::bitset<7>(e_ij) << ", " << std::bitset<7>(e_jk) << ", "
-                    << std::bitset<7>(e_ki) << ")\n";
           return true;
         }
       }
