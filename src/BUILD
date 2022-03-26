@@ -15,6 +15,7 @@ cc_library(
         "edge_gen.cpp",
         "fraction.cpp",
         "graph.cpp",
+        "graph_K4.cpp",
         "grower.cpp",
         "permutator.cpp",
     ],
@@ -63,6 +64,7 @@ cc_test(
         "tests/grower_test.cpp",
         "tests/permutator_test.cpp",
         "tests/graph_test.cpp",
+        "tests/graph_K4_test.cpp",
     ],
     deps=[
         ":graph",
