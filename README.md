@@ -78,9 +78,9 @@ We use the following steps to verify the correctness of the algorithm:
 ## Organization of Code
 All source code are in the `src` directory.
 - `BUILD`: the project that instructs `bazel` how to build, run, and test.
-- `tests/*cpp` : unit tests and stress tests, not part of actual execution.
-- `collector/*` : a utility to collect the data from log files of multiple batches, validate consistency, and summarize the final result. This is used to get the result for `K=4,N=7`.
-- `k4problem/*` : to solve a different problem (let K->4 be a complete graph with 4 vertices and exactly one directed edge, compute the min_theta value for all graphs with `N` vertices that are K->4-free).
+- `tests/*cpp` : unit tests and stress tests. Not part of the actual program.
+- `collector/*` : a utility to collect the data from log files of multiple batches, validate consistency, and summarize the final result. This is used to get the result for `K=4,N=7`. Not part of the main program.
+- `k4problem/*` : to solve a different problem (let K->4 be a complete graph with 4 vertices and exactly one directed edge, compute the min_theta value for all graphs with `N` vertices that are K->4-free). Not part of the main program.
 - `kPDG.cpp`: entry point of the command line program.
 - `graph.h, .cpp`: declaration and implementation of the Graph struct, as well as the definition of `Edge` and `VertexSignature`. This is where isomorphism check, hashing, canonicalization, and T_k-free checks are implemented.
 - `grower.h, .cpp`: declaration and implementation of growing the search tree, see algorithm design below. 
@@ -106,11 +106,12 @@ We use a simple idea to grow the search tree while trying to avoid unnecessary w
     - After the enumeration above is done, sort the resulting graph set, and it becomes `collected_graphs[n]`. 
 3. Now we have accumulated one graph in each isomorphism class for graphs with `N-1` vertices. Start the final enumeration phase. This is essentially same as the previous step above, except for the fact that we don't need to store any generated graph, therefore there is no need to either canonicalize the graph or check for isomorphisms. We just need to check whether the generated graph is `T_k`-free, and record the running minimum theta (and the graph that generates the minimum theta). 
     - Note in this step we create a pool of worker threads (controlled by the command line argument). Each worker thread takes one base graph from the queue (obtained from step 3), and add edges to generate graphs on the base. It has it's own instance of EdgeGenerator to do this. And it accumulates the min theta value locally, until all graphs are generated on the base. It then push the min theta to the global Counters.
-    - In this final enumeration phase, it's not computationally feasible to generate all `(K+2)^\binom{n-1}{k-1}-1` graphs for some `K,N` combinations. For example if `K=4,N=7`, then `(K+2)^\binom{n-1}{k-1} = 6^20 > 3.6* 10^15`, and that's for each base graph. There are almost 30000 base graphs, so the numer of graphs generated in this phase would be more than `10^20`. In order to make it computationally feasible, we implement two optimizations explained below.
+    - Two important optimizations explained in the next section.
 
 ### EdgeGen optimizations
+In this final enumeration phase, it's not computationally feasible to generate all `(K+2)^\binom{n-1}{k-1}-1` graphs for some `K,N` combinations. For example if `K=4,N=7`, then `(K+2)^\binom{n-1}{k-1} = 6^20 > 3.6* 10^15`, and that's for each base graph. There are almost 30000 base graphs, so the numer of graphs generated in this phase would be more than `10^20`. In order to make it computationally feasible, we implement two optimizations.
 
-As an important optimization, if `g` together with an edge set contains `T_k` as a subgraph, then g together with any superset of that edge set also contains `T_k`. So we should skip checking those edge sets. There is no great way to do this in the most general way, but a simple optimization that is reasonably effective is to skip the "lower" edges. Take the 6-edge example from the above. Let's say certain direction of edge 2 and edge 3 gives us a graph that contains T_k, where the counter value is `003400`. Then in theory we can skip all `xy34zw` for all values of `x,y,z,w`. That's hard to do, but we can easily skip all `0034zw`. This is implemented in `notify_contain_tk_skip()` in `edge_gen.cpp`.
+First, if `g` together with an edge set contains `T_k` as a subgraph, then g together with any superset of that edge set also contains `T_k`. So we should skip checking those edge sets. There is no great way to do this in the most general way, but a simple optimization that is reasonably effective is to skip the "lower" edges. Take the 6-edge example from the above. Let's say certain direction of edge 2 and edge 3 gives us a graph that contains T_k, where the counter value is `003400`. Then in theory we can skip all `xy34zw` for all values of `x,y,z,w`. That's hard to do, but we can easily skip all `0034zw`. This is implemented in `notify_contain_tk_skip()` in `edge_gen.cpp`.
 
 An optimization idea, not yet implemented: if we precompute the automorphism group of each graph in `canonicals[n-1]`, before the edge set generation. Then for all vertex permutations that are automorphisms of `g`, we only need to try the edge sets on them once. This is on my list to implement.
 
