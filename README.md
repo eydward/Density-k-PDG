@@ -16,7 +16,7 @@ Values in the table are <img src="doc/theta_kn.png" height="22" /> for the vario
 | 5   | 5/3 | 5/3   |   5/4 |     1 |       |       |
 | 6   | 5/3 | 5/3   |   3/2 |   6/5 |     1 |       |
 | 7   | 7/4 |  ?    |   7/4 |   7/5 |   7/6 |     1 |
-| 8   | 7/4 |  ?    |  ?    |   ?   |   ?   |   8/7 |
+| 8   | 7/4 |  ?    |  ?    |   ?   | <=20/13 |   8/7 |
 
 All results shown in this table can be obtained very fast using optimized build, except
 * `K=5, N=7` takes a few minutes on a regular computer
@@ -28,7 +28,10 @@ All results shown in this table can be obtained very fast using optimized build,
   0126>6, 0136>6, 0236>6, 1236>6, 0146>6, 0246>6, 1246>6, 0346>6, 1346>6, 2346>6
 }
 ```
-
+* `K=6,N=8` partial result: `min_theta<=20/13`. The graph that produced `theta=20/13` value is 
+```
+{023456>0, 123456>1, 012347>7, 012357>7, 012457>7, 013457>7, 023457>0, 012367>7, 012467>7, 013467>7, 023467, 123467, 012567>7, 013567>7, 023567, 123567, 014567>7, 024567, 124567, 034567, 134567}
+```
 
 ## Running the program
 The easiest way to run is to get the binaries from either `bin-linux` or `bin-windows` directories. Alternatively, you can build from source, see next section for details. To run the program:
