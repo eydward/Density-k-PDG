@@ -6,12 +6,7 @@ This program computes the `min_theta` value for k-PDGs with given number of vert
 ![IMAGE](doc/kpdg_intro.png?raw=true)
 
 ## Results
-
-K = number of vertices in each edge
-
-N = number of vertices in each graph
-
-Values in the table : `$min_{|V(H)|=N, T_K \not\subseteq H} (1 - alpha(H)) / beta(H)$`, where alpha(H) is the undirected edge density, beta(H) is the directed edge density. In other words, it's the maximum theta value so that `$alpha(H) + theta * beta(H) <= 1$` is true for all graphs H with N vertices that are T_K free. (Note: the latest version of the program only allows N<=7. 
+Values in the table are ![IMAGE](doc/theta_kn.png?raw=true) for the various `K,N` combinations.
 
 | N   | K=2 | K=3   | K=4   | K=5   | K=6   | K=7   |
 | --- | --- | ----- | ----- | ----- | ----- | ----- |
@@ -23,9 +18,9 @@ Values in the table : `$min_{|V(H)|=N, T_K \not\subseteq H} (1 - alpha(H)) / bet
 | 7   | 7/4 |  ?    |   7/4 |   7/5 |   7/6 |     1 |
 | 8   | 7/4 |  ?    |  ?    |   ?   |   ?   |   8/7 |
 
-
-All results in this table can be obtained very fast using optimized build, except
+All results shown in this table can be obtained very fast using optimized build, except
 * `K=5, N=7` takes a few minutes on a regular computer
+* `K=3, N=7` is likely computationally feasible given enough CPU hours, but there is no sufficient reason to compute it.
 * `K=4, N=7` took almost 6600 CPU hours in total on Google Cloud, in 30 batches. The log files are in the `results` directory. the `collector` utility is used to verify the consistency of all log files to summarize the final result. The graph that produced `theta=7/4` value is the following (note it's symmetric over {5,6}, making it easy to verify by hand).
 ```
 {
