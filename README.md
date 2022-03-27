@@ -6,7 +6,7 @@ This program computes the `min_theta` value for k-PDGs with given number of vert
 ![IMAGE](doc/kpdg_intro.png?raw=true)
 
 ## Results
-Values in the table are ![IMAGE](doc/theta_kn.png?raw=true) for the various `K,N` combinations.
+Values in the table are ![IMAGE](doc/theta_kn.png =x12) for the various `K,N` combinations.
 
 | N   | K=2 | K=3   | K=4   | K=5   | K=6   | K=7   |
 | --- | --- | ----- | ----- | ----- | ----- | ----- |
