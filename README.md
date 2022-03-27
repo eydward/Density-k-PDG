@@ -6,7 +6,7 @@ This program computes the `min_theta` value for k-PDGs with given number of vert
 ![IMAGE](doc/kpdg_intro.png?raw=true)
 
 ## Results
-Values in the table are <img src="doc/theta_kn.png" height="18" /> for the various `K,N` combinations.
+Values in the table are <img src="doc/theta_kn.png" height="22" /> for the various `K,N` combinations.
 
 | N   | K=2 | K=3   | K=4   | K=5   | K=6   | K=7   |
 | --- | --- | ----- | ----- | ----- | ----- | ----- |
@@ -39,15 +39,15 @@ where `K`, `N` are explained above, and `T` is the number of threads in the fina
 
 `  kPDG K N T start_idx end_idx`
 
-where `start_idx` and `end_idx` specify the range of base graph ids in the final enumeration phase. For example for `K=4, N=7`, the final enumeration phase has 29313  base graphs. We can distribute this to 6 machines, with 
+where `start_idx` and `end_idx` specify the range of base graph ids in the final enumeration phase (both inclusive). For example for `K=4, N=7`, the final enumeration phase has 29313  base graphs. We can distribute this to 30 machines, with 
 
 ```
-   kPDG K N T 0 5000
-   kPDG K N T 5000 10000
+   kPDG K N T 0 1000
+   kPDG K N T 1000 2000
    ... 
-   kPDG K N T 25000 30000
+   kPDG K N T 29000 30000
 ```
-Note the `end_idx` is allowed to be larger than the number of available base graphs for convenience. To see how many base graphs there are, just run the program with `kPDG K N -1` which skips the final step and therefore runs relatively quickly, and observe the output saying `Growth phase completed. State:` and take the last `collected` value. 
+Note the `end_idx` is allowed to be larger than the number of available base graphs for convenience. Also in the example given, graph with id 1000, 2000, etc. are actually processed twice, which is fine. To see how many base graphs there are, just run the program with `kPDG K N -1` which skips the final step and therefore runs relatively quickly, and observe the output saying `Growth phase completed. State:` and take the last `collected` value. 
 
 ## Development Environment Setup
 * In order to build and run the code, c++ 17 compatible compiler is required. My environment uses `gcc (Rev8, Built by MSYS2 project) 11.2.0`, but any `gcc-11` release  should work. 
@@ -70,8 +70,8 @@ We cannot use static linking on Linux. On Windows, it's not necessary to use sta
 
 ## Testing and Verification
 We use the following steps to verify the correctness of the algorithm:
-* The theta values on `k=2` is proved for all `n`.
-* Unit tests in `tests` directory
+* The theta values for `K=2` in the table is mathematically proved for all `N`.
+* Unit tests in `tests` directory covers all code in the program.
 * Isomorphism stress test (`isostress`): use a straightforward `is_isomorphic_slow()` implementation without any optimization, and compare its result against `is_isomorphic()` which contains various optimizations. For `(k,n)` combinations that yield relatively small number of graphs, do this on all graph pairs exhaustively. Otherwise sample the graph pairs randomly to perform this check.
 * Edge generator stress test (`edgegenstress`): There are two optimizations we implemented in the edge generation (explained in details below). In order to verify the optimizations are correct, this stress runs all combinations of `K, N` values where `N<=7`, except the two very slow ones: `K=3,N=7` and `K=4,N=7`. For each `K,N` combination, we execute the full growth search, using four different optimization combinations (`(false,false)`, `(false,true)`, `(true,false)`,`(true,true)`,), and compare their resulting graphs, verify everything is identical regardless of the edge_gen optimizations used. 
 
@@ -81,10 +81,10 @@ All source code are in the `src` directory.
 - `tests/*cpp` : unit tests and stress tests. Not part of the actual program.
 - `collector/*` : a utility to collect the data from log files of multiple batches, validate consistency, and summarize the final result. This is used to get the result for `K=4,N=7`. Not part of the main program.
 - `k4problem/*` : to solve a different problem (let K->4 be a complete graph with 4 vertices and exactly one directed edge, compute the min_theta value for all graphs with `N` vertices that are K->4-free). Not part of the main program.
-- `kPDG.cpp`: entry point of the command line program.
+- `kPDG.cpp`: entry point of the main program.
 - `graph.h, .cpp`: declaration and implementation of the Graph struct, as well as the definition of `Edge` and `VertexSignature`. This is where isomorphism check, hashing, canonicalization, and T_k-free checks are implemented.
 - `grower.h, .cpp`: declaration and implementation of growing the search tree, see algorithm design below. 
-- `permutator.h, .cpp`: utility function to generate all permutations with specified ranges.
+- `permutator.h, .cpp`: simple utility function to generate all permutations with specified ranges.
 - `fraction.h, .cpp`: simple implementation of a fraction. (We store the theta value as a fraction).
 - `counters.h, .cpp`: the header and implementation of a bunch of statistical counters. The minimum theta value is stored here with the graph producing it. Also a bunch of data used to track the performance of the algorithm.
 - `edge_gen.h, cpp`: utility to generate edge sets to be added to an existing graph, in order to grow the search tree. 
