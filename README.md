@@ -79,6 +79,8 @@ We use the following steps to verify the correctness of the algorithm:
 All source code are in the `src` directory.
 - `BUILD`: the project that instructs `bazel` how to build, run, and test.
 - `tests/*cpp` : unit tests and stress tests, not part of actual execution.
+- `collector/*` : a utility to collect the data from log files of multiple batches, validate consistency, and summarize the final result. This is used to get the result for `K=4,N=7`.
+- `k4problem/*` : to solve a different problem (let K->4 be a complete graph with 4 vertices and exactly one directed edge, compute the min_theta value for all graphs with `N` vertices that are K->4-free).
 - `kPDG.cpp`: entry point of the command line program.
 - `graph.h, .cpp`: declaration and implementation of the Graph struct, as well as the definition of `Edge` and `VertexSignature`. This is where isomorphism check, hashing, canonicalization, and T_k-free checks are implemented.
 - `grower.h, .cpp`: declaration and implementation of growing the search tree, see algorithm design below. 
