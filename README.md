@@ -22,17 +22,17 @@ All results shown in this table can be obtained very fast using optimized build,
 * `K=5, N=7` takes a few minutes on a regular computer
 * `K=3, N=7` is likely computationally feasible given enough CPU hours, but there is no sufficient reason to compute it.
 * `K=4, N=7` took almost 6600 CPU hours in total on Google Cloud, in 30 batches. The log files are in the `results` directory. the `collector` utility is used to verify the consistency of all log files to summarize the final result. The graph that produced `theta=7/4` value is the following (note it's symmetric over {5,6}, making it easy to verify by hand).
-```
-{
-  0125>5, 0135>5, 0235>5, 1235>5, 0145>5, 0245>5, 1245>5, 0345>5, 1345>5, 2345>5, 
-  0126>6, 0136>6, 0236>6, 1236>6, 0146>6, 0246>6, 1246>6, 0346>6, 1346>6, 2346>6
-}
-```
+    ```
+    {
+      0125>5, 0135>5, 0235>5, 1235>5, 0145>5, 0245>5, 1245>5, 0345>5, 1345>5, 2345>5, 
+      0126>6, 0136>6, 0236>6, 1236>6, 0146>6, 0246>6, 1246>6, 0346>6, 1346>6, 2346>6
+    }
+    ```
 * `K=6,N=8` partial result: `min_theta<=20/13`. The graph that produced `theta=20/13` value is 
     ```
     {
-     023456>0, 123456>1, 012347>7, 012357>7, 012457>7, 013457>7, 023457>0, 012367>7, 012467>7, 013467>7,
-     023467, 123467, 012567>7, 013567>7, 023567, 123567, 014567>7, 024567, 124567, 034567, 134567
+      023456>0, 123456>1, 012347>7, 012357>7, 012457>7, 013457>7, 023457>0, 012367>7, 012467>7, 013467>7,
+      023467, 123467, 012567>7, 013567>7, 023567, 123567, 014567>7, 024567, 124567, 034567, 134567
     }
     ```
 
