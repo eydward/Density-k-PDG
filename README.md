@@ -29,9 +29,12 @@ All results shown in this table can be obtained very fast using optimized build,
 }
 ```
 * `K=6,N=8` partial result: `min_theta<=20/13`. The graph that produced `theta=20/13` value is 
-```
-{023456>0, 123456>1, 012347>7, 012357>7, 012457>7, 013457>7, 023457>0, 012367>7, 012467>7, 013467>7, 023467, 123467, 012567>7, 013567>7, 023567, 123567, 014567>7, 024567, 124567, 034567, 134567}
-```
+    ```
+    {
+     023456>0, 123456>1, 012347>7, 012357>7, 012457>7, 013457>7, 023457>0, 012367>7, 012467>7, 013467>7,
+     023467, 123467, 012567>7, 013567>7, 023567, 123567, 014567>7, 024567, 124567, 034567, 134567
+    }
+    ```
 
 ## Running the program
 The easiest way to run is to get the binaries from either `bin-linux` or `bin-windows` directories. Alternatively, you can build from source, see next section for details. To run the program:
