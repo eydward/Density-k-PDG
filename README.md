@@ -1,5 +1,10 @@
 # Compute Turan Density Coefficient for k-PDG (k-uniform partially directed hypergraphs)
 
+## Introduction
+This program computes the `min_theta` value for k-PDGs with given number of vertices and are free of certain graphs. First we'll define the concepts.
+
+![IMAGE](doc/kpdg_intro.png?raw=true)
+
 ## Results
 
 K = number of vertices in each edge
