@@ -162,13 +162,6 @@ EdgeGenerator::OptResult EdgeGenerator::perform_min_theta_optimization(Fraction 
     }
     enum_state[0] = 0;
     return OptResult::CONTINUE_SEARCH;
-    // if (low_non_edge_idx > 0) {
-    //   enum_state[low_non_edge_idx] = 1;
-    //   for (uint8 i = 0; i < low_non_edge_idx; i++) {
-    //     enum_state[i] = 0;
-    //   }
-    // }
-    // return OptResult::FOUND_CANDIDATE;
   }
   // If we get here, we have enough number of edges. But there still may not be enough number
   // of directed edges. So just compute.
@@ -179,9 +172,9 @@ EdgeGenerator::OptResult EdgeGenerator::perform_min_theta_optimization(Fraction 
     ++stats_theta_directed_edges_skip;
     // Here we can jump forward similar to above when we don't have enough total edges,
     // to the state where it's ready to add another directed edge.
-    // For example if the current enum state is [3, 0, 0, 2, 2, 2], and there are not
+    // For example if the current enum state is [3, 0, 1, 2, 2, 2], and there are not
     // enough directed edges, then the next enum state that may have enough new edges
-    // is NOT [3, 0, 0, 2, 2, 3] (the normal increment), but rather, [3, 0, 2, 2, 2, 2].
+    // is NOT [3, 0, 1, 2, 2, 3] (the normal increment), but rather, [3, 0, 2, 2, 2, 2].
     // Since the begin of the for loop above does increment, we put the enum state to
     // [3, 0, 2, 2, 2, 1], to prepare for the for loop increment to do the job.
     if (low_non_directed_idx >= candidates.edge_candidate_count) {
@@ -194,13 +187,6 @@ EdgeGenerator::OptResult EdgeGenerator::perform_min_theta_optimization(Fraction 
     }
     enum_state[0] = 1;
     return OptResult::CONTINUE_SEARCH;
-    // if (low_non_directed_idx > 0) {
-    //   enum_state[low_non_directed_idx] = 2;
-    //   for (uint8 i = 0; i < low_non_directed_idx; i++) {
-    //     enum_state[i] = 0;
-    //   }
-    // }
-    // return OptResult::FOUND_CANDIDATE;
   }
 
   // Reaching this point means we passed the check and have a valid candidate.
