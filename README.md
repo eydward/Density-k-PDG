@@ -6,7 +6,7 @@ K = number of vertices in each edge
 
 N = number of vertices in each graph
 
-Values in the table : `$min_{|V(H)|=N, T_K \not\subseteq H} (1 - alpha(H)) / beta(H)$`, where alpha(H) is the undirected edge density, beta(H) is the directed edge density. In other words, it's the maximum theta value so that `$alpha(H) + theta * beta(H) <= 1$` is true for all graphs H with N vertices that are T_K free. (Note: the latest version of the program only allows N<=7. All results in this table can be obtained very fast using optimized build, except `K=5, N=7` takes a few minutes, and  `K=4, N=7` which will take many days).
+Values in the table : `$min_{|V(H)|=N, T_K \not\subseteq H} (1 - alpha(H)) / beta(H)$`, where alpha(H) is the undirected edge density, beta(H) is the directed edge density. In other words, it's the maximum theta value so that `$alpha(H) + theta * beta(H) <= 1$` is true for all graphs H with N vertices that are T_K free. (Note: the latest version of the program only allows N<=7. 
 
 | N   | K=2 | K=3   | K=4   | K=5   | K=6   | K=7   |
 | --- | --- | ----- | ----- | ----- | ----- | ----- |
@@ -15,16 +15,20 @@ Values in the table : `$min_{|V(H)|=N, T_K \not\subseteq H} (1 - alpha(H)) / bet
 | 4   | 3/2 | 4/3   |     1 |       |       |       |
 | 5   | 5/3 | 5/3   |   5/4 |     1 |       |       |
 | 6   | 5/3 | 5/3   |   3/2 |   6/5 |     1 |       |
-| 7   | 7/4 |  ?    | <= 7/4 |   7/5 |   7/6 |     1 |
+| 7   | 7/4 |  ?    |   7/4 |   7/5 |   7/6 |     1 |
 | 8   | 7/4 |  ?    |  ?    |   ?   |   ?   |   8/7 |
 
-For `K=4, N=7`, the program has found a graph with `theta=7/4`, the enumeration is not done to know whether this is the smallest value that we will find. It's produced by this graph (note it's symmetric over {5,6}, making it easy to verify by hand).
+
+All results in this table can be obtained very fast using optimized build, except
+* `K=5, N=7` takes a few minutes on a regular computer
+* `K=4, N=7` took almost 6600 CPU hours in total on Google Cloud, in 30 batches. The log files are in the `results` directory. the `collector` utility is used to verify the consistency of all log files to summarize the final result. The graph that produced `theta=7/4` value is the following (note it's symmetric over {5,6}, making it easy to verify by hand).
 ```
 {
   0125>5, 0135>5, 0235>5, 1235>5, 0145>5, 0245>5, 1245>5, 0345>5, 1345>5, 2345>5, 
   0126>6, 0136>6, 0236>6, 1236>6, 0146>6, 0246>6, 1246>6, 0346>6, 1346>6, 2346>6
 }
 ```
+
 
 ## Running the program
 The easiest way to run is to get the binaries from either `bin-linux` or `bin-windows` directories. Alternatively, you can build from source, see next section for details. To run the program:
