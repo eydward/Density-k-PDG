@@ -1,0 +1,47 @@
+All files in this directory for `K=4,N=7`. We run kPDG on Google Cloud to process 1000 base graphs at a time. 
+`collector` utility is used to collect data from all log files and validate consistency.
+Below is the output from the `collector` utility.
+
+
+SUMMARY:
+        Start   End     min_theta       CPU seconds
+        ------  ------  ------          ----------
+        0       1000    15/8            1271290
+        1000    2000    2/1             776536
+        2000    3000    33/17           2089681
+        3000    4000    33/17           1671324
+        4000    5000    17/9            703507
+        5000    6000    33/17           582075
+        6000    7000    31/16           1566283
+        7000    8000    31/16           1283478
+        8000    9000    33/17           1263969
+        9000    10000   31/16           1161491
+        10000   11000   32/17           600748
+        11000   12000   32/17           895136
+        12000   13000   31/16           881032
+        13000   14000   11/6            1387186
+        14000   15000   2/1             491457
+        15000   16000   32/17           550632
+        16000   17000   31/16           576994
+        17000   18000   29/15           940340
+        18000   19000   29/15           774389
+        19000   20000   33/17           545168
+        20000   21000   15/8            412970
+        21000   22000   31/16           376619
+        22000   23000   15/8            336970
+        23000   24000   35/19           677129
+        24000   25000   32/17           304956
+        25000   26000   11/6            617502
+        26000   27000   11/6            525960
+        27000   28000   7/4             241044
+        28000   29000   11/6            186335
+        29000   30000   7/4             59553
+        ------  ------  ------  ----------
+Global min_theta = 7/4
+Total CPU seconds = 23751754  (6597 CPU hours)
+
+
+Validating detail log with result log...
+From result log min_theta = 7/4
+
+All results are verified for consistency. Success.
