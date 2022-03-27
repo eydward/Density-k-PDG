@@ -44,6 +44,14 @@ cc_binary(
     linkstatic=True,
 )
 
+cc_binary(
+    name="collector",
+    srcs=["collector/collector.cpp"],
+    deps=[":graph"],
+    copts=["-std=c++17"],
+    linkstatic=True,
+)
+
 cc_library(
     name="iso_stress_test",
     hdrs=["tests/iso_stress_test.h"],
