@@ -61,7 +61,8 @@ struct VertexSignature {
     vertex_id = vid;
   }
 
-  // Utility function to print an degree info array to the output stream, for debugging purpose.
+  // Returns the degree info, which encodes the values of all 3 degree fields,
+  // but does not contain the vertex id.
   uint32 get_degrees() const {
     return static_cast<uint32>(degree_undirected) << 16 | (static_cast<uint32>(degree_head) << 8) |
            (static_cast<uint32>(degree_tail));

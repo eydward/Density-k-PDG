@@ -208,6 +208,31 @@ void EdgeGenerator::notify_contain_tk_skip() {
       ++stats_tk_skip_bits;
     }
   } else if (candidates.n == Graph::N) {
+    // If we reach here, the lowest ranked edge is in the edge set. So there is no opportunity
+    // to skip the edge candidates like what happens in the "if" branch above. Instead, we check
+    // if the graph without the lower ranked edges still contain T_k, and perform edge candidate
+    // skip if that happens. For example, if the enum state is [3,0,0,2,2,2,2], and it contains
+    // T_k, then we will run in a loop to check if the following also contain T_k:
+    //   [3,0,0,2,2,2,0], [3,0,0,2,2,0,0], [3,0,0,2,0,0,0], ...,
+    // until we find one that doesn't contain T_k. For example if [3,0,0,2,2,0,0] is the first
+    // one that doesn't contain T_k, then we can skip forward all the way to [3,0,0,2,3,0,0].
+    // And similar to in the "if" branch above, in this case  we actually set the counter values
+    // to [3,0,0,2,2,K+1,K+1], so that the next call will advance it to [3,0,0,2,3,0,0].
+    //
+    // What described above is pretty straightforward, but we should explain the motivation
+    // why doing this is necessary. Under normal circumstances, in order to reach counter state
+    // [3,0,0,2,2,2,2] as shown in the example above, it would have already encountered
+    // [3,0,0,2,2,0,0] during a previous `next()` call, which would have detected T_k, and
+    // therefore perform the skipping implemented in the "if" branch above, so [3,0,0,2,2,2,2]
+    // would never occur.
+    //
+    // However if the min_theta optmization occurred (see `perform_min_theta_optimization()`
+    // function), then it's possible that [3,0,0,1,1,1,1] or [3,0,0,2,2,2,2] is encountered
+    // without ever encountering [3,0,0,2,2,0,0]. So without the code below, we would miss the
+    // opportunity to skip a large number of candidate graphs. In fact it was observed that
+    // after min_theta optimization was added, before adding this block of code, the code became
+    // much faster for sparse base graphs, but also became much slower for dense base graphs.
+    // This code block was added to specifically address the slow donw.
     Graph copy;
     for (int skip_front = 1; skip_front < candidates.edge_candidate_count; skip_front++) {
       generate_graph(copy, skip_front);
