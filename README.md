@@ -35,6 +35,7 @@ All results shown in this table can be obtained very fast using optimized build,
       023467, 123467, 012567>7, 013567>7, 023567, 123567, 014567>7, 024567, 124567, 034567, 134567
     }
     ```
+* `K=5,N=8` is not computationally feasible with the current approach. The final enumeration phase has 4722759 base graphs to compute (whereas in `K=4,N=7` case there are 29313 base graphs). And using a quick experiment, processing each base graph will likely take >10^8 CPU hours. So in total we are looking at >10^15 CPU hours to compute `K=5,N=8`.
 
 ## Running the program
 The easiest way to run is to get the binaries from either `bin-linux` or `bin-windows` directories. Alternatively, you can build from source, see next section for details. To run the program:
