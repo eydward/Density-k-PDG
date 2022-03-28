@@ -27,7 +27,7 @@ Grower::Grower(int num_worker_threads_, bool skip_final_enum_, bool use_min_thet
 
 // Find all canonical isomorphism class representations with up to max_n vertices.
 void Grower::grow() {
-  assert(Graph::N <= 7);
+  assert(Graph::N <= MAX_VERTICES);
   print_config(std::cout);
   if (log != nullptr) {
     print_config(*log);

@@ -81,9 +81,9 @@ void Graph::set_global_graph_info(int k, int n) {
   for (int m = 1; m <= k; m++) {
     VertexMask& mask = VERTEX_MASKS[m];
     mask.mask_count = 0;
-    for (uint8 bits = 0; bits < (1 << n); bits++) {
+    for (uint16 bits = 0; bits < (1 << n); bits++) {
       if (__builtin_popcount(bits) == m) {
-        mask.masks[mask.mask_count++] = bits;
+        mask.masks[mask.mask_count++] = static_cast<uint8>(bits);
       }
     }
   }

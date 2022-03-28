@@ -6,7 +6,7 @@ void print_usage() {
   std::cout << "Usage: kPDG K N T [start_idx, end_idx]\n"
             << "  Each argument is an integer, K and N are required, others optional.\n"
             << "  K = Number of vertices in each edge.\n"
-            << "  N = Total number of vertices in a graph.  2 <= K <= N <= 7.\n"
+            << "  N = Total number of vertices in a graph.  2 <= K <= N <= 8.\n"
             << "  T = Number of worker threads. (0 means don't use threads,\n"
             << "                                 -1 means no final phase).\n"
             << "  (optional) start_idx and end_index: the range of graph indices in the final\n"
@@ -43,7 +43,8 @@ int main(int argc, char* argv[]) {
     t = 0;
   }
 
-  if (k < 2 || n > 7 || k > n || t < 0 || t > 128 || start_idx < 0 || end_idx < start_idx) {
+  if (k < 2 || n > 8 || k > n || t < 0 || t > 128 || start_idx < 0 || end_idx < start_idx ||
+      (n == 8 && k == 4)) {
     std::cout << "Invalid command line arguments. See usage for details.\n";
     print_usage();
     return -1;
@@ -51,7 +52,7 @@ int main(int argc, char* argv[]) {
 
   Graph::set_global_graph_info(k, n);
 
-  std::string log_file_name = "kPDG_v9_" + std::to_string(Graph::K) + "_" +
+  std::string log_file_name = "kPDG_v10_" + std::to_string(Graph::K) + "_" +
                               std::to_string(Graph::N) + "_" + std::to_string(t) + "_" +
                               std::to_string(start_idx) + "_" + std::to_string(end_idx) + "_" +
                               get_current_time();

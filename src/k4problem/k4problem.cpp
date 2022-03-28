@@ -5,7 +5,7 @@
 void print_usage() {
   std::cout << "Usage: k4problem N T\n"
             << "  Each argument is an integer\n"
-            << "  N = Total number of vertices in a graph.  2 <= N <= 7.\n"
+            << "  N = Total number of vertices in a graph.  2 <= N <= 8.\n"
             << "  T = Number of worker threads. (0 means don't use threads,\n"
             << "                                 -1 means no final phase).\n";
 }
@@ -32,7 +32,7 @@ int main(int argc, char* argv[]) {
     t = 0;
   }
 
-  if (n > 7 || 2 > n || t < 0 || t > 128) {
+  if (n > 8 || 2 > n || t < 0 || t > 128) {
     std::cout << "Invalid command line arguments. See usage for details.\n";
     print_usage();
     return -1;

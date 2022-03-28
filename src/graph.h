@@ -11,9 +11,11 @@ using uint32 = uint32_t;
 using uint64 = uint64_t;
 
 // Maximum number of vertex allowed in a graph.
-constexpr int MAX_VERTICES = 7;
-// Maximum number of edges allowed in a graph. Note $35=\binom73=\binom74$.
-constexpr int MAX_EDGES = 35;
+constexpr int MAX_VERTICES = 8;
+// Maximum number of edges allowed in a graph. Note $56=\binom83$ which allows
+// all (K,N) combinations with N<=8, except for K=4,N=8, which is not computationally feasible
+// in our current approach anyway.
+constexpr int MAX_EDGES = 56;
 
 // Special value to indicate an edge is undirected.
 constexpr uint8 UNDIRECTED = 0xFF;
@@ -246,4 +248,4 @@ struct Graph {
   FRIEND_TEST(EdgeGeneratorTest, Generate45);
   friend class IsomorphismStressTest;
 };
-static_assert(sizeof(Graph) == 108);
+static_assert(sizeof(Graph) == 152);

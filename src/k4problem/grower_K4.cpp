@@ -22,7 +22,7 @@ K4Grower::K4Grower(int num_worker_threads_, bool skip_final_enum_, std::ostream*
 
 // Find all canonical isomorphism class representations with up to max_n vertices.
 void K4Grower::grow() {
-  assert(Graph::N <= 7);
+  assert(Graph::N <= MAX_VERTICES);
   print_config(std::cout);
   if (log != nullptr) {
     print_config(*log);

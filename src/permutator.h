@@ -8,7 +8,7 @@ class Permutator {
   std::vector<std::pair<int, int>> perm_sets;
 
   // The current permutation state
-  static constexpr int MAX_VERTICES = 7;
+  static constexpr int MAX_VERTICES = 8;
 
  public:
   // The current permutation state. Valid after each next() call that returns true.
