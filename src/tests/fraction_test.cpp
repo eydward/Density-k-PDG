@@ -17,3 +17,13 @@ TEST(FractionTest, Fractions) {
   EXPECT_TRUE(b != a);
   EXPECT_FALSE(b == a);
 }
+
+TEST(FractionTest, Add) {
+  Fraction f = Fraction(2, 3) + Fraction(1, 3);
+  EXPECT_EQ(f.n, 1);
+  EXPECT_EQ(f.d, 1);
+
+  f = Fraction(2, 3) + Fraction(3, 2);
+  EXPECT_EQ(f.n, 13);
+  EXPECT_EQ(f.d, 6);
+}

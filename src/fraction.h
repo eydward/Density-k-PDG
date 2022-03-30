@@ -4,7 +4,7 @@
 // Represents a simplified fraction n/d.
 struct Fraction {
  public:
-  int n, d;
+  int n, d;  // The numerator and denominator of the fraction, respectively.
 
   Fraction(int n_, int d_);
 
@@ -12,6 +12,7 @@ struct Fraction {
   void simplify();
 };
 
+Fraction operator+(const Fraction& a, const Fraction& b);
 bool operator<(const Fraction& a, const Fraction& b);
 bool operator<=(const Fraction& a, const Fraction& b);
 bool operator>(const Fraction& a, const Fraction& b);

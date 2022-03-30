@@ -17,6 +17,11 @@ class Grower {
   // The start index and end index in the final enumeration phase.
   const int start_idx;
   const int end_idx;
+  // If true, search for all graphs that generate the given theta value,
+  // instead of searching for min_theta.
+  const bool search_theta_graph;
+  // The theta value to search for. Ignored unless search_theta_graph==true.
+  const Fraction theta_to_search;
 
   // The log files.
   std::ostream* const log;
@@ -67,7 +72,8 @@ class Grower {
   // Constructs the Grower object.
   // log_stream is used for status reporting and debugging purpose.
   Grower(int num_worker_threads_, bool skip_final_enum_, bool use_min_theta_opt_,
-         bool use_contains_Tk_opt_, int start_idx_, int end_idx_, std::ostream* log_ = nullptr,
+         bool use_contains_Tk_opt_, int start_idx_, int end_idx_, bool search_theta_graph_ = false,
+         Fraction theta_to_search_ = Fraction(1, 1), std::ostream* log_ = nullptr,
          std::ostream* log_detail_ = nullptr, std::ostream* log_result_ = nullptr);
 
   // Finds all canonical isomorphism class representations with up to max_n vertices.

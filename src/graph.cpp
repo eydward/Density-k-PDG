@@ -86,6 +86,7 @@ void Graph::set_global_graph_info(int k, int n) {
         mask.masks[mask.mask_count++] = static_cast<uint8>(bits);
       }
     }
+    assert(mask.mask_count == compute_binom(n, m));
   }
 }
 

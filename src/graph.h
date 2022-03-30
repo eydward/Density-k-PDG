@@ -81,7 +81,7 @@ struct VertexMask {
   uint8 mask_count;
   // Each element in this array has exactly k bits that are 1s. The position of the 1-bits
   // indicate which vertex should be used in the computations.
-  uint8 masks[MAX_EDGES];
+  uint8 masks[255];
 };
 
 // Represents a k-PDG, with the data structure optimized for computing isomorphisms.

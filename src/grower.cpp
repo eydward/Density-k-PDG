@@ -12,14 +12,17 @@ struct GraphComparer {
 };
 
 Grower::Grower(int num_worker_threads_, bool skip_final_enum_, bool use_min_theta_opt_,
-               bool use_contains_Tk_opt_, int start_idx_, int end_idx_, std::ostream* log_,
-               std::ostream* log_detail_, std::ostream* log_result_)
+               bool use_contains_Tk_opt_, int start_idx_, int end_idx_, bool search_theta_graph_,
+               Fraction theta_to_search_, std::ostream* log_, std::ostream* log_detail_,
+               std::ostream* log_result_)
     : num_worker_threads(num_worker_threads_),
       skip_final_enum(skip_final_enum_),
       use_min_theta_opt(use_min_theta_opt_),
       use_contains_Tk_opt(use_contains_Tk_opt_),
       start_idx(start_idx_),
       end_idx(end_idx_),
+      search_theta_graph(search_theta_graph_),
+      theta_to_search(theta_to_search_),
       log(log_),
       log_detail(log_detail_),
       log_result(log_result_),
@@ -51,7 +54,7 @@ void Grower::grow() {
     // Finally, enumerate all graphs with N vertices, no need to store graphs.
     enumerate_final_step(collected_graphs[Graph::N - 1]);
     std::sort(results.begin(), results.end());
-    if (log_result != nullptr) {
+    if (log_result != nullptr && !search_theta_graph) {
       for (const auto& r : results) {
         int base_graph_id = std::get<0>(r);
         const Graph& base_graph = std::get<1>(r);
@@ -165,6 +168,13 @@ void Grower::worker_thread_main(int thread_id) {
     }
 
     Fraction min_theta(1E8, 1);
+    if (search_theta_graph) {
+      // If we are searching all graphs generating the given theta value, set min_theta
+      // to be slightly higher than the given value so that the min_theta optimization
+      // won't skip any graph that produces the theta value.
+      min_theta = theta_to_search + Fraction(1, 1000);
+    }
+
     uint64 graphs_processed = 0;
     EdgeGenerator edge_gen(edge_candidates, base);
     while (edge_gen.next(copy, true, min_theta)) {
@@ -201,9 +211,23 @@ void Grower::worker_thread_main(int thread_id) {
 
       // Bookkeeping: retain the minimum theta value encountered so far, and the graph genreated it.
       graphs_processed++;
-      if (copy.get_theta() < min_theta) {
-        min_theta = copy.get_theta();
-        min_theta_graph = copy;
+      if (!search_theta_graph) {
+        // Normal path: we are searching for min_theta.
+        if (copy.get_theta() < min_theta) {
+          min_theta = copy.get_theta();
+          min_theta_graph = copy;
+        }
+      } else {
+        // Here we are searching for all graphs that produce the given theta value.
+        if (copy.get_theta() == theta_to_search) {
+          std::scoped_lock lock(counters_mutex);
+          std::cout << "G[" << base_graph_id << "]=> ";
+          copy.print_concise(std::cout, true);
+          if (log_result != nullptr) {
+            *log_result << "G[" << base_graph_id << "]=> ";
+            copy.print_concise(*log_result, true);
+          }
+        }
       }
     }
 

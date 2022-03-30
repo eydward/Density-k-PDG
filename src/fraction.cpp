@@ -22,6 +22,9 @@ void Fraction::simplify() {
     d /= g;
   }
 }
+Fraction operator+(const Fraction& a, const Fraction& b) {
+  return Fraction(a.n * b.d + a.d * b.n, a.d * b.d);
+}
 
 bool operator<(const Fraction& a, const Fraction& b) { return a.n * b.d < a.d * b.n; }
 bool operator>(const Fraction& a, const Fraction& b) { return b < a; }

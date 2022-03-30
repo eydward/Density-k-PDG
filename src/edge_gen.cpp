@@ -232,7 +232,7 @@ void EdgeGenerator::notify_contain_tk_skip() {
     // opportunity to skip a large number of candidate graphs. In fact it was observed that
     // after min_theta optimization was added, before adding this block of code, the code became
     // much faster for sparse base graphs, but also became much slower for dense base graphs.
-    // This code block was added to specifically address the slow donw.
+    // This code block was added to specifically address the slow down.
     Graph copy;
     for (int skip_front = 1; skip_front < candidates.edge_candidate_count; skip_front++) {
       generate_graph(copy, skip_front);
