@@ -71,7 +71,8 @@ We cannot use static linking on Linux. On Windows, it's not necessary to use sta
 
 ## Testing and Verification
 We use the following steps to verify the correctness of the algorithm:
-* The theta values for `K=2` in the table is mathematically proved for all `N`.
+* The theta values for `K=2` in the table are mathematically proved for all `N`.
+* The theta values for `N=K+1` cells in the table are mathemaically proved.
 * Unit tests in `tests` directory covers all code in the program.
 * Isomorphism stress test (`isostress`): use a straightforward `is_isomorphic_slow()` implementation without any optimization, and compare its result against `is_isomorphic()` which contains various optimizations. For `(K,N)` combinations that yield relatively small number of graphs, do this on all graph pairs exhaustively. Otherwise sample the graph pairs randomly to perform this check.
 * Edge generator stress test (`edgegenstress`): There are two optimizations we implemented in the edge generation (explained in details below). In order to verify the optimizations are correct, this stress runs all combinations of `K, N` values where `N<=7`, except the two very slow ones: `K=3,N=7` and `K=4,N=7`. For each `K,N` combination, we execute the full growth search, using four different optimization combinations (`(false,false)`, `(false,true)`, `(true,false)`,`(true,true)`,), and compare their resulting graphs, verify everything is identical regardless of the edge_gen optimizations used. 
@@ -159,3 +160,9 @@ With the above we can describe the algorithm to determine isomorphism (implement
    
 ### T_k-free
 General partially directed hypergraph subgraph check is really really complicated and expensive (much more complicated than isomorphism check, since now the problem is to find a subgraph for it to isomorphic to). But luckily, `T_k`-free is simple and fast. This is implemented in `contains_Tk()` in `graph.cpp`. The comment of that function is very detailed so I won't repeat here. It relies heavily on bit mask manipulation. 
+
+## Generalization of the Code & Future Improvements
+1. The code can be generalized from the current `N<=8` to `N<=12`, by using C bitfield in the Edge data structure, without increasing the size of the `Edge` struct. Basically we give 12 bits to the `vertex_set` and 4 bits to the `head_vertex`. For the current purpose (computing min_theta values), I don't expect `N>=9` to be computationally feasible except for trivial cases (`K=2` or `K>=N-1`). 
+2. The code can be generalized to compute other `F`-free scenarios, where `F` is different from T_k described above. The `k4problem` directory is an example of this, completely separate from the T_k-free computation code. 
+3. The code provides a pretty fast partially directed hypergraph isomorphism check. If needed, we can bring back the neighbor hashing optimization ([03d28fd](https://github.com/ThinGarfield/Density-k-PDG/commit/03d28fdc1b032ddf86d3d2060a1bb23202d966c1)) to make it even faster. This may be useful in computations different from T_k-free theta values. 
+4. If the focus is undirected hypergraph and either performance or space is critical, the data structure and code dealing with `head_vertex` can be removed to make the code more compact and faster. 
