@@ -15,7 +15,8 @@ TEST(EdgeGeneratorTest, Generate22) {
   EXPECT_EQ(ec.edge_candidates_heads[0][2], 0);
   EXPECT_EQ(ec.edge_candidates_heads[0][3], 1);
 
-  EdgeGenerator edge_gen(ec, Graph());
+  Graph base;
+  EdgeGenerator edge_gen(ec, base);
   Graph copy;
 
   // 3 edges: {01} {01>0} {01>1}
@@ -45,7 +46,8 @@ TEST(EdgeGeneratorTest, Generate23) {
   EXPECT_EQ(ec.edge_candidates_heads[1][2], 1);
   EXPECT_EQ(ec.edge_candidates_heads[1][3], 2);
 
-  EdgeGenerator edge_gen(ec, Graph());
+  Graph base;
+  EdgeGenerator edge_gen(ec, base);
   Graph copy;
 
   // First 3: {02} {02>0} {02>2}
@@ -81,7 +83,8 @@ TEST(EdgeGeneratorTest, Generate23) {
 TEST(EdgeGeneratorTest, Generate23WithSkip) {
   Graph::set_global_graph_info(2, 3);
   EdgeCandidates ec(3);
-  EdgeGenerator edge_gen(ec, Graph());
+  Graph base;
+  EdgeGenerator edge_gen(ec, base);
   Graph copy;
 
   // First 3: {02} {02>0} {02>2}
@@ -139,7 +142,8 @@ TEST(EdgeGeneratorTest, Generate33) {
   EXPECT_EQ(ec.edge_candidates_heads[0][3], 1);
   EXPECT_EQ(ec.edge_candidates_heads[0][4], 2);
 
-  EdgeGenerator edge_gen(ec, Graph());
+  Graph base;
+  EdgeGenerator edge_gen(ec, base);
   Graph copy;
 
   // 4 edges: {012} {012>0} {012>1} {012>2}
@@ -188,7 +192,8 @@ TEST(EdgeGeneratorTest, Generate35) {
   EXPECT_EQ(ec.edge_candidates_heads[5][3], 3);
   EXPECT_EQ(ec.edge_candidates_heads[5][4], 4);
 
-  EdgeGenerator edge_gen(ec, Graph());
+  Graph base;
+  EdgeGenerator edge_gen(ec, base);
   edge_gen.print_debug(std::cout, true, 0);
   Graph copy;
 
@@ -218,7 +223,8 @@ TEST(EdgeGeneratorTest, Generate27) {
     EXPECT_EQ(ec.edge_candidates_heads[v][3], 6);
   }
 
-  EdgeGenerator edge_gen(ec, Graph());
+  Graph base;
+  EdgeGenerator edge_gen(ec, base);
   Graph copy;
 
   int count = 0;
@@ -233,7 +239,8 @@ TEST(EdgeGeneratorTest, Generate27) {
 TEST(EdgeGeneratorTest, Generate45) {
   Graph::set_global_graph_info(4, 5);
   EdgeCandidates ec(5);
-  EdgeGenerator edge_gen(ec, Graph());
+  Graph base;
+  EdgeGenerator edge_gen(ec, base);
   Graph copy;
 
   // First 5: {0124} {0124>0} {0124>1} {0124>2} {0124>4}

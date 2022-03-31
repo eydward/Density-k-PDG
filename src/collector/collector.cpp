@@ -83,7 +83,7 @@ void read_detail_log(const fs::directory_entry& item) {
     size_t pos = line.find(']');
     std::string graph = line.substr(pos + 1);
     trim(graph);
-    if (graphs.size() != id) {
+    if (graphs.size() != static_cast<size_t>(id)) {
       std::cout << "ERROR: graph id mismatch: " << graphs.size() << " != " << line << "\n";
       exit(-1);
     }
@@ -92,7 +92,7 @@ void read_detail_log(const fs::directory_entry& item) {
   std::cout << "Done Reading detail log " << item << "\n";
 
   // Verify total count
-  if (num_base_graphs != graphs.size()) {
+  if (static_cast<size_t>(num_base_graphs) != graphs.size()) {
     std::cout << "ERROR: graph count mismatch: " << num_base_graphs << " != " << graphs.size()
               << "\n";
     exit(-1);
@@ -183,10 +183,10 @@ void read_summary_log(const fs::directory_entry& item) {
 
     // Parse time
     int params =
-        std::sscanf(line.c_str(), "--------Wall clock time:  %d`%dms", &time_high, &time_low);
+        std::sscanf(line.c_str(), "--------Wall clock time:  %lu`%lums", &time_high, &time_low);
     if (params < 2) {
       time_high = 0;
-      params = std::sscanf(line.c_str(), "--------Wall clock time:  %dms", &time_low);
+      params = std::sscanf(line.c_str(), "--------Wall clock time:  %lums", &time_low);
     }
     if (params > 0) {
       uint64 time = time_high * 1000000 + time_low;
