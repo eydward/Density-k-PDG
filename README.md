@@ -16,7 +16,7 @@ Values in the table are <img src="doc/theta_kn.png" height="22" /> for the vario
 | 5   | 5/3 | 5/3   |   5/4 |     1 |       |       |
 | 6   | 5/3 | 5/3   |   3/2 |   6/5 |     1 |       |
 | 7   | 7/4 |  7/4  |   7/4 |   7/5 |   7/6 |     1 |
-| 8   | 7/4 |  ?    |  ?    |   ?   |   4/3 |   8/7 |
+| 8   | 7/4 |  ?    |  ?    | *8/5* |   4/3 |   8/7 |
 
 All results shown in this table can be obtained very fast using optimized build, except
 * `K=5, N=7` takes a few minutes on a regular computer
@@ -29,7 +29,7 @@ All results shown in this table can be obtained very fast using optimized build,
       0126>6, 0136>6, 0236>6, 1236>6, 0146>6, 0246>6, 1246>6, 0346>6, 1346>6, 2346>6
     }
     ```
-* `K=5,N=8` is not computationally feasible with the current approach. The final enumeration phase has 4722759 base graphs to compute (whereas in `K=4,N=7` case there are 29313 base graphs). And using a quick experiment, processing each base graph will likely take >10^8 CPU hours. So in total we are looking at >10^15 CPU hours to compute `K=5,N=8`.
+* `K=5,N=8` is not computationally feasible with the current approach. The final enumeration phase has 4722759 base graphs to compute (whereas in `K=4,N=7` case there are 29313 base graphs). And using a quick experiment, processing each base graph will likely take >10^8 CPU hours. So in total we are looking at >10^15 CPU hours to compute `K=5,N=8`. The value `8/5` in the table is not obtained by computation, but by a proposition I proved that reduces the value to `K=4,N=7` case.
 
 ## Running the program
 The easiest way to run is to get the binaries from either `bin-linux` or `bin-windows` directories. Alternatively, you can build from source, see next section for details. To run the program:
