@@ -219,12 +219,15 @@ void Grower::worker_thread_main(int thread_id) {
         }
       } else {
         // Here we are searching for all graphs that produce the given theta value.
-        if (copy.get_theta() == theta_to_search) {
+        if (copy.get_theta() <= theta_to_search) {
+          std::string to_print = "G[" + std::to_string(base_graph_id) +
+                                 "], theta = " + std::to_string(copy.get_theta().n) + "/" +
+                                 std::to_string(copy.get_theta().d) + " => ";
           std::scoped_lock lock(counters_mutex);
-          std::cout << "G[" << base_graph_id << "]=> ";
+          std::cout << to_print;
           copy.print_concise(std::cout, true);
           if (log_result != nullptr) {
-            *log_result << "G[" << base_graph_id << "]=> ";
+            *log_result << to_print;
             copy.print_concise(*log_result, true);
           }
         }
