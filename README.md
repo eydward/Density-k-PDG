@@ -15,13 +15,13 @@ Values in the table are <img src="doc/theta_kn.png" height="22" /> for the vario
 | 4   | 3/2 | 4/3   |     1 |       |       |       |
 | 5   | 5/3 | 5/3   |   5/4 |     1 |       |       |
 | 6   | 5/3 | 5/3   |   3/2 |   6/5 |     1 |       |
-| 7   | 7/4 |  ?    |   7/4 |   7/5 |   7/6 |     1 |
+| 7   | 7/4 |  7/4  |   7/4 |   7/5 |   7/6 |     1 |
 | 8   | 7/4 |  ?    |  ?    |   ?   |   4/3 |   8/7 |
 
 All results shown in this table can be obtained very fast using optimized build, except
 * `K=5, N=7` takes a few minutes on a regular computer
 * `K=6,N=8` took 200 CPU hours (log files from the run in `results\K6N8` directory).
-* `K=3, N=7` is likely computationally feasible given enough CPU hours, but there is no sufficient reason to compute it.
+* `K=3, N=7` tool 870 CPU hours (logs files from the run in `results\K3N7` directory).
 * `K=4, N=7` took almost 6600 CPU hours in total on Google Cloud, in 30 batches. The log files are in the `results` directory. the `collector` utility is used to verify the consistency of all log files to summarize the final result. The graph that produced `theta=7/4` value is the following (note it's symmetric over {5,6}, making it easy to verify by hand).
     ```
     {
