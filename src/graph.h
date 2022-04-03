@@ -248,4 +248,4 @@ struct Graph {
   FRIEND_TEST(EdgeGeneratorTest, Generate45);
   friend class IsomorphismStressTest;
 };
-static_assert(sizeof(Graph) == 180);
+static_assert(sizeof(Graph) == 196);

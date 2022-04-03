@@ -71,7 +71,8 @@ TEST(EdgeGeneratorTest, Generate23) {
       EXPECT_TRUE(edge_gen.next(copy));
       EXPECT_EQ(copy.edge_count, 2);
       EXPECT_EQ(copy.edges[0].vertex_set, 0b101);
-      EXPECT_EQ(copy.edges[0].head_vertex, static_cast<uint8>(i0 == 1 ? 2 : i0));
+      EXPECT_EQ(copy.edges[0].head_vertex,
+                static_cast<uint8>(i0 == 1 ? 2 : (i0 == 0 ? 0 : UNDIRECTED)));
       EXPECT_EQ(copy.edges[1].vertex_set, 0b110);
       EXPECT_EQ(copy.edges[1].head_vertex, static_cast<uint8>(i1 == 0 ? UNDIRECTED : i1));
     }
@@ -123,7 +124,8 @@ TEST(EdgeGeneratorTest, Generate23WithSkip) {
     EXPECT_TRUE(edge_gen.next(copy));
     EXPECT_EQ(copy.edge_count, 2);
     EXPECT_EQ(copy.edges[0].vertex_set, 0b101);
-    EXPECT_EQ(copy.edges[0].head_vertex, static_cast<uint8>(i0 == 1 ? 2 : i0));
+    EXPECT_EQ(copy.edges[0].head_vertex,
+              static_cast<uint8>(i0 == 1 ? 2 : (i0 == -1 ? UNDIRECTED : i0)));
     EXPECT_EQ(copy.edges[1].vertex_set, 0b110);
     EXPECT_EQ(copy.edges[1].head_vertex, 2);
   }
@@ -248,7 +250,8 @@ TEST(EdgeGeneratorTest, Generate45) {
     EXPECT_TRUE(edge_gen.next(copy));
     EXPECT_EQ(copy.edge_count, 1);
     EXPECT_EQ(copy.edges[0].vertex_set, 0b10111);
-    EXPECT_EQ(copy.edges[0].head_vertex, static_cast<uint8>(i == 3 ? 4 : i));
+    EXPECT_EQ(copy.edges[0].head_vertex,
+              static_cast<uint8>(i == 3 ? 4 : (i == -1 ? UNDIRECTED : i)));
   }
 
   // Next 30:
@@ -260,15 +263,18 @@ TEST(EdgeGeneratorTest, Generate45) {
     EXPECT_TRUE(edge_gen.next(copy));
     EXPECT_EQ(copy.edge_count, 1);
     EXPECT_EQ(copy.edges[0].vertex_set, 0b11011);
-    EXPECT_EQ(copy.edges[0].head_vertex, static_cast<uint8>(i1 >= 2 ? i1 + 1 : i1));
+    EXPECT_EQ(copy.edges[0].head_vertex,
+              static_cast<uint8>(i1 >= 2 ? i1 + 1 : (i1 == -1 ? UNDIRECTED : i1)));
 
     for (int i0 = -1; i0 <= 3; i0++) {
       EXPECT_TRUE(edge_gen.next(copy));
       EXPECT_EQ(copy.edge_count, 2);
       EXPECT_EQ(copy.edges[0].vertex_set, 0b10111);
-      EXPECT_EQ(copy.edges[0].head_vertex, static_cast<uint8>(i0 == 3 ? 4 : i0));
+      EXPECT_EQ(copy.edges[0].head_vertex,
+                static_cast<uint8>(i0 == 3 ? 4 : (i0 == -1 ? UNDIRECTED : i0)));
       EXPECT_EQ(copy.edges[1].vertex_set, 0b11011);
-      EXPECT_EQ(copy.edges[1].head_vertex, static_cast<uint8>(i1 >= 2 ? i1 + 1 : i1));
+      EXPECT_EQ(copy.edges[1].head_vertex,
+                static_cast<uint8>(i1 >= 2 ? i1 + 1 : (i1 == -1 ? UNDIRECTED : i1)));
     }
   }
 }
