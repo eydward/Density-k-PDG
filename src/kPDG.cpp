@@ -62,7 +62,7 @@ int main(int argc, char* argv[]) {
 
   Graph::set_global_graph_info(k, n);
 
-  std::string log_file_name = (search_theta_graphs ? "kPDG_thetagraph_v10_K" : "kPDG_v10_K") +
+  std::string log_file_name = (search_theta_graphs ? "kPDG_thetagraph_v11_K" : "kPDG_v11_K") +
                               std::to_string(Graph::K) + "_N" + std::to_string(Graph::N) + "_" +
                               std::to_string(start_idx) + "_" + std::to_string(end_idx) + "_T" +
                               std::to_string(t) + "_" + get_current_time();
