@@ -1,0 +1,12 @@
+G[1], base_theta = 3/1, grow_to_theta = 3/2 :
+  {01>0}
+  {01>0, 02>0}
+G[1], base_theta = 3/1, grow_to_theta = 3/2 :
+  {01>0}
+  {01>0, 02>2}
+G[1], base_theta = 3/1, grow_to_theta = 3/2 :
+  {01>0}
+  {01>0, 12>1}
+G[1], base_theta = 3/1, grow_to_theta = 3/2 :
+  {01>0}
+  {01>0, 12>2}

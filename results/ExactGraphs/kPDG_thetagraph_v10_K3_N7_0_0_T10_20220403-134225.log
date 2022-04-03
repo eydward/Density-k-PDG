@@ -1,0 +1,80 @@
+kPDG run arguments: K=3, N=7, TOTAL_EDGES=35, THREADS=10, idx_range=[0, 0]
+Searching graphs with theta 7/4
+
+Searching for all T_k-free k-PDGs
+    K= 3 (number of vertices in each edge)
+    N= 7 (maximum possible number of edges in each graph)
+
+--------Wall clock time:  65919ms
+    Current minimum theta = 35 / 12
+    Produced by graph: {023>0, 123>1, 024>0, 124>1, 034>0, 134>1, 025>0, 125>1, 035>0, 135>1, 045>0, 145>1}
+    Accumulated canonicals	= 1`255783
+    Ops (vertex sig, copies, canonicalize, permute, T_k)= (10`267882, 56`726360, 10`267882, 266`218608, 56`726360)
+    Isomorphic tests (total, true, expensive, false w/ =hash, identical, codeg_diff)= 
+                     (240`121415, 9`012099, 233`682689, 231`109127, 506`339834, 0)
+    Growth stats(vertices, total in step, processed in step, accumulated in step)= (6, 752, 752, 1`255030)
+
+---------------------------------
+Growth phase completed. State:
+    order=0 : collected= 0, all_edge_directed= 0
+    order=1 : collected= 0, all_edge_directed= 0
+    order=2 : collected= 1, all_edge_directed= 1
+    order=3 : collected= 2, all_edge_directed= 1
+    order=4 : collected= 14, all_edge_directed= 6
+    order=5 : collected= 752, all_edge_directed= 159
+    order=6 : collected= 1255782, all_edge_directed= 69832
+---------------------------------
+
+Starting final enumeration phase...
+
+--------Wall clock time:  100006ms
+    Current minimum theta = 7 / 4
+    Produced by graph: {023>0, 123>1, 024>0, 124>1, 034>0, 134>1, 025>0, 125>1, 035>0, 135>1, 045>0, 145>1}
+    Base graphs processed / total = 243803 / 1`255782. Ops (copies, T_k, free)= (1101`145535, 1090`112666, 1`255030)
+    EdgeGen stats (tk-skip, bits, theta_edge_skip, theta_dir_skip, sets)= (69`624692, 690`903049, 699`251639, 683`104262, 69`624692)
+
+--------Wall clock time:  200006ms
+    Current minimum theta = 7 / 4
+    Produced by graph: {023>0, 123>1, 024>0, 124>1, 034>0, 134>1, 025>0, 125>1, 035>0, 135>1, 045>0, 145>1}
+    Base graphs processed / total = 546481 / 1`255782. Ops (copies, T_k, free)= (4385`078313, 4294`917077, 1`255030)
+    EdgeGen stats (tk-skip, bits, theta_edge_skip, theta_dir_skip, sets)= (289`682319, 2710`807133, 2697`403508, 2673`309909, 289`682319)
+
+--------Wall clock time:  300008ms
+    Current minimum theta = 7 / 4
+    Produced by graph: {023>0, 123>1, 024>0, 124>1, 034>0, 134>1, 025>0, 125>1, 035>0, 135>1, 045>0, 145>1}
+    Base graphs processed / total = 746613 / 1`255782. Ops (copies, T_k, free)= (7675`115563, 7502`161757, 1`255030)
+    EdgeGen stats (tk-skip, bits, theta_edge_skip, theta_dir_skip, sets)= (510`846370, 4664`564625, 4610`321765, 4570`501167, 510`846370)
+
+--------Wall clock time:  400009ms
+    Current minimum theta = 7 / 4
+    Produced by graph: {023>0, 123>1, 024>0, 124>1, 034>0, 134>1, 025>0, 125>1, 035>0, 135>1, 045>0, 145>1}
+    Base graphs processed / total = 920098 / 1`255782. Ops (copies, T_k, free)= (10977`230231, 10696`793062, 1`255030)
+    EdgeGen stats (tk-skip, bits, theta_edge_skip, theta_dir_skip, sets)= (733`208092, 6584`898827, 6475`549335, 6438`850485, 733`208092)
+
+--------Wall clock time:  500010ms
+    Current minimum theta = 7 / 4
+    Produced by graph: {023>0, 123>1, 024>0, 124>1, 034>0, 134>1, 025>0, 125>1, 035>0, 135>1, 045>0, 145>1}
+    Base graphs processed / total = 1`034265 / 1`255782. Ops (copies, T_k, free)= (14316`539103, 13918`417593, 1`255030)
+    EdgeGen stats (tk-skip, bits, theta_edge_skip, theta_dir_skip, sets)= (959`845365, 8447`791250, 8283`873375, 8206`417404, 959`845365)
+
+--------Wall clock time:  600011ms
+    Current minimum theta = 7 / 4
+    Produced by graph: {023>0, 123>1, 024>0, 124>1, 034>0, 134>1, 025>0, 125>1, 035>0, 135>1, 045>0, 145>1}
+    Base graphs processed / total = 1`161868 / 1`255782. Ops (copies, T_k, free)= (17619`147982, 17107`331072, 1`255030)
+    EdgeGen stats (tk-skip, bits, theta_edge_skip, theta_dir_skip, sets)= (1182`959160, 10304`215592, 10064`823439, 9980`788928, 1182`959160)
+
+--------Wall clock time:  700012ms
+    Current minimum theta = 7 / 4
+    Produced by graph: {023>0, 123>1, 024>0, 124>1, 034>0, 134>1, 025>0, 125>1, 035>0, 135>1, 045>0, 145>1, 026>0, 126>1, 036>0, 136>1, 046>0, 146>1, 056>0, 156>1}
+    Base graphs processed / total = 1`254952 / 1`255782. Ops (copies, T_k, free)= (20939`583445, 20295`983305, 1`255032)
+    EdgeGen stats (tk-skip, bits, theta_edge_skip, theta_dir_skip, sets)= (1409`090764, 12109`943611, 11782`584120, 11680`394255, 1409`090766)
+
+
+***************************
+ALL DONE. Final result:
+
+--------Wall clock time:  702552ms
+    Current minimum theta = 7 / 4
+    Produced by graph: {023>0, 123>1, 024>0, 124>1, 034>0, 134>1, 025>0, 125>1, 035>0, 135>1, 045>0, 145>1, 026>0, 126>1, 036>0, 136>1, 046>0, 146>1, 056>0, 156>1}
+    Base graphs processed / total = 1`255782 / 1`255782. Ops (copies, T_k, free)= (21005`721497, 20359`650151, 1`255032)
+    EdgeGen stats (tk-skip, bits, theta_edge_skip, theta_dir_skip, sets)= (1413`590922, 12143`208859, 11812`712287, 11711`542928, 1413`590924)

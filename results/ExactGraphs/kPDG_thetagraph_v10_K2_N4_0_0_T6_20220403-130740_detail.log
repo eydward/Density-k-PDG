@@ -1,0 +1,16 @@
+-------- Accumulated canonicals[order=0] : count = 0, min_theta = 100000000/1 --------
+-------- Accumulated canonicals[order=1] : count = 1, min_theta = 100000000/1 --------
+  [0] {}
+-------- Accumulated canonicals[order=2] : count = 2, min_theta = 6/1 --------
+  [0] {01  }
+  [1] {01>0}
+-------- Accumulated canonicals[order=3] : count = 9, min_theta = 3/1 --------
+  [0] {01  }
+  [1] {01>0}
+  [2] {01  , 02  }
+  [3] {01  , 02>0}
+  [4] {01  , 02>2}
+  [5] {01>0, 02>0}
+  [6] {01>1, 02>0}
+  [7] {02>0, 12>1}
+  [8] {01  , 02  , 12  }

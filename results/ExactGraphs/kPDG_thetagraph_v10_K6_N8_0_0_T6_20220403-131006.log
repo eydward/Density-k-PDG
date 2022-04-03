@@ -1,0 +1,192 @@
+kPDG run arguments: K=6, N=8, TOTAL_EDGES=28, THREADS=6, idx_range=[0, 0]
+Searching graphs with theta 4/3
+
+Searching for all T_k-free k-PDGs
+    K= 6 (number of vertices in each edge)
+    N= 8 (maximum possible number of edges in each graph)
+
+--------Wall clock time:  7ms
+    Current minimum theta = 14 / 3
+    Produced by graph: {012345>0, 012346>0, 012356>0, 012456>0, 013456>0, 023456>0}
+    Accumulated canonicals	= 48
+    Ops (vertex sig, copies, canonicalize, permute, T_k)= (4482, 19964, 4482, 8685, 19964)
+    Isomorphic tests (total, true, expensive, false w/ =hash, identical, codeg_diff)= 
+                     (4434, 4434, 1970, 0, 13119, 0)
+    Growth stats(vertices, total in step, processed in step, accumulated in step)= (7, 2, 2, 45)
+
+---------------------------------
+Growth phase completed. State:
+    order=0 : collected= 0, all_edge_directed= 0
+    order=1 : collected= 0, all_edge_directed= 0
+    order=2 : collected= 0, all_edge_directed= 0
+    order=3 : collected= 0, all_edge_directed= 0
+    order=4 : collected= 0, all_edge_directed= 0
+    order=5 : collected= 1, all_edge_directed= 1
+    order=6 : collected= 2, all_edge_directed= 1
+    order=7 : collected= 47, all_edge_directed= 16
+---------------------------------
+
+Starting final enumeration phase...
+    EdgeGen[0, state=166657765567112222222]
+    EdgeGen[0, state=167776615676122222222]
+    EdgeGen[0, state=176776677171632222222]
+    EdgeGen[0, state=556651761162222222222]
+
+--------Wall clock time:  102320ms
+    Current minimum theta = 4 / 3
+    Produced by graph: {012345>0, 012346>0, 012356>0, 012456>0, 013456>0, 023456>0}
+    Base graphs processed / total = 7 / 47. Ops (copies, T_k, free)= (2056`724369, 2039`960003, 45)
+    EdgeGen stats (tk-skip, bits, theta_edge_skip, theta_dir_skip, sets)= (20`242966, 150`032790, 147`868379, 148`697258, 20`242967)
+    EdgeGen[0, state=616766771616776522222]
+    EdgeGen[0, state=661177777767661522222]
+    EdgeGen[0, state=666661665551122222222]
+    EdgeGen[0, state=667167677616763122222]
+    EdgeGen[0, state=667776117766167522222]
+
+--------Wall clock time:  206551ms
+    Current minimum theta = 4 / 3
+    Produced by graph: {012345>0, 012346>0, 012356>0, 012456>0, 013456>0, 023456>0}
+    Base graphs processed / total = 7 / 47. Ops (copies, T_k, free)= (4123`780166, 4105`998029, 45)
+    EdgeGen stats (tk-skip, bits, theta_edge_skip, theta_dir_skip, sets)= (30`542966, 221`662222, 221`371817, 214`154909, 30`542967)
+    EdgeGen[0, state=676176116666767222222]
+    EdgeGen[0, state=676771776711667422222]
+    EdgeGen[0, state=677711767776616722222]
+    EdgeGen[0, state=716666711777666222222]
+    EdgeGen[0, state=717766766777117522222]
+
+--------Wall clock time:  308728ms
+    Current minimum theta = 4 / 3
+    Produced by graph: {012345>0, 012346>0, 012356>0, 012456>0, 013456>0, 023456>0}
+    Base graphs processed / total = 10 / 47. Ops (copies, T_k, free)= (6050`604848, 6028`496568, 45)
+    EdgeGen stats (tk-skip, bits, theta_edge_skip, theta_dir_skip, sets)= (93`575768, 775`042277, 724`875234, 753`813181, 93`575769)
+    EdgeGen[0, state=765615711574222222222]
+    EdgeGen[0, state=766766616716673122222]
+    EdgeGen[0, state=767676761666167612222]
+    EdgeGen[0, state=771716767776767512222]
+    EdgeGen[0, state=776666767117167722222]
+
+--------Wall clock time:  413029ms
+    Current minimum theta = 4 / 3
+    Produced by graph: {012345>0, 012346>0, 012356>0, 012456>0, 013456>0, 023456>0}
+    Base graphs processed / total = 14 / 47. Ops (copies, T_k, free)= (8038`519916, 8011`777111, 45)
+    EdgeGen stats (tk-skip, bits, theta_edge_skip, theta_dir_skip, sets)= (280`849956, 2438`939266, 2327`139233, 2309`370673, 280`849957)
+    EdgeGen[0, state=776777776611766512222]
+    EdgeGen[0, state=777717676777716212222]
+    EdgeGen[17, state=156016456072222222222]
+    EdgeGen[17, state=665051055065222222222]
+    EdgeGen[17, state=767051055260322222222]
+
+--------Wall clock time:  515059ms
+    Current minimum theta = 4 / 3
+    Produced by graph: {012345>0, 012346>0, 012356>0, 012456>0, 013456>0, 023456>0}
+    Base graphs processed / total = 23 / 47. Ops (copies, T_k, free)= (10170`839332, 10135`188348, 45)
+    EdgeGen stats (tk-skip, bits, theta_edge_skip, theta_dir_skip, sets)= (361`786791, 3205`103173, 3048`251159, 3025`265108, 361`786791)
+    EdgeGen[21, state=761056066540651122222]
+    EdgeGen[26, state=663500606502222222222]
+    EdgeGen[29, state=606062016651666222222]
+    EdgeGen[30, state=705101616161022222222]
+    EdgeGen[37, state=105061056110322222222]
+
+--------Wall clock time:  615204ms
+    Current minimum theta = 4 / 3
+    Produced by graph: {012345>0, 012346>0, 012356>0, 012456>0, 013456>0, 023456>0}
+    Base graphs processed / total = 41 / 47. Ops (copies, T_k, free)= (12299`628041, 12242`376079, 45)
+    EdgeGen stats (tk-skip, bits, theta_edge_skip, theta_dir_skip, sets)= (445`672559, 3952`835906, 3746`311112, 3732`438876, 445`672559)
+    EdgeGen[39, state=002566026146601722222]
+    EdgeGen[39, state=010530565106722222222]
+    EdgeGen[39, state=016011166517022222222]
+    EdgeGen[39, state=020006665644211222222]
+    EdgeGen[39, state=056660516601062222222]
+
+--------Wall clock time:  717332ms
+    Current minimum theta = 4 / 3
+    Produced by graph: {012345>0, 012346>0, 012356>0, 012456>0, 013456>0, 023456>0}
+    Base graphs processed / total = 44 / 47. Ops (copies, T_k, free)= (14164`169639, 14054`521482, 45)
+    EdgeGen stats (tk-skip, bits, theta_edge_skip, theta_dir_skip, sets)= (491`614425, 4302`444563, 4055`656703, 4066`350094, 491`614426)
+    EdgeGen[39, state=061614660066064722222]
+    EdgeGen[39, state=066115201615042222222]
+    EdgeGen[39, state=100016666666167222222]
+    EdgeGen[39, state=105651555400022222222]
+    EdgeGen[39, state=110011130666622222222]
+
+--------Wall clock time:  818269ms
+    Current minimum theta = 4 / 3
+    Produced by graph: {012345>0, 012346>0, 012356>0, 012456>0, 013456>0, 023456>0, 012347>0, 012357>0, 012457>0, 013457>0, 023457>0, 012367>0, 012467>0, 013467>0, 023467>0, 012567>0, 013567>0, 023567>0, 014567>0, 024567>0, 034567>0}
+    Base graphs processed / total = 47 / 47. Ops (copies, T_k, free)= (15618`284606, 15465`904873, 46)
+    EdgeGen stats (tk-skip, bits, theta_edge_skip, theta_dir_skip, sets)= (650`473161, 5554`021556, 5232`964062, 5217`107715, 650`473163)
+    EdgeGen[39, state=111111650165022222222]
+    EdgeGen[39, state=111661605663002222222]
+    EdgeGen[39, state=116111016151042222222]
+    EdgeGen[39, state=116611616106616502222]
+    EdgeGen[39, state=151511061500322222222]
+
+--------Wall clock time:  921491ms
+    Current minimum theta = 4 / 3
+    Produced by graph: {012345>0, 012346>0, 012356>0, 012456>0, 013456>0, 023456>0, 012347>0, 012357>0, 012457>0, 013457>0, 023457>0, 012367>0, 012467>0, 013467>0, 023467>0, 012567>0, 013567>0, 023567>0, 014567>0, 024567>0, 034567>0}
+    Base graphs processed / total = 47 / 47. Ops (copies, T_k, free)= (16524`398215, 16354`634544, 46)
+    EdgeGen stats (tk-skip, bits, theta_edge_skip, theta_dir_skip, sets)= (701`883700, 5914`484788, 5559`190771, 5538`009783, 701`883702)
+    EdgeGen[39, state=160616665570070222222]
+    EdgeGen[39, state=161166001615112222222]
+    EdgeGen[39, state=161666565060002222222]
+    EdgeGen[39, state=166106661610616202222]
+    EdgeGen[39, state=166606660666011422222]
+
+--------Wall clock time:  1`023286ms
+    Current minimum theta = 4 / 3
+    Produced by graph: {012345>0, 012346>0, 012356>0, 012456>0, 013456>0, 023456>0, 012347>0, 012357>0, 012457>0, 013457>0, 023457>0, 012367>0, 012467>0, 013467>0, 023467>0, 012567>0, 013567>0, 023567>0, 014567>0, 024567>0, 034567>0}
+    Base graphs processed / total = 47 / 47. Ops (copies, T_k, free)= (17371`745433, 17185`580412, 46)
+    EdgeGen stats (tk-skip, bits, theta_edge_skip, theta_dir_skip, sets)= (713`883700, 5996`063796, 5624`552929, 5612`928487, 713`883702)
+    EdgeGen[39, state=200161016222222222222]
+    EdgeGen[39, state=461506005104422222222]
+    EdgeGen[39, state=550556615120002222222]
+    EdgeGen[39, state=600116151065222222222]
+    EdgeGen[39, state=601665655664000122222]
+
+--------Wall clock time:  1`125299ms
+    Current minimum theta = 4 / 3
+    Produced by graph: {012345>0, 012346>0, 012356>0, 012456>0, 013456>0, 023456>0, 012347>0, 012357>0, 012457>0, 013457>0, 023457>0, 012367>0, 012467>0, 013467>0, 023467>0, 012567>0, 013567>0, 023567>0, 014567>0, 024567>0, 034567>0}
+    Base graphs processed / total = 47 / 47. Ops (copies, T_k, free)= (18111`752386, 17916`545098, 46)
+    EdgeGen stats (tk-skip, bits, theta_edge_skip, theta_dir_skip, sets)= (802`093596, 6674`371811, 6246`382761, 6216`553098, 802`093598)
+    EdgeGen[39, state=606310666666111202222]
+    EdgeGen[39, state=610166606663500222222]
+    EdgeGen[39, state=611116660066702222222]
+    EdgeGen[39, state=611661661616016006522]
+    EdgeGen[39, state=616101161166200222222]
+
+--------Wall clock time:  1`228860ms
+    Current minimum theta = 4 / 3
+    Produced by graph: {012345>0, 012346>0, 012356>0, 012456>0, 013456>0, 023456>0, 012347>0, 012357>0, 012457>0, 013457>0, 023457>0, 012367>0, 012467>0, 013467>0, 023467>0, 012567>0, 013567>0, 023567>0, 014567>0, 024567>0, 034567>0}
+    Base graphs processed / total = 47 / 47. Ops (copies, T_k, free)= (18650`262490, 18455`055203, 46)
+    EdgeGen stats (tk-skip, bits, theta_edge_skip, theta_dir_skip, sets)= (815`893596, 6768`780800, 6326`041231, 6303`057539, 815`893598)
+    EdgeGen[39, state=616606111161006622222]
+    EdgeGen[39, state=633000666614601422222]
+    EdgeGen[39, state=656665616606001062222]
+    EdgeGen[39, state=660655605670031122222]
+    EdgeGen[39, state=661116601611601622222]
+
+--------Wall clock time:  1`330969ms
+    Current minimum theta = 4 / 3
+    Produced by graph: {012345>0, 012346>0, 012356>0, 012456>0, 013456>0, 023456>0, 012347>0, 012357>0, 012457>0, 013457>0, 023457>0, 012367>0, 012467>0, 013467>0, 023467>0, 012567>0, 013567>0, 023567>0, 014567>0, 024567>0, 034567>0}
+    Base graphs processed / total = 47 / 47. Ops (copies, T_k, free)= (19138`499758, 18943`292470, 46)
+    EdgeGen stats (tk-skip, bits, theta_edge_skip, theta_dir_skip, sets)= (828`993596, 6857`595960, 6401`197723, 6382`817725, 828`993598)
+    EdgeGen[39, state=661616556600600722222]
+    EdgeGen[39, state=665610150470042222222]
+    EdgeGen[39, state=666115060611032222222]
+    EdgeGen[39, state=666606600015153222222]
+    EdgeGen[39, state=666666161566100202222]
+
+--------Wall clock time:  2`454585ms
+    Current minimum theta = 4 / 3
+    Produced by graph: {012345>0, 012346>0, 012356>0, 012456>0, 013456>0, 023456>0, 012347>0, 012357>0, 012457>0, 013457>0, 023457>0, 012367>0, 012467>0, 013467>0, 023467>0, 012567>0, 013567>0, 023567>0, 014567>0, 024567>0, 034567>0}
+    Base graphs processed / total = 47 / 47. Ops (copies, T_k, free)= (22250`296907, 22055`089620, 46)
+    EdgeGen stats (tk-skip, bits, theta_edge_skip, theta_dir_skip, sets)= (840`637659, 6930`457382, 6460`583243, 6446`662408, 840`637660)
+
+
+***************************
+ALL DONE. Final result:
+
+--------Wall clock time:  2`454592ms
+    Current minimum theta = 4 / 3
+    Produced by graph: {012345>0, 012346>0, 012356>0, 012456>0, 013456>0, 023456>0, 012347>0, 012357>0, 012457>0, 013457>0, 023457>0, 012367>0, 012467>0, 013467>0, 023467>0, 012567>0, 013567>0, 023567>0, 014567>0, 024567>0, 034567>0}
+    Base graphs processed / total = 47 / 47. Ops (copies, T_k, free)= (22250`296907, 22055`089620, 46)
+    EdgeGen stats (tk-skip, bits, theta_edge_skip, theta_dir_skip, sets)= (1062`695838, 8334`833082, 7534`486401, 7731`615327, 1062`695839)

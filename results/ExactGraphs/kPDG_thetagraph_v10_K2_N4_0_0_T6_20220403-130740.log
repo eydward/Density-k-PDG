@@ -1,0 +1,35 @@
+kPDG run arguments: K=2, N=4, TOTAL_EDGES=6, THREADS=6, idx_range=[0, 0]
+Searching graphs with theta 3/2
+
+Searching for all T_k-free k-PDGs
+    K= 2 (number of vertices in each edge)
+    N= 4 (maximum possible number of edges in each graph)
+
+--------Wall clock time:  4ms
+    Current minimum theta = 3 / 1
+    Produced by graph: {01>0, 02>0}
+    Accumulated canonicals	= 10
+    Ops (vertex sig, copies, canonicalize, permute, T_k)= (17, 33, 17, 0, 33)
+    Isomorphic tests (total, true, expensive, false w/ =hash, identical, codeg_diff)= 
+                     (7, 7, 0, 0, 7, 0)
+    Growth stats(vertices, total in step, processed in step, accumulated in step)= (3, 2, 2, 7)
+
+---------------------------------
+Growth phase completed. State:
+    order=0 : collected= 0, all_edge_directed= 0
+    order=1 : collected= 1, all_edge_directed= 1
+    order=2 : collected= 2, all_edge_directed= 1
+    order=3 : collected= 9, all_edge_directed= 4
+---------------------------------
+
+Starting final enumeration phase...
+
+
+***************************
+ALL DONE. Final result:
+
+--------Wall clock time:  11ms
+    Current minimum theta = 3 / 2
+    Produced by graph: {01>1, 02>0, 13>3, 23>3}
+    Base graphs processed / total = 9 / 9. Ops (copies, T_k, free)= (521, 509, 19)
+    EdgeGen stats (tk-skip, bits, theta_edge_skip, theta_dir_skip, sets)= (164, 16, 64, 54, 176)
