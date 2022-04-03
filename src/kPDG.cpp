@@ -54,8 +54,7 @@ int main(int argc, char* argv[]) {
     t = 0;
   }
 
-  if (k < 2 || n > 8 || k > n || t < 0 || t > 128 || start_idx < 0 || end_idx < start_idx ||
-      (n == 8 && k == 4)) {
+  if (k < 2 || n > 8 || k > n || t < 0 || t > 128 || start_idx < 0 || end_idx < start_idx) {
     std::cout << "Invalid command line arguments. See usage for details.\n";
     print_usage();
     return -1;

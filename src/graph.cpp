@@ -11,10 +11,9 @@ uint64 hash_combine64(uint64 hash, uint64 value) {
   return hash ^= value + 0x9E3779B97F4A7C15ull + (hash << 12) + (hash >> 4);
 }
 
-// Helper function for printing vertex list in an edge.
-void print_vertices(std::ostream& os, uint8 vertices) {
-  constexpr uint8 MAX_VERTEX_COUNT = 8;
-  for (int v = 0; v < MAX_VERTEX_COUNT; v++) {
+// Helper function for printing vertex list in an edge. `vertices` is a bitmask.
+void print_vertices(std::ostream& os, uint16 vertices) {
+  for (int v = 0; v < MAX_VERTICES; v++) {
     if ((vertices & 1) != 0) {
       os << v;
     }
@@ -28,7 +27,7 @@ void print_vertices(std::ostream& os, uint8 vertices) {
 void Edge::print_edges(std::ostream& os, uint8 edge_count, const Edge edges[], bool aligned) {
   os << "{";
   bool is_first = true;
-  for (int i = 0; i < edge_count; i++) {
+  for (uint8 i = 0; i < edge_count; i++) {
     if (!is_first) {
       os << ", ";
     }
@@ -83,7 +82,7 @@ void Graph::set_global_graph_info(int k, int n) {
     mask.mask_count = 0;
     for (uint16 bits = 0; bits < (1 << n); bits++) {
       if (__builtin_popcount(bits) == m) {
-        mask.masks[mask.mask_count++] = static_cast<uint8>(bits);
+        mask.masks[mask.mask_count++] = bits;
       }
     }
     assert(mask.mask_count == compute_binom(n, m));
@@ -105,8 +104,8 @@ Fraction Graph::get_theta() const {
 
 // Returns true if the edge specified by the bitmask of the vertices in the edge is allowed
 // to be added to the graph (this vertex set does not yet exist in the edges).
-bool Graph::edge_allowed(uint8 vertices) const {
-  for (int i = 0; i < edge_count; i++) {
+bool Graph::edge_allowed(uint16 vertices) const {
+  for (uint8 i = 0; i < edge_count; i++) {
     if (vertices == edges[i].vertex_set) return false;
   }
   return true;
@@ -137,7 +136,7 @@ void Graph::compute_vertex_signature() {
   for (int i = 0; i < edge_count; i++) {
     uint8 head = edges[i].head_vertex;
     for (int v = 0; v < N; v++) {
-      uint8 mask = 1 << v;
+      uint16 mask = static_cast<uint16>(1) << v;
       if ((edges[i].vertex_set & mask) != 0) {
         if (head == UNDIRECTED) {
           vertices[v].degree_undirected++;

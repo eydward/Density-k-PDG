@@ -11,28 +11,27 @@ using uint32 = uint32_t;
 using uint64 = uint64_t;
 
 // Maximum number of vertex allowed in a graph.
-constexpr int MAX_VERTICES = 8;
-// Maximum number of edges allowed in a graph. Note $56=\binom83$ which allows
-// all (K,N) combinations with N<=8, except for K=4,N=8, which is not computationally feasible
-// in our current approach anyway.
-constexpr int MAX_EDGES = 56;
+constexpr int MAX_VERTICES = 12;
+// Maximum number of edges allowed in a graph. Note $70=\binom84$ which allows
+// all (K,N) combinations with N<=8.
+constexpr int MAX_EDGES = 70;
 
 // Special value to indicate an edge is undirected.
-constexpr uint8 UNDIRECTED = 0xFF;
+constexpr uint8 UNDIRECTED = 0x0F;
 
 // Specifies one edge in the graph. The vertex_set is a bitmasks of all vertices in the edge.
 // Example 00001011 means vertices {0,1,3}.
 // The head_vertex is the id of the head vertex if the edge is directed,
 // or UNDIRECTED if the edge is undirected.
 struct Edge {
-  uint8 vertex_set;
-  uint8 head_vertex;
+  uint16 vertex_set : 12;
+  uint16 head_vertex : 4;
 
   Edge() : vertex_set(0), head_vertex(0) {}
-  Edge(uint8 vset, uint8 head) : vertex_set(vset), head_vertex(head) {
-#if !NDEBUG
-    assert(head_vertex == UNDIRECTED || ((1 << head_vertex) & vertex_set) != 0);
-#endif
+  Edge(uint16 vset, uint8 head) : vertex_set(vset), head_vertex(head) {
+    assert((vset & 0xF000) == 0);
+    assert(head_vertex == UNDIRECTED ||
+           ((static_cast<uint16>(1) << head_vertex) & vertex_set) != 0);
   }
 
   // Utility function to print an edge array to the given output stream, for debugging purpose.
@@ -81,7 +80,7 @@ struct VertexMask {
   uint8 mask_count;
   // Each element in this array has exactly k bits that are 1s. The position of the 1-bits
   // indicate which vertex should be used in the computations.
-  uint8 masks[255];
+  uint16 masks[compute_binom(12, 6)];
 };
 
 // Represents a k-PDG, with the data structure optimized for computing isomorphisms.
@@ -142,7 +141,7 @@ struct Graph {
 
   // Returns true if the edge specified by the bitmask of the vertices in the edge is allowed
   // to be added to the graph (this vertex set does not yet exist in the edges).
-  bool edge_allowed(uint8 vertices) const;
+  bool edge_allowed(uint16 vertices) const;
 
   // Adds an edge to the graph. It's caller's responsibility to make sure this is allowed.
   // And the input is consistent (head is inside the vertex set).
@@ -249,4 +248,4 @@ struct Graph {
   FRIEND_TEST(EdgeGeneratorTest, Generate45);
   friend class IsomorphismStressTest;
 };
-static_assert(sizeof(Graph) == 152);
+static_assert(sizeof(Graph) == 180);
