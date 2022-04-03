@@ -1,12 +1,21 @@
 #pragma once
 #include <assert.h>
 
+#include <string>
+
 // Represents a simplified fraction n/d.
 struct Fraction {
  public:
-  int n, d;  // The numerator and denominator of the fraction, respectively.
-
+  // The numerator and denominator of the fraction, respectively.
+  int n, d;
+  // Constructs a new Fraction with the given numerator and denominator values (will be simplified).
   Fraction(int n_, int d_);
+  // Returns a text representation of the fraction.
+  std::string to_string() const;
+  // Returns a large value that represents infinity (in fact it's 1E8).
+  static Fraction infinity();
+  // Returns a small value that is close to 0 (in fact it's 1/(8!))
+  static Fraction epsilon();
 
  private:
   void simplify();

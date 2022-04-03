@@ -240,7 +240,7 @@ int main(int argc, char* argv[]) {
             << "\tStart\tEnd\tmin_theta\tCPU seconds\n"
             << "\t------\t------\t------\t\t----------\n";
 
-  Fraction min_theta(1E8, 1);
+  Fraction min_theta = Fraction::infinity();
   uint64 total_cpu_seconds = 0;
   for (const auto& summary : summary_data) {
     std::cout << "\t" << std::get<0>(summary) << "\t" << std::get<1>(summary) << "\t"
@@ -258,7 +258,7 @@ int main(int argc, char* argv[]) {
 
   std::cout << "\n\nValidating detail log with result log...\n";
   std::vector<bool> covered(base_graph_count);
-  Fraction result_min_theta(1E8, 1);
+  Fraction result_min_theta = Fraction::infinity();
   for (const auto& kv : results) {
     int graph_id = kv.first;
     const std::string& base_graph = std::get<0>(kv.second);

@@ -73,3 +73,24 @@ TEST(GrowerTest, Grow) {
   verify_growth_result(6, 7, Fraction(7, 6),
                        "{012345>0, 012346>0, 012356>0, 012456>0, 013456>0, 023456>0}");
 }
+
+void verify_thetagraph_search(int k, int n, Fraction theta, int expected_thetagraph_count,
+                              Fraction expected_min_theta) {
+  Graph::set_global_graph_info(k, n);
+  for (int num_threads = 0; num_threads < 10; num_threads++) {
+    Counters::initialize();
+    Grower s1(num_threads, false, true, true, 0, 0, true, theta);
+    s1.grow();
+    std::cout << "*** " << Counters::get_min_theta().to_string() << "\n";
+    EXPECT_EQ(Counters::get_min_theta(), expected_min_theta);
+    EXPECT_EQ(Counters::get_thetagraph_count(), expected_thetagraph_count);
+  }
+}
+
+TEST(GrowerTest, ThetaGraphSearch) {
+  verify_thetagraph_search(2, 3, Fraction(3, 2), 4, Fraction(3, 2));
+  verify_thetagraph_search(2, 3, Fraction(5, 4), 0, Fraction(5, 4));
+  verify_thetagraph_search(2, 3, Fraction(2, 1), 10, Fraction(3, 2));
+  verify_thetagraph_search(3, 4, Fraction(4, 3), 1, Fraction(4, 3));
+  verify_thetagraph_search(3, 5, Fraction(5, 3), 3, Fraction(5, 3));
+}

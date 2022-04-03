@@ -4,7 +4,7 @@
 
 constexpr int PRINT_EVERY_N_SECONDS = 100;
 
-Fraction Counters::min_theta(1E8, 1);
+Fraction Counters::min_theta = Fraction::infinity();
 Graph Counters::min_theta_graph{};
 uint64 Counters::compute_vertex_signatures = 0;
 std::atomic<uint64> Counters::graph_copies = 0;
@@ -32,11 +32,12 @@ uint64 Counters::edgegen_tk_skip_bits = 0;
 uint64 Counters::edgegen_theta_edges_skip = 0;
 uint64 Counters::edgegen_theta_directed_edges_skip = 0;
 uint64 Counters::edgegen_edge_sets = 0;
+uint64 Counters::thetagraph_count = 0;
 
 bool Counters::in_final_step = false;
 
 void Counters::initialize(std::ofstream* log_stream) {
-  min_theta = Fraction(1E8, 1);
+  min_theta = Fraction::infinity();
   last_print_time = start_time = std::chrono::steady_clock::now();
   log = log_stream;
 }
@@ -71,9 +72,21 @@ void Counters::new_growth_step(uint64 vertex_count, uint64 total_graphs_in_curre
 
 void Counters::enter_final_step(uint64 num_base_graphs) {
   in_final_step = true;
-  min_theta = Fraction(1E8, 1);
+  min_theta = Fraction::infinity();
   growth_num_base_graphs_in_final_step = num_base_graphs;
   growth_processed_graphs_in_current_step = 0;
+}
+
+void Counters::initialize_thetagraph_search(Fraction theta) {
+  min_theta = theta;
+  thetagraph_count = 0;
+}
+void Counters::notify_thetagraph_found(const Graph& g) {
+  ++thetagraph_count;
+  if (g.get_theta() <= min_theta) {
+    min_theta = g.get_theta();
+    min_theta_graph = g;
+  }
 }
 
 void Counters::print_at_time_interval() {

@@ -49,12 +49,16 @@ class Counters {
   static uint64 edgegen_theta_directed_edges_skip;  // How many skips min_theta opt, directed.
   static uint64 edgegen_edge_sets;  // How many edge sets returned from this generator.
 
+  // How many graphs found to be <= given theta value, in theta-graph search.
+  static uint64 thetagraph_count;
+
   // Prints the counter values the given output stream.
   static void print_counters_to_stream(std::ostream& os);
 
  public:
   static Fraction get_min_theta() { return min_theta; }
   static const Graph& get_min_theta_graph() { return min_theta_graph; }
+  static uint64 get_thetagraph_count() { return thetagraph_count; }
   static void increment_compute_vertex_signatures() { ++compute_vertex_signatures; }
   static void increment_graph_copies() { ++graph_copies; }
   static void increment_graph_canonicalize_ops() { ++graph_canonicalize_ops; }
@@ -70,6 +74,10 @@ class Counters {
   static void increment_growth_processed_graphs_in_current_step() {
     ++growth_processed_graphs_in_current_step;
   }
+  // Initialize the counters before starting the theta-graph search.
+  static void initialize_thetagraph_search(Fraction theta);
+  // Notify that a graph matching the theta value is found during theta-graph search.
+  static void notify_thetagraph_found(const Graph& g);
 
   static std::ofstream* get_log() { return log; }
 

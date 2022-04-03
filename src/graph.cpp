@@ -99,7 +99,7 @@ Fraction Graph::get_theta() const {
   if (directed > 0) {
     return Fraction(TOTAL_EDGES - undirected_edge_count, directed);
   } else {
-    return Fraction(1E8, 1);
+    return Fraction::infinity();
   }
 }
 

@@ -446,7 +446,7 @@ TEST(GraphTest, Theta) {
 
   Graph::set_global_graph_info(2, 5);
   Graph j = parse_edges("{}");
-  EXPECT_EQ(j.get_theta(), Fraction(1E8, 1));
+  EXPECT_EQ(j.get_theta(), Fraction::infinity());
 
   Graph::set_global_graph_info(3, 4);
   Graph k = parse_edges("{012>2, 123}");

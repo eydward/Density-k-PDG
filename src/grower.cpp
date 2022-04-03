@@ -127,6 +127,9 @@ void Grower::enumerate_final_step(const std::vector<Graph>& base_graphs) {
     to_be_processed.push(base_graphs[i]);
   }
   Counters::enter_final_step(to_be_processed.size());
+  if (search_theta_graph) {
+    Counters::initialize_thetagraph_search(theta_to_search);
+  }
 
   if (num_worker_threads == 0) {
     worker_thread_main(0);
@@ -167,12 +170,12 @@ void Grower::worker_thread_main(int thread_id) {
       Counters::increment_growth_processed_graphs_in_current_step();
     }
 
-    Fraction min_theta(1E8, 1);
+    Fraction min_theta = Fraction::infinity();
     if (search_theta_graph) {
       // If we are searching all graphs generating the given theta value, set min_theta
       // to be slightly higher than the given value so that the min_theta optimization
       // won't skip any graph that produces the theta value.
-      min_theta = theta_to_search + Fraction(1, 1000);
+      min_theta = theta_to_search + Fraction::epsilon();
     }
 
     uint64 graphs_processed = 0;
@@ -221,15 +224,16 @@ void Grower::worker_thread_main(int thread_id) {
         // Here we are searching for all graphs that produce the given theta value.
         if (copy.get_theta() <= theta_to_search) {
           std::string to_print = "G[" + std::to_string(base_graph_id) +
-                                 "], theta = " + std::to_string(copy.get_theta().n) + "/" +
-                                 std::to_string(copy.get_theta().d) + " => ";
+                                 "], base_theta = " + base.get_theta().to_string() +
+                                 ", grow_to_theta = " + copy.get_theta().to_string() + " :\n  " +
+                                 base.serialize_edges() + "\n  " + copy.serialize_edges() + "\n";
+
           std::scoped_lock lock(counters_mutex);
           std::cout << to_print;
-          copy.print_concise(std::cout, true);
           if (log_result != nullptr) {
             *log_result << to_print;
-            copy.print_concise(*log_result, true);
           }
+          Counters::notify_thetagraph_found(copy);
         }
       }
     }
@@ -242,7 +246,7 @@ void Grower::worker_thread_main(int thread_id) {
       Counters::observe_edgegen_stats(
           edge_gen.stats_tk_skip, edge_gen.stats_tk_skip_bits, edge_gen.stats_theta_edges_skip,
           edge_gen.stats_theta_directed_edges_skip, edge_gen.stats_edge_sets);
-      if (log_detail != nullptr) {
+      if (log_detail != nullptr && !search_theta_graph) {
         *log_detail << "---- G[" << base_graph_id << "] T[" << thread_id
                     << "]: min_theta = " << min_theta.n << " / " << min_theta.d << " :\n  ";
         base.print_concise(*log_detail, true);
@@ -263,8 +267,14 @@ void Grower::print_before_final(const std::vector<Graph> collected_graphs[MAX_VE
   }
   if (log_detail != nullptr) {
     for (int i = 0; i < Graph::N; i++) {
+      Fraction min_theta = Fraction::infinity();
+      for (const Graph& g : collected_graphs[i]) {
+        min_theta = std::min(min_theta, g.get_theta());
+      }
+
       *log_detail << "-------- Accumulated canonicals[order=" << i
-                  << "] : " << collected_graphs[i].size() << " --------\n";
+                  << "] : count = " << collected_graphs[i].size()
+                  << ", min_theta = " << min_theta.to_string() << " --------\n";
       int idx = 0;
       for (const Graph& g : collected_graphs[i]) {
         *log_detail << "  [" << idx++ << "] ";
