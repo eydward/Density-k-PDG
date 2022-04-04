@@ -6,7 +6,7 @@ void print_usage() {
   std::cout << "Usage: kPDG K N T [start_idx, end_idx, [theta_n, theta_d]]\n"
             << "  Each argument is an integer, K and N are required, others optional.\n"
             << "  K = Number of vertices in each edge.\n"
-            << "  N = Total number of vertices in a graph.  2 <= K <= N <= 8.\n"
+            << "  N = Total number of vertices in a graph.  2 <= K <= N <= 12.\n"
             << "  T = Number of worker threads. (0 means don't use threads,\n"
             << "                                 -1 means no final phase).\n"
             << "  (optional) start_idx and end_index: the range of graph indices in the final\n"
@@ -54,9 +54,14 @@ int main(int argc, char* argv[]) {
     t = 0;
   }
 
-  if (k < 2 || n > 8 || k > n || t < 0 || t > 128 || start_idx < 0 || end_idx < start_idx) {
+  if (k < 2 || n > 12 || k > n || t < 0 || t > 128 || start_idx < 0 || end_idx < start_idx) {
     std::cout << "Invalid command line arguments. See usage for details.\n";
     print_usage();
+    return -1;
+  }
+  if (compute_binom(n, k) > MAX_EDGES) {
+    std::cout << "K=" << k << ", N=" << n
+              << " requires edge count more than MAX_EDGES=" << MAX_EDGES << ". Cannot execute.\n";
     return -1;
   }
 
