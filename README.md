@@ -50,6 +50,13 @@ where `start_idx` and `end_idx` specify the range of base graph ids in the final
 ```
 Note the `end_idx` is allowed to be larger than the number of available base graphs for convenience. Also in the example given, graph with id 1000, 2000, etc. are actually processed twice, which is fine. To see how many base graphs there are, just run the program with `kPDG K N -1` which skips the final step and therefore runs relatively quickly, and observe the output saying `Growth phase completed. State:` and take the last `collected` value. 
 
+### Theta-graph search
+Once we know the min_theta value, we can run the program to find all graphs that produce the min_theta. In fact this is much faster because the min_theta optmization (explained below) becomes much more effective. For example, running `k=3,n=7` combination normally to find min_theta takes around 880 CPU hours. But once we know its min_theta=7/4, finding all graphs that produces theta=7/4 (and verifying that indeed there are no graphs with smaller 7/4) only takes around 2 CPU hours. The command line argument to run the theta-graph search is 
+
+`  kPDG K N T start_idx end_idx theta_numerator theta_denominator`
+
+For example, to search for all graphs producing theta=7/4 for `k=3,n=7` using 10 threads, use `kPDG 3 7 10 0 0 7 4`. Note the arguments ` 0 0 ` are the start/end index of the base graphs, and 0s means search all base graphs. From the numerical results (and some mathematical proofs of special cases), we conjecture that when `K<=N<2K`, the min_theta is `N/K`. And when `N=2K`, the min_theta is `(2K-1)/K`. This is verified for all computationally feasible `K,N` combinations in the table, the results are in the `results/ExactGraphs` directory, with the exhaustive list of graphs in `*_result.log`. 
+
 ## Development Environment Setup
 * In order to build and run the code, c++ 17 compatible compiler is required. My environment uses `gcc (Rev8, Built by MSYS2 project) 11.2.0`, but any `gcc-11` release  should work. 
     - To install gcc on Windows, follow instructions in this [section](https://code.visualstudio.com/docs/languages/cpp#_example-install-mingwx64)
