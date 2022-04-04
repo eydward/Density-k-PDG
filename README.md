@@ -50,7 +50,7 @@ where `start_idx` and `end_idx` specify the range of base graph ids in the final
 ```
 Note the `end_idx` is allowed to be larger than the number of available base graphs for convenience. Also in the example given, graph with id 1000, 2000, etc. are actually processed twice, which is fine. To see how many base graphs there are, just run the program with `kPDG K N -1` which skips the final step and therefore runs relatively quickly, and observe the output saying `Growth phase completed. State:` and take the last `collected` value. 
 
-### Theta-graph search
+### Theta-graph search (requires v10 build)
 Once we know the min_theta value, we can run the program to find all graphs that produce the min_theta. In fact this is much faster because the min_theta optmization (explained below) becomes much more effective. For example, running `k=3,n=7` combination normally to find min_theta takes around 880 CPU hours. But once we know its min_theta=7/4, finding all graphs that produces theta=7/4 (and verifying that indeed there are no graphs with theta value less than 7/4) only takes around 2 CPU hours. The command line argument to run the theta-graph search is 
 
 `  kPDG K N T start_idx end_idx theta_numerator theta_denominator`
