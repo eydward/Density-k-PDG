@@ -77,7 +77,7 @@ static_assert(sizeof(VertexSignature) == 4);
 // Each VertexMask struct instance holds all valid vertex bitmasks for a given k value.
 struct VertexMask {
   // Number of valid masks in the next array.
-  uint8 mask_count;
+  uint16 mask_count;
   // Each element in this array has exactly k bits that are 1s. The position of the 1-bits
   // indicate which vertex should be used in the computations.
   uint16 masks[compute_binom(12, 6)];
