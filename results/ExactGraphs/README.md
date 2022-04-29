@@ -1,16 +1,16 @@
 # Theta Graph Search: All Graphs That Produce min_theta
 
-This directory contains the exhausitive list of graphs that produces the min_theta value
-for all `K,N` combinations that are computationally feasible. The `*_result.log` files contain
-the list of the exact graphs (each entry has the base graph, the result graph that produces
-min_theta, and the theta values of both). The `*_detail.log` files contain the base graph info
-before the final enumeration step.
+This directory contains an exhaustive list of graphs that produce min_theta values
+for all `K,N` combinations which have been computed thus far.
+The `*_result.log` files contain a list of exact graphs
+(each entry has the base graph, the result graph that produces min_theta, with the theta values of both).
+The `*_detail.log` files contain the base graph info before the final enumeration step.
 
-We copy the most interest data here for convenience. 
+We copy the most interesting data here for convenience. 
 
-Note since we don't perform isomorphism check in the final enumeration step, it's possible that
-some graphs listed under the same `K,N` combination may be isomorphic to each other. We 
-intentionally copy the computer run output here without removing those.
+Note that, since we are not performing an isomorphism check in the final enumeration step, it is possible that
+some graphs listed under the same `K,N` combination might be isomorphic to each other. We are
+intentionally copying computer output here without removing such isomorphisms.
 
 ## N=K+1
 * `K=2, N=3`:
