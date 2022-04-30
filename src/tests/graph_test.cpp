@@ -465,3 +465,14 @@ TEST(GraphTest, IsomorphicStress) {
     }
   }
 }
+
+TEST(GraphTest, VertexCount12) {
+  Graph::set_global_graph_info(2, 12);
+  Graph g = parse_edges("{01, 23, 45, 67, 89, 9a, 9b, ab>a}");
+  for (int v = 9; v < 12; v++) {
+    EXPECT_TRUE(g.contains_Tk(v));
+  }
+  for (int v = 0; v < 9; v++) {
+    EXPECT_FALSE(g.contains_Tk(v));
+  }
+}

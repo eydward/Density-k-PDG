@@ -46,7 +46,7 @@ void Edge::print_edges(std::ostream& os, uint8 edge_count, const Edge edges[], b
     is_first = false;
     print_vertices(os, edges[i].vertex_set);
     if (edges[i].head_vertex != UNDIRECTED) {
-      os << ">" << static_cast<int>(edges[i].head_vertex);
+      os << ">" << vertex_id_to_char(edges[i].head_vertex);
     } else if (aligned) {
       os << "  ";
     }
