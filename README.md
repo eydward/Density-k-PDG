@@ -88,7 +88,6 @@ We use the following steps to verify the correctness of the algorithm:
 * Unit tests in `tests` directory covers all code in the program.
 * Isomorphism stress test (`isostress`): use a straightforward `is_isomorphic_slow()` implementation without any optimization, and compare its result against `is_isomorphic()` which contains various optimizations. For `(K,N)` combinations that yield relatively small number of graphs, do this on all graph pairs exhaustively. Otherwise sample the graph pairs randomly to perform this check.
 * Edge generator stress test (`edgegenstress`): There are two optimizations we implemented in the edge generation (explained in details below). In order to verify the optimizations are correct, this stress runs all combinations of `K, N` values where `N<=7`, except the two very slow ones: `K=3,N=7` and `K=4,N=7`. For each `K,N` combination, we execute the full growth search, using four different optimization combinations (`(false,false)`, `(false,true)`, `(true,false)`,`(true,true)`,), and compare their resulting graphs, verify everything is identical regardless of the edge_gen optimizations used. 
-* Some special cases were mathematically verified.
 
 ## Organization of Code
 All source code is in the `src` directory.
