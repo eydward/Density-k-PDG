@@ -307,5 +307,5 @@ void Grower::print_state_to_stream(std::ostream& os,
 void Grower::print_config(std::ostream& os) const {
   os << "Searching for all T_k-free k-PDGs\n    K= " << Graph::K
      << " (number of vertices in each edge)\n    N= " << Graph::N
-     << " (maximum possible number of edges in each graph)\n";
+     << " (maximum possible number of vertices in each graph)\n";
 }
