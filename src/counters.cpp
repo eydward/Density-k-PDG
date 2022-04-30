@@ -22,7 +22,7 @@ uint64 Counters::graph_permute_ops = 0;
 uint64 Counters::graph_permute_canonical_ops = 0;
 std::chrono::time_point<std::chrono::steady_clock> Counters::start_time;
 std::chrono::time_point<std::chrono::steady_clock> Counters::last_print_time;
-std::ofstream* Counters::log = nullptr;
+std::ostream* Counters::log = nullptr;
 uint64 Counters::growth_vertex_count = 0;
 uint64 Counters::growth_total_graphs_in_current_step = 0;
 uint64 Counters::growth_accumulated_canonicals_in_current_step = 0;
@@ -36,7 +36,7 @@ uint64 Counters::thetagraph_count = 0;
 
 bool Counters::in_final_step = false;
 
-void Counters::initialize(std::ofstream* log_stream) {
+void Counters::initialize(std::ostream* log_stream) {
   min_theta = Fraction::infinity();
   last_print_time = start_time = std::chrono::steady_clock::now();
   log = log_stream;

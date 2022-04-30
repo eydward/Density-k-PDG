@@ -124,3 +124,32 @@ TEST(GrowerTest, ThetaGraphSearch) {
   verify_thetagraph_search(3, 4, Fraction(4, 3), 1, Fraction(4, 3));
   verify_thetagraph_search(3, 5, Fraction(5, 3), 3, Fraction(5, 3));
 }
+
+TEST(GrowerTest, WithLogging) {
+  Graph::set_global_graph_info(2, 3);
+  {
+    std::stringstream log, log_detail, log_result;
+    Counters::initialize(&log);
+    Grower s1(2, false, false, false, 0, 0, false, Fraction(1E8, 1), &log, &log_detail,
+              &log_result);
+    s1.set_stats_print_interval(1, 0);
+    s1.grow();
+    EXPECT_EQ(Counters::get_min_theta(), Fraction(3, 2));
+  }
+  {
+    std::stringstream log, log_detail, log_result;
+    Counters::initialize(&log);
+    Grower s1(2, false, false, false, 0, 0, true, Fraction(3, 2), &log, &log_detail, &log_result);
+    s1.set_stats_print_interval(1, 0);
+    s1.grow();
+    EXPECT_EQ(Counters::get_min_theta(), Fraction(3, 2));
+  }
+  {
+    std::stringstream log, log_detail, log_result;
+    Counters::initialize(&log);
+    Grower s1(2, true, false, false, 0, 0, false, Fraction(1E8, 1), &log, &log_detail, &log_result);
+    s1.set_stats_print_interval(1, 0);
+    s1.grow();
+    EXPECT_EQ(Counters::get_min_theta(), Fraction(3, 1));
+  }
+}

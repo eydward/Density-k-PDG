@@ -23,6 +23,11 @@ class Grower {
   // The theta value to search for. Ignored unless search_theta_graph==true.
   const Fraction theta_to_search;
 
+  // The number of generations between checking whether should print statistics.
+  uint64 stats_check_every_n_gen = 100000;
+  // The number of seconds between printing statistics in the final enumeration step.
+  int stats_print_every_n_seconds = 20;
+
   // The log files.
   std::ostream* const log;
   std::ostream* const log_detail;
@@ -81,4 +86,8 @@ class Grower {
 
   // Returns the growth results.
   const std::vector<std::tuple<int, Graph, Graph>>& get_results() const { return results; }
+
+  // For debugging and testing purpose: override the number of generations and seconds
+  // between printing stats.
+  void set_stats_print_interval(uint64 check_every_n_gen, int print_every_n_seconds);
 };

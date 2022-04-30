@@ -28,6 +28,11 @@ Grower::Grower(int num_worker_threads_, bool skip_final_enum_, bool use_min_thet
       log_result(log_result_),
       to_be_processed_id(start_idx_) {}
 
+void Grower::set_stats_print_interval(uint64 check_every_n_gen, int print_every_n_seconds) {
+  stats_check_every_n_gen = check_every_n_gen;
+  stats_print_every_n_seconds = print_every_n_seconds;
+}
+
 // Find all canonical isomorphism class representations with up to max_n vertices.
 void Grower::grow() {
   assert(Graph::N <= MAX_VERTICES);
@@ -184,12 +189,11 @@ void Grower::worker_thread_main(int thread_id) {
       // Thread 0 has the extra responsibility as time keeper,
       // to periodically ask Counters to print.
       if (thread_id == 0) {
-        if (edge_gen.stats_edge_sets % 100000 == 0) {
+        if (edge_gen.stats_edge_sets % stats_check_every_n_gen == 0) {
           const auto now = std::chrono::steady_clock::now();
-          constexpr int CHECK_EVERY_N_SECONDS = 20;
           int seconds =
               std::chrono::duration_cast<std::chrono::seconds>(now - last_check_time).count();
-          if (seconds >= CHECK_EVERY_N_SECONDS) {
+          if (seconds >= stats_print_every_n_seconds) {
             std::scoped_lock lock(counters_mutex);
             last_check_time = now;
             Counters::observe_theta(min_theta_graph, graphs_processed);
@@ -199,9 +203,9 @@ void Grower::worker_thread_main(int thread_id) {
                                             edge_gen.stats_edge_sets);
             edge_gen.clear_stats();
             Counters::print_at_time_interval();
-            if (Counters::get_log() != nullptr) {
+            if (log != nullptr) {
               edge_gen.print_debug(std::cout, false, base_graph_id);
-              edge_gen.print_debug(*Counters::get_log(), false, base_graph_id);
+              edge_gen.print_debug(*log, false, base_graph_id);
             }
           }
         }
