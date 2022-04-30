@@ -27,12 +27,8 @@ struct Edge {
   uint16 vertex_set : 12;
   uint16 head_vertex : 4;
 
-  Edge() : vertex_set(0), head_vertex(0) {}
-  Edge(uint16 vset, uint8 head) : vertex_set(vset), head_vertex(head) {
-    assert((vset & 0xF000) == 0);
-    assert(head_vertex == UNDIRECTED ||
-           ((static_cast<uint16>(1) << head_vertex) & vertex_set) != 0);
-  }
+  Edge();
+  Edge(uint16 vset, uint8 head);
 
   // Utility function to print an edge array to the given output stream, for debugging purpose.
   // Undirected edge is printed as "013" (for vertex set {0,1,3}),
@@ -55,17 +51,10 @@ struct VertexSignature {
   uint8 vertex_id;
 
   // Reset all data fields to 0, except setting the vertex_id using the given vid value.
-  void reset(int vid) {
-    degree_undirected = degree_head = degree_tail = 0;
-    vertex_id = vid;
-  }
-
+  void reset(int vid);
   // Returns the degree info, which encodes the values of all 3 degree fields,
   // but does not contain the vertex id.
-  uint32 get_degrees() const {
-    return static_cast<uint32>(degree_undirected) << 16 | (static_cast<uint32>(degree_head) << 8) |
-           (static_cast<uint32>(degree_tail));
-  }
+  uint32 get_degrees() const;
 
   // Utility function to print an array of VertexSignatures to the given output stream,
   // for debugging purpose.
@@ -129,12 +118,9 @@ struct Graph {
   // Returns theta such that (undirected edge density) + theta (directed edge density) = 1.
   // Namely, returns theta = (binom_nk - (undirected edge count)) / (directed edge count).
   Fraction get_theta() const;
-
   // Returns the hash of this graph.
-  uint32 get_graph_hash() const {
-    assert(is_canonical);
-    return graph_hash;
-  }
+  uint32 get_graph_hash() const;
+  // Several functions to get the edge counts.
   uint8 get_edge_count() const { return edge_count; }
   uint8 get_undirected_edge_count() const { return undirected_edge_count; }
   uint8 get_directed_edge_count() const { return edge_count - undirected_edge_count; }

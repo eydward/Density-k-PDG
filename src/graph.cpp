@@ -4,9 +4,6 @@
 #include "permutator.h"
 
 // Combines value into the hash and returns the combined hash.
-uint32 hash_combine32(uint32 hash_code, uint32 value) {
-  return hash_code ^= value + 0x9E3779B9ul + (hash_code << 6) + (hash_code >> 2);
-}
 uint64 hash_combine64(uint64 hash, uint64 value) {
   return hash ^= value + 0x9E3779B97F4A7C15ull + (hash << 12) + (hash >> 4);
 }
@@ -33,6 +30,12 @@ void print_vertices(std::ostream& os, uint16 vertices) {
   }
 }
 
+Edge::Edge() : vertex_set(0), head_vertex(0) {}
+Edge::Edge(uint16 vset, uint8 head) : vertex_set(vset), head_vertex(head) {
+  assert((vset & 0xF000) == 0);
+  assert(head_vertex == UNDIRECTED || ((static_cast<uint16>(1) << head_vertex) & vertex_set) != 0);
+}
+
 // Utility function to print an edge array to the given output stream.
 // Undirected edge is printed as "013" (for vertex set {0,1,3}),
 // and directed edge is printed as "013>1" (for vertex set {0,1,3} and head vertex 1).
@@ -52,6 +55,19 @@ void Edge::print_edges(std::ostream& os, uint8 edge_count, const Edge edges[], b
     }
   }
   os << "}\n";
+}
+
+// Reset all data fields to 0, except setting the vertex_id using the given vid value.
+void VertexSignature::reset(int vid) {
+  degree_undirected = degree_head = degree_tail = 0;
+  vertex_id = vid;
+}
+
+// Returns the degree info, which encodes the values of all 3 degree fields,
+// but does not contain the vertex id.
+uint32 VertexSignature::get_degrees() const {
+  return static_cast<uint32>(degree_undirected) << 16 | (static_cast<uint32>(degree_head) << 8) |
+         (static_cast<uint32>(degree_tail));
 }
 
 // Utility function to print an array of VertexSignatures to the given output stream,
@@ -112,6 +128,12 @@ Fraction Graph::get_theta() const {
   } else {
     return Fraction::infinity();
   }
+}
+
+// Returns the hash of this graph.
+uint32 Graph::get_graph_hash() const {
+  assert(is_canonical);
+  return graph_hash;
 }
 
 // Returns true if the edge specified by the bitmask of the vertices in the edge is allowed
