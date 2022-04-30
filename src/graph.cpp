@@ -447,10 +447,13 @@ bool Graph::operator<(const Graph& other) const {
   for (uint8 i = 0; i < edge_count; i++) {
     if (edges[i].vertex_set < other.edges[i].vertex_set) return true;
     if (edges[i].vertex_set > other.edges[i].vertex_set) return false;
-    if (static_cast<int8>(edges[i].head_vertex) < static_cast<int8>(other.edges[i].head_vertex))
-      return true;
-    if (static_cast<int8>(edges[i].head_vertex) > static_cast<int8>(other.edges[i].head_vertex))
-      return false;
+    int head_this =
+        edges[i].head_vertex == UNDIRECTED ? -1 : static_cast<int>(edges[i].head_vertex);
+    int head_other = other.edges[i].head_vertex == UNDIRECTED
+                         ? -1
+                         : static_cast<int>(other.edges[i].head_vertex);
+    if (head_this < head_other) return true;
+    if (head_this > head_other) return false;
   }
   return false;
 }
