@@ -452,6 +452,18 @@ TEST(EdgeGeneratorTest, MinTheta2) {
   EXPECT_FALSE(edge_gen.next(copy, true, Fraction(2, 1)));
 }
 
+TEST(EdgeGeneratorTest, MinTheta2F) {
+  Graph::set_global_graph_info(2, 3);
+  Graph base;
+  EXPECT_TRUE(Graph::parse_edges("{01}", base));
+  EdgeCandidates ec(3);
+  EdgeGenerator edge_gen(ec, base);
+
+  Graph copy;
+  // Simulate a corner case - it simply cannot generate anything that will produce smaller theta.
+  EXPECT_FALSE(edge_gen.next(copy, true, Fraction(1, 1)));
+}
+
 TEST(EdgeGeneratorTest, MinTheta3) {
   Graph::set_global_graph_info(3, 4);
   Graph base;
@@ -477,4 +489,25 @@ TEST(EdgeGeneratorTest, MinTheta3) {
   // to get two directed edges.
   EXPECT_TRUE(edge_gen.next(copy, true, Fraction(3, 2)));
   EXPECT_EQ(copy.serialize_edges(), "{012>2, 013>0, 023>0, 123}");
+}
+
+TEST(EdgeGeneratorTest, Stats) {
+  Graph::set_global_graph_info(3, 3);
+  EdgeCandidates ec(3);
+  Graph base;
+  EdgeGenerator edge_gen(ec, base);
+  Graph copy;
+
+  EXPECT_TRUE(edge_gen.next(copy));
+  EXPECT_TRUE(edge_gen.next(copy));
+  EXPECT_EQ(edge_gen.stats_tk_skip, 0);
+  EXPECT_EQ(edge_gen.stats_tk_skip_bits, 0);
+  EXPECT_EQ(edge_gen.stats_theta_edges_skip, 0);
+  EXPECT_EQ(edge_gen.stats_theta_directed_edges_skip, 0);
+  EXPECT_EQ(edge_gen.stats_edge_sets, 2);
+
+  edge_gen.clear_stats();
+  EXPECT_EQ(edge_gen.stats_edge_sets, 0);
+  EXPECT_TRUE(edge_gen.next(copy));
+  EXPECT_EQ(edge_gen.stats_edge_sets, 1);
 }
