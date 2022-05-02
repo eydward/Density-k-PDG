@@ -1,13 +1,13 @@
 #pragma once
 #include "graph.h"
 
-constexpr uint8 NOT_IN_SET = 0xEE;
+constexpr uint8 NOT_IN_SET = 0x0E;
 
 // This struct holds all edge candidates that contain vertex (n-1).
 struct EdgeCandidates {
-  const uint8 n;                     // Number of vertices after adding the new vertex.
-  uint8 edge_candidate_count;        // Number of edge candidates in the next array.
-  uint8 edge_candidates[MAX_EDGES];  // All possible edges going through the new vertex.
+  const uint16 n;                     // Number of vertices after adding the new vertex.
+  uint16 edge_candidate_count;        // Number of edge candidates in the next array.
+  uint16 edge_candidates[MAX_EDGES];  // All possible edges going through the new vertex.
 
   // The possible head vertex in the corresponding edge candidate.
   // [0] is always NOT_IN_SET, [1] is always UNDIRECTED,

@@ -26,12 +26,12 @@ bool Graph::contains_K4(int v) const {
   for (int i = 0; i < neighbor_count; i++) {
     for (int j = i + 1; j < neighbor_count; j++) {
       for (int k = j + 1; k < neighbor_count; k++) {
-        uint8 e_ij = (1 << neighbors[i]) | (1 << neighbors[j]);
-        uint8 e_jk = (1 << neighbors[j]) | (1 << neighbors[k]);
-        uint8 e_ki = (1 << neighbors[k]) | (1 << neighbors[i]);
+        uint16 e_ij = (1 << neighbors[i]) | (1 << neighbors[j]);
+        uint16 e_jk = (1 << neighbors[j]) | (1 << neighbors[k]);
+        uint16 e_ki = (1 << neighbors[k]) | (1 << neighbors[i]);
         bool has_ij = false, has_jk = false, has_ki = false;
         bool directed_ij = false, directed_jk = false, directed_ki = false;
-        for (uint8 e = 0; e < edge_count; e++) {
+        for (uint16 e = 0; e < edge_count; e++) {
           if (edges[e].vertex_set == e_ij) {
             has_ij = true;
             directed_ij = edges[e].head_vertex != UNDIRECTED;

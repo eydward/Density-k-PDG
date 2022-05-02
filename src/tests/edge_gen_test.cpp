@@ -71,7 +71,8 @@ TEST(EdgeGeneratorTest, Generate23) {
       EXPECT_TRUE(edge_gen.next(copy));
       EXPECT_EQ(copy.edge_count, 2);
       EXPECT_EQ(copy.edges[0].vertex_set, 0b101);
-      EXPECT_EQ(copy.edges[0].head_vertex, static_cast<uint8>(i0 == 1 ? 2 : i0));
+      EXPECT_EQ(copy.edges[0].head_vertex,
+                static_cast<uint8>(i0 == 1 ? 2 : (i0 == 0 ? 0 : UNDIRECTED)));
       EXPECT_EQ(copy.edges[1].vertex_set, 0b110);
       EXPECT_EQ(copy.edges[1].head_vertex, static_cast<uint8>(i1 == 0 ? UNDIRECTED : i1));
     }
@@ -123,7 +124,8 @@ TEST(EdgeGeneratorTest, Generate23WithSkip) {
     EXPECT_TRUE(edge_gen.next(copy));
     EXPECT_EQ(copy.edge_count, 2);
     EXPECT_EQ(copy.edges[0].vertex_set, 0b101);
-    EXPECT_EQ(copy.edges[0].head_vertex, static_cast<uint8>(i0 == 1 ? 2 : i0));
+    EXPECT_EQ(copy.edges[0].head_vertex,
+              static_cast<uint8>(i0 == 1 ? 2 : (i0 == -1 ? UNDIRECTED : i0)));
     EXPECT_EQ(copy.edges[1].vertex_set, 0b110);
     EXPECT_EQ(copy.edges[1].head_vertex, 2);
   }
@@ -248,7 +250,8 @@ TEST(EdgeGeneratorTest, Generate45) {
     EXPECT_TRUE(edge_gen.next(copy));
     EXPECT_EQ(copy.edge_count, 1);
     EXPECT_EQ(copy.edges[0].vertex_set, 0b10111);
-    EXPECT_EQ(copy.edges[0].head_vertex, static_cast<uint8>(i == 3 ? 4 : i));
+    EXPECT_EQ(copy.edges[0].head_vertex,
+              static_cast<uint8>(i == 3 ? 4 : (i == -1 ? UNDIRECTED : i)));
   }
 
   // Next 30:
@@ -260,15 +263,18 @@ TEST(EdgeGeneratorTest, Generate45) {
     EXPECT_TRUE(edge_gen.next(copy));
     EXPECT_EQ(copy.edge_count, 1);
     EXPECT_EQ(copy.edges[0].vertex_set, 0b11011);
-    EXPECT_EQ(copy.edges[0].head_vertex, static_cast<uint8>(i1 >= 2 ? i1 + 1 : i1));
+    EXPECT_EQ(copy.edges[0].head_vertex,
+              static_cast<uint8>(i1 >= 2 ? i1 + 1 : (i1 == -1 ? UNDIRECTED : i1)));
 
     for (int i0 = -1; i0 <= 3; i0++) {
       EXPECT_TRUE(edge_gen.next(copy));
       EXPECT_EQ(copy.edge_count, 2);
       EXPECT_EQ(copy.edges[0].vertex_set, 0b10111);
-      EXPECT_EQ(copy.edges[0].head_vertex, static_cast<uint8>(i0 == 3 ? 4 : i0));
+      EXPECT_EQ(copy.edges[0].head_vertex,
+                static_cast<uint8>(i0 == 3 ? 4 : (i0 == -1 ? UNDIRECTED : i0)));
       EXPECT_EQ(copy.edges[1].vertex_set, 0b11011);
-      EXPECT_EQ(copy.edges[1].head_vertex, static_cast<uint8>(i1 >= 2 ? i1 + 1 : i1));
+      EXPECT_EQ(copy.edges[1].head_vertex,
+                static_cast<uint8>(i1 >= 2 ? i1 + 1 : (i1 == -1 ? UNDIRECTED : i1)));
     }
   }
 }
@@ -446,6 +452,18 @@ TEST(EdgeGeneratorTest, MinTheta2) {
   EXPECT_FALSE(edge_gen.next(copy, true, Fraction(2, 1)));
 }
 
+TEST(EdgeGeneratorTest, MinTheta2F) {
+  Graph::set_global_graph_info(2, 3);
+  Graph base;
+  EXPECT_TRUE(Graph::parse_edges("{01}", base));
+  EdgeCandidates ec(3);
+  EdgeGenerator edge_gen(ec, base);
+
+  Graph copy;
+  // Simulate a corner case - it simply cannot generate anything that will produce smaller theta.
+  EXPECT_FALSE(edge_gen.next(copy, true, Fraction(1, 1)));
+}
+
 TEST(EdgeGeneratorTest, MinTheta3) {
   Graph::set_global_graph_info(3, 4);
   Graph base;
@@ -471,4 +489,25 @@ TEST(EdgeGeneratorTest, MinTheta3) {
   // to get two directed edges.
   EXPECT_TRUE(edge_gen.next(copy, true, Fraction(3, 2)));
   EXPECT_EQ(copy.serialize_edges(), "{012>2, 013>0, 023>0, 123}");
+}
+
+TEST(EdgeGeneratorTest, Stats) {
+  Graph::set_global_graph_info(3, 3);
+  EdgeCandidates ec(3);
+  Graph base;
+  EdgeGenerator edge_gen(ec, base);
+  Graph copy;
+
+  EXPECT_TRUE(edge_gen.next(copy));
+  EXPECT_TRUE(edge_gen.next(copy));
+  EXPECT_EQ(edge_gen.stats_tk_skip, 0);
+  EXPECT_EQ(edge_gen.stats_tk_skip_bits, 0);
+  EXPECT_EQ(edge_gen.stats_theta_edges_skip, 0);
+  EXPECT_EQ(edge_gen.stats_theta_directed_edges_skip, 0);
+  EXPECT_EQ(edge_gen.stats_edge_sets, 2);
+
+  edge_gen.clear_stats();
+  EXPECT_EQ(edge_gen.stats_edge_sets, 0);
+  EXPECT_TRUE(edge_gen.next(copy));
+  EXPECT_EQ(edge_gen.stats_edge_sets, 1);
 }

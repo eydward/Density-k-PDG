@@ -16,7 +16,7 @@ class Counters {
   // The time of the last status print.
   static std::chrono::time_point<std::chrono::steady_clock> last_print_time;
   // The log file, can be nullptr.
-  static std::ofstream* log;
+  static std::ostream* log;
   // True if we are already in the final step to enumerate graphs.
   static bool in_final_step;
 
@@ -79,8 +79,6 @@ class Counters {
   // Notify that a graph matching the theta value is found during theta-graph search.
   static void notify_thetagraph_found(const Graph& g);
 
-  static std::ofstream* get_log() { return log; }
-
   // Starting a new step in growth.
   static void new_growth_step(uint64 vertex_count, uint64 total_graphs_in_current_step);
 
@@ -96,7 +94,7 @@ class Counters {
 
   // Resets all values to 0, and starts the stopwatch, which will be used
   // by print_counters to calculate elapsed time.
-  static void initialize(std::ofstream* log_stream = nullptr);
+  static void initialize(std::ostream* log_stream = nullptr);
 
   // Print status if sufficient time has elapsed since the last print.
   static void print_at_time_interval();

@@ -4,22 +4,36 @@
 #include "permutator.h"
 
 // Combines value into the hash and returns the combined hash.
-uint32 hash_combine32(uint32 hash_code, uint32 value) {
-  return hash_code ^= value + 0x9E3779B9ul + (hash_code << 6) + (hash_code >> 2);
-}
 uint64 hash_combine64(uint64 hash, uint64 value) {
   return hash ^= value + 0x9E3779B97F4A7C15ull + (hash << 12) + (hash >> 4);
 }
 
-// Helper function for printing vertex list in an edge.
-void print_vertices(std::ostream& os, uint8 vertices) {
-  constexpr uint8 MAX_VERTEX_COUNT = 8;
-  for (int v = 0; v < MAX_VERTEX_COUNT; v++) {
+// Returns the text representation of the vertex id (one of "0123456789ab")
+char vertex_id_to_char(int vertex_id) {
+  assert(0 <= vertex_id && vertex_id < Graph::N);
+  if (vertex_id == 10) {
+    return 'a';
+  } else if (vertex_id == 11) {
+    return 'b';
+  } else {
+    return '0' + vertex_id;
+  }
+}
+
+// Helper function for printing vertex list in an edge. `vertices` is a bitmask.
+void print_vertices(std::ostream& os, uint16 vertices) {
+  for (int v = 0; v < MAX_VERTICES; v++) {
     if ((vertices & 1) != 0) {
-      os << v;
+      os << vertex_id_to_char(v);
     }
     vertices >>= 1;
   }
+}
+
+Edge::Edge() : vertex_set(0), head_vertex(0) {}
+Edge::Edge(uint16 vset, uint8 head) : vertex_set(vset), head_vertex(head) {
+  assert((vset & 0xF000) == 0);
+  assert(head_vertex == UNDIRECTED || ((static_cast<uint16>(1) << head_vertex) & vertex_set) != 0);
 }
 
 // Utility function to print an edge array to the given output stream.
@@ -28,19 +42,32 @@ void print_vertices(std::ostream& os, uint8 vertices) {
 void Edge::print_edges(std::ostream& os, uint8 edge_count, const Edge edges[], bool aligned) {
   os << "{";
   bool is_first = true;
-  for (int i = 0; i < edge_count; i++) {
+  for (uint8 i = 0; i < edge_count; i++) {
     if (!is_first) {
       os << ", ";
     }
     is_first = false;
     print_vertices(os, edges[i].vertex_set);
     if (edges[i].head_vertex != UNDIRECTED) {
-      os << ">" << static_cast<int>(edges[i].head_vertex);
+      os << ">" << vertex_id_to_char(edges[i].head_vertex);
     } else if (aligned) {
       os << "  ";
     }
   }
   os << "}\n";
+}
+
+// Reset all data fields to 0, except setting the vertex_id using the given vid value.
+void VertexSignature::reset(int vid) {
+  degree_undirected = degree_head = degree_tail = 0;
+  vertex_id = vid;
+}
+
+// Returns the degree info, which encodes the values of all 3 degree fields,
+// but does not contain the vertex id.
+uint32 VertexSignature::get_degrees() const {
+  return static_cast<uint32>(degree_undirected) << 16 | (static_cast<uint32>(degree_head) << 8) |
+         (static_cast<uint32>(degree_tail));
 }
 
 // Utility function to print an array of VertexSignatures to the given output stream,
@@ -83,7 +110,7 @@ void Graph::set_global_graph_info(int k, int n) {
     mask.mask_count = 0;
     for (uint16 bits = 0; bits < (1 << n); bits++) {
       if (__builtin_popcount(bits) == m) {
-        mask.masks[mask.mask_count++] = static_cast<uint8>(bits);
+        mask.masks[mask.mask_count++] = bits;
       }
     }
     assert(mask.mask_count == compute_binom(n, m));
@@ -103,10 +130,16 @@ Fraction Graph::get_theta() const {
   }
 }
 
+// Returns the hash of this graph.
+uint32 Graph::get_graph_hash() const {
+  assert(is_canonical);
+  return graph_hash;
+}
+
 // Returns true if the edge specified by the bitmask of the vertices in the edge is allowed
 // to be added to the graph (this vertex set does not yet exist in the edges).
-bool Graph::edge_allowed(uint8 vertices) const {
-  for (int i = 0; i < edge_count; i++) {
+bool Graph::edge_allowed(uint16 vertices) const {
+  for (uint8 i = 0; i < edge_count; i++) {
     if (vertices == edges[i].vertex_set) return false;
   }
   return true;
@@ -137,7 +170,7 @@ void Graph::compute_vertex_signature() {
   for (int i = 0; i < edge_count; i++) {
     uint8 head = edges[i].head_vertex;
     for (int v = 0; v < N; v++) {
-      uint8 mask = 1 << v;
+      uint16 mask = static_cast<uint16>(1) << v;
       if ((edges[i].vertex_set & mask) != 0) {
         if (head == UNDIRECTED) {
           vertices[v].degree_undirected++;
@@ -243,7 +276,7 @@ void Graph::canonicalize() {
   graph_hash = (hash >> 32) ^ hash;
 
   for (int i = 0; i < edge_count; i++) {
-    uint8 vset = edges[i].vertex_set;
+    uint16 vset = edges[i].vertex_set;
     if (edges[i].head_vertex != UNDIRECTED) {
       edges[i].head_vertex = p[edges[i].head_vertex];
     }
@@ -397,23 +430,23 @@ bool Graph::contains_Tk(int v) const {
   //   stem = 01111000
   //   xyz  = 00000111
   for (int i = 0; i < edge_count - 1; i++) {
-    uint8 e_i = edges[i].vertex_set;
+    uint16 e_i = edges[i].vertex_set;
     if ((e_i & (1 << v)) == 0) continue;
 
     for (int j = i + 1; j < edge_count; j++) {
-      uint8 e_j = edges[j].vertex_set;
+      uint16 e_j = edges[j].vertex_set;
       if ((e_j & (1 << v)) == 0) continue;
 
-      uint8 m = e_i ^ e_j;
+      uint16 m = e_i ^ e_j;
       if (__builtin_popcount(m) == 2) {
-        uint8 mask = m | edges[i].vertex_set;
+        uint16 mask = m | edges[i].vertex_set;
         for (int k = 0; k < edge_count; k++) {
           if (k == i || k == j) continue;
 
-          uint8 e_k = edges[k].vertex_set;
+          uint16 e_k = edges[k].vertex_set;
           if (__builtin_popcount(mask ^ e_k) == 1) {
-            uint8 stem = m ^ e_k;
-            uint8 xyz = (e_i | e_j | e_k) & ~stem;
+            uint16 stem = m ^ e_k;
+            uint16 xyz = (e_i | e_j | e_k) & ~stem;
             if ((edges[i].head_vertex != UNDIRECTED && (xyz & (1 << edges[i].head_vertex)) != 0) ||
                 (edges[j].head_vertex != UNDIRECTED && (xyz & (1 << edges[j].head_vertex)) != 0) ||
                 (edges[k].head_vertex != UNDIRECTED && (xyz & (1 << edges[k].head_vertex)) != 0)) {
@@ -436,10 +469,13 @@ bool Graph::operator<(const Graph& other) const {
   for (uint8 i = 0; i < edge_count; i++) {
     if (edges[i].vertex_set < other.edges[i].vertex_set) return true;
     if (edges[i].vertex_set > other.edges[i].vertex_set) return false;
-    if (static_cast<int8>(edges[i].head_vertex) < static_cast<int8>(other.edges[i].head_vertex))
-      return true;
-    if (static_cast<int8>(edges[i].head_vertex) > static_cast<int8>(other.edges[i].head_vertex))
-      return false;
+    int head_this =
+        edges[i].head_vertex == UNDIRECTED ? -1 : static_cast<int>(edges[i].head_vertex);
+    int head_other = other.edges[i].head_vertex == UNDIRECTED
+                         ? -1
+                         : static_cast<int>(other.edges[i].head_vertex);
+    if (head_this < head_other) return true;
+    if (head_this > head_other) return false;
   }
   return false;
 }
@@ -464,6 +500,23 @@ std::string Graph::serialize_edges() const {
   return text.substr(0, text.length() - 1);  // Removes the tailing line return.
 }
 
+// Returns the vertex id if the given char is a valid representation of a vertext
+// (one of "0123456789ab", and less than Graph::N). Otherwise returns -1.
+int parse_vertex_char(char c) {
+  int value = -1;
+  if ('0' <= c && c <= '9') {
+    value = c - '0';
+  } else if (c == 'a') {
+    value = 10;
+  } else if (c == 'b') {
+    value = 11;
+  }
+  if (value >= Graph::N) {
+    value = -1;
+  }
+  return value;
+}
+
 bool Graph::parse_edges(const std::string& edge_representation, Graph& result) {
   result.is_canonical = false;
   result.edge_count = result.undirected_edge_count = 0;
@@ -477,19 +530,20 @@ bool Graph::parse_edges(const std::string& edge_representation, Graph& result) {
   while (s.length() != 0) {
     size_t pos = s.find(',', prev_pos);
     std::string e = pos == s.npos ? s.substr(prev_pos) : s.substr(prev_pos, pos - prev_pos);
-    uint8 vertex_set = 0;
+    uint16 vertex_set = 0;
     uint8 head = UNDIRECTED;
     for (size_t i = 0; i < e.length(); i++) {
       char c = e[i];
       if (c == ' ') continue;
-      if ('0' <= c && c <= '6') {
-        vertex_set |= (1 << (c - '0'));
+      int vertex_id = parse_vertex_char(c);
+      if (vertex_id >= 0) {
+        vertex_set |= (1 << vertex_id);
       }
       if (c == '>') {
         if (i != e.length() - 2) return false;
-        c = e[i + 1];
-        if ('0' > c || c > '6') return false;
-        head = c - '0';
+        vertex_id = parse_vertex_char(e[i + 1]);
+        if (vertex_id < 0) return false;
+        head = vertex_id;
         if ((vertex_set & (1 << head)) == 0) return false;
       }
     }

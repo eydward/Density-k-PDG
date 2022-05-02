@@ -7,7 +7,7 @@
 // of all possible graphs.
 constexpr int FULL_TEST_THRESHOLD = 1000;
 constexpr int RANDOM_ITERATIONS = 10 * 1000 * 1000;
-constexpr uint8 NOT_IN_SET = 0xEE;
+constexpr uint8 NOT_IN_SET = 0xE;
 
 IsomorphismStressTest::IsomorphismStressTest(int k_, int n_)
     : k(k_), n(n_), random_engine(std::random_device()()) {

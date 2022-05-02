@@ -7,7 +7,7 @@
 EdgeCandidates::EdgeCandidates(int vertex_count) : n(vertex_count), edge_candidate_count(0) {
   // First gather all edges, where (n-1) is one vertex in the edge, and the other K-1 vertices
   // come from {1,2,...,n-2}.
-  for (uint8 mask = 0; mask < (1 << (n - 1)); mask++) {
+  for (uint16 mask = 0; mask < (1 << (n - 1)); mask++) {
     if (__builtin_popcount(mask) == Graph::K - 1) {
       edge_candidates[edge_candidate_count] = (mask | (1 << (n - 1)));
       ++edge_candidate_count;

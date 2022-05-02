@@ -177,9 +177,9 @@ void K4Grower::worker_thread_main(int thread_id) {
                                             edge_gen.stats_edge_sets);
             edge_gen.clear_stats();
             Counters::print_at_time_interval();
-            if (Counters::get_log() != nullptr) {
+            if (log != nullptr) {
               edge_gen.print_debug(std::cout, false, base_graph_id);
-              edge_gen.print_debug(*Counters::get_log(), false, base_graph_id);
+              edge_gen.print_debug(*log, false, base_graph_id);
             }
           }
         }

@@ -31,7 +31,7 @@ bool operator!=(const Fraction& a, const Fraction& b);
 
 // Returns n choose k.
 constexpr int compute_binom(int n, int k) {
-  assert(0 < n && n <= 8);
+  assert(0 < n && n <= 12);
   assert(0 < k && k <= n);
   int result = 1;
   for (int i = 0; i < k; i++) {

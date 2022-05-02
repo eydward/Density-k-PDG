@@ -465,3 +465,72 @@ TEST(GraphTest, IsomorphicStress) {
     }
   }
 }
+
+TEST(GraphTest, VertexCount12) {
+  Graph::set_global_graph_info(2, 12);
+  Graph g = parse_edges("{01, 23, 45, 67, 89, 9a, 9b, ab>a}");
+  for (int v = 9; v < 12; v++) {
+    EXPECT_TRUE(g.contains_Tk(v));
+  }
+  for (int v = 0; v < 9; v++) {
+    EXPECT_FALSE(g.contains_Tk(v));
+  }
+}
+
+TEST(GraphTest, GraphCompare) {
+  Graph::set_global_graph_info(4, 7);
+  Graph g = parse_edges("{0123, 0124}");
+  Graph h = parse_edges("{0123, 0124}");
+  EXPECT_FALSE(g < h);
+
+  g = parse_edges("{0123, 0124}");
+  h = parse_edges("{1234}");
+  EXPECT_TRUE(h < g);
+  EXPECT_FALSE(g < h);
+  EXPECT_LT(h, g);
+
+  g = parse_edges("{0123, 0124}");
+  h = parse_edges("{0123, 0124>1}");
+  EXPECT_FALSE(h < g);
+  EXPECT_TRUE(g < h);
+  EXPECT_LT(g, h);
+
+  g = parse_edges("{0123, 0124>2}");
+  h = parse_edges("{0123, 0124>1}");
+  EXPECT_TRUE(h < g);
+  EXPECT_FALSE(g < h);
+  EXPECT_LT(h, g);
+
+  g = parse_edges("{0123, 1234}");
+  h = parse_edges("{0123, 0134>4}");
+  EXPECT_TRUE(h < g);
+  EXPECT_FALSE(g < h);
+  EXPECT_LT(h, g);
+}
+
+TEST(GraphTest, ParseUnexpectedInput) {
+  Graph::set_global_graph_info(2, 12);
+  EXPECT_THROW(parse_edges("{01, 23, 45, 67, 89, 9a, 9b, ac>a}"), std::invalid_argument);
+  EXPECT_THROW(parse_edges("{01, 23, 45, 67, 89, 9a, 9b, ab>9}"), std::invalid_argument);
+
+  Graph::set_global_graph_info(2, 3);
+  EXPECT_THROW(parse_edges("{03}"), std::invalid_argument);
+  EXPECT_THROW(parse_edges("{01>3}"), std::invalid_argument);
+  EXPECT_THROW(parse_edges("{x0}"), std::invalid_argument);
+}
+
+TEST(GraphTest, GraphPrint) {
+  Graph::set_global_graph_info(2, 12);
+  Graph g = parse_edges("{01, 23, 45, 67, 89, 9a, 9b, ab>a}");
+  {
+    std::stringstream ss;
+    g.print_concise(ss, false);
+    EXPECT_EQ(ss.str(), "{01, 23, 45, 67, 89, 9a, 9b, ab>a}\n");
+  }
+  {
+    std::stringstream ss;
+    g.print_concise(ss, true);
+    EXPECT_EQ(ss.str(), "{01  , 23  , 45  , 67  , 89  , 9a  , 9b  , ab>a}\n");
+  }
+  g.print();
+}
