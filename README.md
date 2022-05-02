@@ -8,15 +8,16 @@ This program computes the `min_theta` value for k-PDGs with a fixed number of ve
 ## Results
 Values in the table are <img src="doc/theta_kn.png" height="22" /> for the various `K,N` combinations.
 
-| N   | K=2 | K=3   | K=4   | K=5   | K=6   | K=7   |
-| --- | --- | ----- | ----- | ----- | ----- | ----- |
-| 2   |   1 |       |       |       |       |       |
-| 3   | 3/2 |   1   |       |       |       |       |
-| 4   | 3/2 | 4/3   |     1 |       |       |       |
-| 5   | 5/3 | 5/3   |   5/4 |     1 |       |       |
-| 6   | 5/3 | 5/3   |   3/2 |   6/5 |     1 |       |
-| 7   | 7/4 |  7/4  |   7/4 |   7/5 |   7/6 |     1 |
-| 8   | 7/4 |  ?    |  ?    |   8/5 |   4/3 |   8/7 |
+| N   | K=2 | K=3 | K=4 | K=5 | K=6 | K=7 | K=8 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 2   | 1   |     |     |     |     |     |     |
+| 3   | 3/2 | 1   |     |     |     |     |     |
+| 4   | 3/2 | 4/3 | 1   |     |     |     |     |
+| 5   | 5/3 | 5/3 | 5/4 | 1   |     |     |     |
+| 6   | 5/3 | 5/3 | 3/2 | 6/5 | 1   |     |     |
+| 7   | 7/4 | 7/4 | 7/4 | 7/5 | 7/6 | 1   |     |
+| 8   | 7/4 | ?   | ?   | 8/5 | 4/3 | 8/7 | 1   |
+| 9   | 9/5 |     |     |     |     | 9/7 | 9/8 |
 
 All results shown in this table can be obtained very fast using an optimized build, except
 * `K=5, N=7` takes a few minutes on a regular computer
@@ -171,7 +172,7 @@ With the above, we can describe the algorithm to determine isomorphism (implemen
 Subgraph checking for arbitrary partially directed hypergraphs can be quite complicated and expensive (much more complicated than isomorphism check). But luckily, we can check if a k-PDG is `T_k`-free much more quickly. This is implemented in `contains_Tk()` in `graph.cpp` and relies heavily on bit mask manipulation (as documented further in the code)
 
 ## Generalization of the Code & Future Improvements
-1. The code can be generalized from the current `N<=8` to `N<=12`, by using C bitfield in the Edge data structure, without increasing the size of the `Edge` struct. We give 12 bits to the `vertex_set` and 4 bits to the `head_vertex`. For the current application (computing min_theta values), we don't expect `N>=9` to be computationally feasible except for trivial cases (`K=2` or `K>=N-1`). 
+1. The code at label `v10.1` supports `N<=8` and the code at `v11` supports `N<=12`. The change to support `9<=N<=12` is primarily in the `Edge` struct, where instead of using a `uint8` as the vertex set bit mask, we use 12 bits in a C bit field (and the other 4 bits in the bit field to represent the head). This didn't need any algorithmic changes. The change does mean the compiled binary code is slightly more complex (it needs to do more bit-mask and shifting operations), empirically it's about 1% slower, which is acceptable.
 2. The code can be generalized to compute other `F`-free scenarios, where `F` is different from T_k described above. The `k4problem` directory is an example of this, completely separate from the T_k-free computation code. 
-3. The code provides a pretty fast partially directed hypergraph isomorphism check. We have some further deprecated optimizations, such as neighbor hashing ([03d28fd](https://github.com/ThinGarfield/Density-k-PDG/commit/03d28fdc1b032ddf86d3d2060a1bb23202d966c1)) that may further improve runtime in some cases. This may be useful in computations different from T_k-free theta values. 
-4. If the focus is undirected hypergraphs and either performance or space is critical, the data structure and code dealing with `head_vertex` can be removed to make the code more compact and faster. 
+3. The code provides a pretty fast partially directed hypergraph isomorphism check. We have some deprecated optimizations, such as neighbor hashing ([03d28fd](https://github.com/ThinGarfield/Density-k-PDG/commit/03d28fdc1b032ddf86d3d2060a1bb23202d966c1)) that may further improve runtime in some cases. This may be useful in computations different from T_k-free theta values. 
+4. If the focus is undirected hypergraphs and either performance or space is critical, the data structure and code dealing with `head_vertex` can be removed to make the code more compact and faster (we can also use the entire `uint16` to represent the vertex set bit mask and therefore support `N<=16`). 
