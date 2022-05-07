@@ -178,10 +178,6 @@ struct Graph {
   // to the number of vertices in each edge in this code, don't be confused.
   bool contains_K4(int v) const;
 
-  // Return true if the graphs contains {01,02,03,12>2,13>3,23>3}.
-  // Only works for 2-PDG. The given vertex v must be in the complete graph.
-  bool contains_K4D3(int v);
-
   // Print the graph to the output stream for debugging purpose.
   // If aligned==true, pad the undirected edges, so the print is easier to read.
   void print_concise(std::ostream& os, bool aligned) const;
@@ -219,6 +215,9 @@ struct Graph {
   // actual run, but is used in self-test and verifying the correctness of the optimized
   // algorithm.
   bool is_isomorphic_slow(const Graph& other) const;
+
+  // Friend declarations for the "contains_xys" functions.
+  friend bool contains_K4D3(Graph&, int);
 
   // Friend declarations that allows unit testing of some private implementations.
 #define FRIEND_TEST(test_case_name, test_name) friend class test_case_name##_##test_name##_Test

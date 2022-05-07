@@ -9,6 +9,7 @@ cc_library(
         "graph.h",
         "grower.h",
         "permutator.h",
+        "k4d3problem/graph_k4d3.h",
     ],
     srcs=[
         "counters.cpp",
