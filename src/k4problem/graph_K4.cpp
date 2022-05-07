@@ -1,21 +1,27 @@
 #include "../graph.h"
 
-// Return true if the graphs contains a complete graph with 4 vertices with at least
-// one directed edge. Only works for 2-PDG. The given vertex v must be in the complete graph.
-bool Graph::contains_K4(int v) const {
-  assert(K == 2);  // This logic only works for 2-PDG
+// Returns true if the given graph g contains F = {01, 02, 03, 12, 13, 23>3},
+// namely a complete graph with 4 vertices and at least one directed edge, and the given
+// vertex v is in F. Only works for 2-PDGs (K=3).
+//
+// Subgraph definition: F is a subgraph of G iff F can be obtained from G by
+// (1) deleting vertices
+// (2) deleting edges
+// (3) changing directed edges to undirected by forgetting directions.
+bool contains_K4(const Graph& g, int v) {
+  assert(Graph::K == 2);  // This logic only works for 2-PDG
 
   int neighbor_count = 0;                 // The number of neighbors of vertex v.
   int neighbors[MAX_VERTICES];            // The neighboring vertices of v.
   bool neighbors_directed[MAX_VERTICES];  // Whether the neighbor is from a directed edge.
 
   // First find all neighbors of v (ignore edge direction).
-  for (uint8 e = 0; e < edge_count; e++) {
-    if ((edges[e].vertex_set & (1 << v)) != 0) {
+  for (uint8 e = 0; e < g.edge_count; e++) {
+    if ((g.edges[e].vertex_set & (1 << v)) != 0) {
       // The edge contains the given vertex v. Find the other vertex u.
-      int u = __builtin_ctz(static_cast<uint32>(edges[e].vertex_set & ~(1 << v)));
+      int u = __builtin_ctz(static_cast<uint32>(g.edges[e].vertex_set & ~(1 << v)));
       neighbors[neighbor_count] = u;
-      neighbors_directed[neighbor_count] = edges[e].head_vertex != UNDIRECTED;
+      neighbors_directed[neighbor_count] = g.edges[e].head_vertex != UNDIRECTED;
       ++neighbor_count;
     }
   }
@@ -31,16 +37,16 @@ bool Graph::contains_K4(int v) const {
         uint16 e_ki = (1 << neighbors[k]) | (1 << neighbors[i]);
         bool has_ij = false, has_jk = false, has_ki = false;
         bool directed_ij = false, directed_jk = false, directed_ki = false;
-        for (uint16 e = 0; e < edge_count; e++) {
-          if (edges[e].vertex_set == e_ij) {
+        for (uint16 e = 0; e < g.edge_count; e++) {
+          if (g.edges[e].vertex_set == e_ij) {
             has_ij = true;
-            directed_ij = edges[e].head_vertex != UNDIRECTED;
-          } else if (edges[e].vertex_set == e_jk) {
+            directed_ij = g.edges[e].head_vertex != UNDIRECTED;
+          } else if (g.edges[e].vertex_set == e_jk) {
             has_jk = true;
-            directed_jk = edges[e].head_vertex != UNDIRECTED;
-          } else if (edges[e].vertex_set == e_ki) {
+            directed_jk = g.edges[e].head_vertex != UNDIRECTED;
+          } else if (g.edges[e].vertex_set == e_ki) {
             has_ki = true;
-            directed_ki = edges[e].head_vertex != UNDIRECTED;
+            directed_ki = g.edges[e].head_vertex != UNDIRECTED;
           }
         }
         if (has_ij && has_jk && has_ki &&

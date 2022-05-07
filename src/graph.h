@@ -171,13 +171,6 @@ struct Graph {
   // can be called without calling init(), which saves time when doing T_k free growing.
   bool contains_Tk(int v) const;
 
-  // Return true if the graphs contains a complete graph with 4 vertices with at least
-  // one directed edge. Only works for 2-PDG. The given vertex v must be in the complete graph.
-  //
-  // The name "K4" here refers to complete graph. Unfortunately we also use K to refer
-  // to the number of vertices in each edge in this code, don't be confused.
-  bool contains_K4(int v) const;
-
   // Print the graph to the output stream for debugging purpose.
   // If aligned==true, pad the undirected edges, so the print is easier to read.
   void print_concise(std::ostream& os, bool aligned) const;
@@ -218,6 +211,7 @@ struct Graph {
 
   // Friend declarations for the "contains_xys" functions.
   friend bool contains_K4D3(Graph&, int);
+  friend bool contains_K4(const Graph&, int v);
 
   // Friend declarations that allows unit testing of some private implementations.
 #define FRIEND_TEST(test_case_name, test_name) friend class test_case_name##_##test_name##_Test
