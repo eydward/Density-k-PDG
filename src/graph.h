@@ -119,8 +119,8 @@ struct Graph {
   // Namely, returns theta = (binom_nk - (undirected edge count)) / (directed edge count).
   Fraction get_theta() const;
 
-  // Returns phi = (binom_nk - (directed edge count)) / (undirected edge count).
-  Fraction get_phi() const;
+  // Returns zeta = (binom_nk - (directed edge count)) / (undirected edge count).
+  Fraction get_zeta() const;
 
   // Returns the hash of this graph.
   uint32 get_graph_hash() const;
