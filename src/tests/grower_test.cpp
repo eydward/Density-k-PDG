@@ -22,32 +22,32 @@ void verify_growth_result(int k, int n, Fraction min_theta, const std::string& m
   Counters::initialize();
   Grower s1(num_threads, false, false, false, 0, 0);
   s1.grow();
-  EXPECT_EQ(Counters::get_min_theta(), min_theta);
+  EXPECT_EQ(Counters::get_min_ratio(), min_theta);
   if (num_threads == 0) {
     // Check the min_theta_graph only when not using multi-threading, because different
     // threads could race and use a different graph to generate the same min_theta value.
-    EXPECT_EQ(Counters::get_min_theta_graph().serialize_edges(), min_theta_graph);
+    EXPECT_EQ(Counters::get_min_ratio_graph().serialize_edges(), min_theta_graph);
   }
 
   Counters::initialize();
   Grower s2(num_threads, false, false, true, 0, 0);
   s2.grow();
   if (num_threads == 0) {
-    EXPECT_TRUE(Counters::get_min_theta() == min_theta);
+    EXPECT_TRUE(Counters::get_min_ratio() == min_theta);
   }
 
   Counters::initialize();
   Grower s3(num_threads, false, true, false, 0, 0);
   s3.grow();
   if (num_threads == 0) {
-    EXPECT_TRUE(Counters::get_min_theta() == min_theta);
+    EXPECT_TRUE(Counters::get_min_ratio() == min_theta);
   }
 
   Counters::initialize();
   Grower s4(num_threads, false, true, true, 0, 0);
   s4.grow();
   if (num_threads == 0) {
-    EXPECT_TRUE(Counters::get_min_theta() == min_theta);
+    EXPECT_TRUE(Counters::get_min_ratio() == min_theta);
   }
 
   // In addition to the above, also verify that the resulting growth graphs are identical
@@ -112,8 +112,8 @@ void verify_thetagraph_search(int k, int n, Fraction theta, int expected_thetagr
     Counters::initialize();
     Grower s1(num_threads, false, true, true, 0, 0, true, theta);
     s1.grow();
-    EXPECT_EQ(Counters::get_min_theta(), expected_min_theta);
-    EXPECT_EQ(Counters::get_thetagraph_count(), expected_thetagraph_count);
+    EXPECT_EQ(Counters::get_min_ratio(), expected_min_theta);
+    EXPECT_EQ(Counters::get_ratio_graph_count(), expected_thetagraph_count);
   }
 }
 
@@ -134,7 +134,7 @@ TEST(GrowerTest, WithLogging) {
               &log_result);
     s1.set_stats_print_interval(1, 0);
     s1.grow();
-    EXPECT_EQ(Counters::get_min_theta(), Fraction(3, 2));
+    EXPECT_EQ(Counters::get_min_ratio(), Fraction(3, 2));
   }
   {
     std::stringstream log, log_detail, log_result;
@@ -142,7 +142,7 @@ TEST(GrowerTest, WithLogging) {
     Grower s1(2, false, false, false, 0, 0, true, Fraction(3, 2), &log, &log_detail, &log_result);
     s1.set_stats_print_interval(1, 0);
     s1.grow();
-    EXPECT_EQ(Counters::get_min_theta(), Fraction(3, 2));
+    EXPECT_EQ(Counters::get_min_ratio(), Fraction(3, 2));
   }
   {
     std::stringstream log, log_detail, log_result;
@@ -150,6 +150,6 @@ TEST(GrowerTest, WithLogging) {
     Grower s1(2, true, false, false, 0, 0, false, Fraction(1E8, 1), &log, &log_detail, &log_result);
     s1.set_stats_print_interval(1, 0);
     s1.grow();
-    EXPECT_EQ(Counters::get_min_theta(), Fraction(3, 1));
+    EXPECT_EQ(Counters::get_min_ratio(), Fraction(3, 1));
   }
 }

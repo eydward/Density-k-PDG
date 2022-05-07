@@ -115,12 +115,13 @@ struct Graph {
  public:
   Graph();
 
-  // Returns theta such that (undirected edge density) + theta (directed edge density) = 1.
-  // Namely, returns theta = (binom_nk - (undirected edge count)) / (directed edge count).
-  Fraction get_theta() const;
+  // Returns theta_ratio = (binom_nk - (undirected edge count)) / (directed edge count).
+  // In case directed edge count is 0, Fraction::infinity() is returned.
+  Fraction get_theta_ratio() const;
 
-  // Returns zeta = (binom_nk - (directed edge count)) / (undirected edge count).
-  Fraction get_zeta() const;
+  // Returns zeta_ratio = (binom_nk - (directed edge count)) / (undirected edge count).
+  // In case undirected edge count is 0, Fraction::infinity() is returned.
+  Fraction get_zeta_ratio() const;
 
   // Returns the hash of this graph.
   uint32 get_graph_hash() const;

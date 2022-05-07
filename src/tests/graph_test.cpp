@@ -331,22 +331,22 @@ TEST(GraphTest, Isomorphic_C) {
 
 TEST(GraphTest, Theta) {
   Graph g = get_T3();
-  EXPECT_EQ(g.get_theta(), Fraction(4, 1));
+  EXPECT_EQ(g.get_theta_ratio(), Fraction(4, 1));
 
   Graph::set_global_graph_info(2, 5);
   Graph h = parse_edges("{01>0, 12>1, 03>3, 13>3, 04>4, 24>4, 34>4}");
-  EXPECT_EQ(h.get_theta(), Fraction(10, 7));
+  EXPECT_EQ(h.get_theta_ratio(), Fraction(10, 7));
 
   Graph::set_global_graph_info(2, 5);
   Graph j = parse_edges("{}");
-  EXPECT_EQ(j.get_theta(), Fraction::infinity());
+  EXPECT_EQ(j.get_theta_ratio(), Fraction::infinity());
 
   Graph::set_global_graph_info(3, 4);
   Graph k = parse_edges("{012>2, 123}");
-  EXPECT_EQ(k.get_theta(), Fraction(3, 1));
+  EXPECT_EQ(k.get_theta_ratio(), Fraction(3, 1));
 
   Graph l = parse_edges("{012>2, 123>1, 023>2, 013>0}");
-  EXPECT_EQ(l.get_theta(), Fraction(1, 1));
+  EXPECT_EQ(l.get_theta_ratio(), Fraction(1, 1));
 }
 
 TEST(GraphTest, IsomorphicStress) {

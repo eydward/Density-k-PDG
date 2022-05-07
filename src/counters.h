@@ -7,10 +7,11 @@
 // Holds all statistical counters to keep track of number of operations during the search.
 class Counters {
  private:
-  // The smallest theta value observed so far.
-  static Fraction min_theta;
-  // The graph that produces the min_theta.
-  static Graph min_theta_graph;
+  // The smallest ratio value observed so far (depending on the computational goal, it may be
+  // theta_ratio, zeta_ratio, or some other quantity).
+  static Fraction min_ratio;
+  // The graph that produces the min_ratio.
+  static Graph min_ratio_graph;
   // The start time of the computation.
   static std::chrono::time_point<std::chrono::steady_clock> start_time;
   // The time of the last status print.
@@ -49,16 +50,16 @@ class Counters {
   static uint64 edgegen_theta_directed_edges_skip;  // How many skips min_theta opt, directed.
   static uint64 edgegen_edge_sets;  // How many edge sets returned from this generator.
 
-  // How many graphs found to be <= given theta value, in theta-graph search.
-  static uint64 thetagraph_count;
+  // How many graphs found to be <= given ratio value, in ratio-graph search.
+  static uint64 ratio_graph_count;
 
   // Prints the counter values the given output stream.
   static void print_counters_to_stream(std::ostream& os);
 
  public:
-  static Fraction get_min_theta() { return min_theta; }
-  static const Graph& get_min_theta_graph() { return min_theta_graph; }
-  static uint64 get_thetagraph_count() { return thetagraph_count; }
+  static Fraction get_min_ratio() { return min_ratio; }
+  static const Graph& get_min_ratio_graph() { return min_ratio_graph; }
+  static uint64 get_ratio_graph_count() { return ratio_graph_count; }
   static void increment_compute_vertex_signatures() { ++compute_vertex_signatures; }
   static void increment_graph_copies() { ++graph_copies; }
   static void increment_graph_canonicalize_ops() { ++graph_canonicalize_ops; }
@@ -74,10 +75,10 @@ class Counters {
   static void increment_growth_processed_graphs_in_current_step() {
     ++growth_processed_graphs_in_current_step;
   }
-  // Initialize the counters before starting the theta-graph search.
-  static void initialize_thetagraph_search(Fraction theta);
-  // Notify that a graph matching the theta value is found during theta-graph search.
-  static void notify_thetagraph_found(const Graph& g);
+  // Initialize the counters before starting the ratio-graph search.
+  static void initialize_ratio_graph_search(Fraction ratio_threshold);
+  // Notify that a graph matching the ratio value is found during ratio-graph search.
+  static void notify_ratio_graph_found(const Graph& g, Fraction ratio);
 
   // Starting a new step in growth.
   static void new_growth_step(uint64 vertex_count, uint64 total_graphs_in_current_step);
@@ -85,8 +86,8 @@ class Counters {
   // Starting the final enumeration phase.
   static void enter_final_step(uint64 num_base_graphs);
 
-  // If the given graph's theta is less than min_theta, assign it to min_theta.
-  static void observe_theta(const Graph& g, uint64 graphs_processed = 1);
+  // If the given graph's ratio value is less than min_ratio, assign it to min_ratio.
+  static void observe_ratio(const Graph& g, Fraction ratio, uint64 graphs_processed = 1);
 
   // Adds the edge gen stats to the counters.
   static void observe_edgegen_stats(uint64 tk_skip, uint64 tk_skip_bits, uint64 theta_edges_skip,

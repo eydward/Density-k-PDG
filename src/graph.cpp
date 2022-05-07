@@ -119,9 +119,9 @@ void Graph::set_global_graph_info(int k, int n) {
 
 Graph::Graph() : graph_hash(0), is_canonical(false), edge_count(0), undirected_edge_count(0) {}
 
-// Returns theta such that (undirected edge density) + theta (directed edge density) = 1.
-// Namely, returns theta = (binom_nk - (undirected edge count)) / (directed edge count).
-Fraction Graph::get_theta() const {
+// Returns theta_ratio = (binom_nk - (undirected edge count)) / (directed edge count).
+// In case directed edge count is 0, Fraction::infinity() is returned.
+Fraction Graph::get_theta_ratio() const {
   uint8 directed = edge_count - undirected_edge_count;
   if (directed > 0) {
     return Fraction(TOTAL_EDGES - undirected_edge_count, directed);
@@ -130,8 +130,9 @@ Fraction Graph::get_theta() const {
   }
 }
 
-// Returns zeta = (binom_nk - (directed edge count)) / (undirected edge count).
-Fraction Graph::get_zeta() const {
+// Returns zeta_ratio = (binom_nk - (directed edge count)) / (undirected edge count).
+// In case undirected edge count is 0, Fraction::infinity() is returned.
+Fraction Graph::get_zeta_ratio() const {
   uint8 directed = edge_count - undirected_edge_count;
   if (undirected_edge_count > 0) {
     return Fraction(TOTAL_EDGES - directed, undirected_edge_count);

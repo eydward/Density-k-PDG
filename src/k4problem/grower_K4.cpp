@@ -34,7 +34,7 @@ void K4Grower::grow() {
   Graph g;
   g.canonicalize();
   collected_graphs[Graph::K - 1].push_back(g);
-  Counters::observe_theta(g);
+  Counters::observe_ratio(g, g.get_theta_ratio());
 
   // First grow to N-1 vertices, accumulate one graph from each isomorphic class.
   for (int n = Graph::K; n < Graph::N; n++) {
@@ -52,8 +52,8 @@ void K4Grower::grow() {
         int base_graph_id = std::get<0>(r);
         const Graph& base_graph = std::get<1>(r);
         const Graph& min_theta_graph = std::get<2>(r);
-        *log_result << "G[" << base_graph_id << "] min_theta=" << min_theta_graph.get_theta().n
-                    << " / " << min_theta_graph.get_theta().d << "\n  ";
+        *log_result << "G[" << base_graph_id
+                    << "] min_theta=" << min_theta_graph.get_theta_ratio().to_string() << "\n  ";
         base_graph.print_concise(*log_result, true);
         *log_result << "  ";
         min_theta_graph.print_concise(*log_result, true);
@@ -100,7 +100,7 @@ std::vector<Graph> K4Grower::grow_step(int n, const std::vector<Graph>& base_gra
 
       if (results.find(copy) == results.cend()) {
         results.insert(copy);
-        Counters::observe_theta(copy);
+        Counters::observe_ratio(copy, copy.get_theta_ratio());
       }
     }
   }
@@ -171,7 +171,8 @@ void K4Grower::worker_thread_main(int thread_id) {
           if (seconds >= CHECK_EVERY_N_SECONDS) {
             std::scoped_lock lock(counters_mutex);
             last_check_time = now;
-            Counters::observe_theta(min_theta_graph, graphs_processed);
+            Counters::observe_ratio(min_theta_graph, min_theta_graph.get_theta_ratio(),
+                                    graphs_processed);
             Counters::observe_edgegen_stats(edge_gen.stats_tk_skip, edge_gen.stats_tk_skip_bits,
                                             edge_gen.stats_theta_edges_skip,
                                             edge_gen.stats_theta_directed_edges_skip,
@@ -192,8 +193,8 @@ void K4Grower::worker_thread_main(int thread_id) {
 
       // Bookkeeping: retain the minimum theta value encountered so far, and the graph genreated it.
       graphs_processed++;
-      if (copy.get_theta() < min_theta) {
-        min_theta = copy.get_theta();
+      if (copy.get_theta_ratio() < min_theta) {
+        min_theta = copy.get_theta_ratio();
         min_theta_graph = copy;
       }
     }
@@ -202,7 +203,7 @@ void K4Grower::worker_thread_main(int thread_id) {
     {
       std::scoped_lock lock(counters_mutex);
       results.push_back(std::make_tuple(base_graph_id, base, min_theta_graph));
-      Counters::observe_theta(min_theta_graph, graphs_processed);
+      Counters::observe_ratio(min_theta_graph, min_theta_graph.get_theta_ratio(), graphs_processed);
       Counters::observe_edgegen_stats(
           edge_gen.stats_tk_skip, edge_gen.stats_tk_skip_bits, edge_gen.stats_theta_edges_skip,
           edge_gen.stats_theta_directed_edges_skip, edge_gen.stats_edge_sets);

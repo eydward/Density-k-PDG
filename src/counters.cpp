@@ -4,8 +4,8 @@
 
 constexpr int PRINT_EVERY_N_SECONDS = 100;
 
-Fraction Counters::min_theta = Fraction::infinity();
-Graph Counters::min_theta_graph{};
+Fraction Counters::min_ratio = Fraction::infinity();
+Graph Counters::min_ratio_graph{};
 uint64 Counters::compute_vertex_signatures = 0;
 std::atomic<uint64> Counters::graph_copies = 0;
 std::atomic<uint64> Counters::graph_contains_Tk_tests = 0;
@@ -32,24 +32,23 @@ uint64 Counters::edgegen_tk_skip_bits = 0;
 uint64 Counters::edgegen_theta_edges_skip = 0;
 uint64 Counters::edgegen_theta_directed_edges_skip = 0;
 uint64 Counters::edgegen_edge_sets = 0;
-uint64 Counters::thetagraph_count = 0;
+uint64 Counters::ratio_graph_count = 0;
 
 bool Counters::in_final_step = false;
 
 void Counters::initialize(std::ostream* log_stream) {
-  min_theta = Fraction::infinity();
+  min_ratio = Fraction::infinity();
   last_print_time = start_time = std::chrono::steady_clock::now();
   log = log_stream;
 }
 
-// If the given graph's theta is less than min_theta, assign it to min_theta.
-void Counters::observe_theta(const Graph& g, uint64 graphs_processed) {
+// If the given graph's ratio value is less than min_ratio, assign it to min_ratio.
+void Counters::observe_ratio(const Graph& g, Fraction ratio, uint64 graphs_processed) {
   graph_accumulated_canonicals += graphs_processed;
   growth_accumulated_canonicals_in_current_step += graphs_processed;
-  Fraction theta = g.get_theta();
-  if (theta < min_theta) {
-    min_theta = theta;
-    min_theta_graph = g;
+  if (ratio < min_ratio) {
+    min_ratio = ratio;
+    min_ratio_graph = g;
   }
   print_at_time_interval();
 }
@@ -72,20 +71,20 @@ void Counters::new_growth_step(uint64 vertex_count, uint64 total_graphs_in_curre
 
 void Counters::enter_final_step(uint64 num_base_graphs) {
   in_final_step = true;
-  min_theta = Fraction::infinity();
+  min_ratio = Fraction::infinity();
   growth_num_base_graphs_in_final_step = num_base_graphs;
   growth_processed_graphs_in_current_step = 0;
 }
 
-void Counters::initialize_thetagraph_search(Fraction theta) {
-  min_theta = theta;
-  thetagraph_count = 0;
+void Counters::initialize_ratio_graph_search(Fraction ratio_threshold) {
+  min_ratio = ratio_threshold;
+  ratio_graph_count = 0;
 }
-void Counters::notify_thetagraph_found(const Graph& g) {
-  ++thetagraph_count;
-  if (g.get_theta() <= min_theta) {
-    min_theta = g.get_theta();
-    min_theta_graph = g;
+void Counters::notify_ratio_graph_found(const Graph& g, Fraction ratio) {
+  ++ratio_graph_count;
+  if (ratio <= min_ratio) {
+    min_ratio = ratio;
+    min_ratio_graph = g;
   }
 }
 
@@ -127,9 +126,8 @@ void Counters::print_counters_to_stream(std::ostream& os) {
   const auto end = std::chrono::steady_clock::now();
   os << "\n--------Wall clock time:  "
      << fmt(std::chrono::duration_cast<std::chrono::milliseconds>(end - start_time).count()) << "ms"
-     << "\n    Current minimum theta = " << min_theta.n << " / " << min_theta.d
-     << "\n    Produced by graph: ";
-  min_theta_graph.print_concise(os, false);
+     << "\n    Current minimum ratio = " << min_ratio.to_string() << "\n    Produced by graph: ";
+  min_ratio_graph.print_concise(os, false);
 
   if (in_final_step) {
     os << "    Base graphs processed / total = " << fmt(growth_processed_graphs_in_current_step)
