@@ -130,6 +130,16 @@ Fraction Graph::get_theta() const {
   }
 }
 
+// Returns phi = (binom_nk - (directed edge count)) / (undirected edge count).
+Fraction Graph::get_phi() const {
+  uint8 directed = edge_count - undirected_edge_count;
+  if (undirected_edge_count > 0) {
+    return Fraction(TOTAL_EDGES - directed, undirected_edge_count);
+  } else {
+    return Fraction::infinity();
+  }
+}
+
 // Returns the hash of this graph.
 uint32 Graph::get_graph_hash() const {
   assert(is_canonical);

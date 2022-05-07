@@ -16,6 +16,7 @@ cc_library(
         "fraction.cpp",
         "graph.cpp",
         "k4problem/graph_K4.cpp",
+        "k4d3problem/graph_k4d3.cpp",
         "grower.cpp",
         "permutator.cpp",
     ],
@@ -86,6 +87,7 @@ cc_test(
         "tests/permutator_test.cpp",
         "tests/graph_test.cpp",
         "tests/graph_K4_test.cpp",
+        "tests/graph_K4D3_test.cpp",
     ],
     deps=[
         ":graph",

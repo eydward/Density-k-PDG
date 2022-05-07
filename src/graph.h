@@ -118,6 +118,10 @@ struct Graph {
   // Returns theta such that (undirected edge density) + theta (directed edge density) = 1.
   // Namely, returns theta = (binom_nk - (undirected edge count)) / (directed edge count).
   Fraction get_theta() const;
+
+  // Returns phi = (binom_nk - (directed edge count)) / (undirected edge count).
+  Fraction get_phi() const;
+
   // Returns the hash of this graph.
   uint32 get_graph_hash() const;
   // Several functions to get the edge counts.
@@ -173,6 +177,10 @@ struct Graph {
   // The name "K4" here refers to complete graph. Unfortunately we also use K to refer
   // to the number of vertices in each edge in this code, don't be confused.
   bool contains_K4(int v) const;
+
+  // Return true if the graphs contains {01,02,03,12>2,13>3,23>3}.
+  // Only works for 2-PDG. The given vertex v must be in the complete graph.
+  bool contains_K4D3(int v);
 
   // Print the graph to the output stream for debugging purpose.
   // If aligned==true, pad the undirected edges, so the print is easier to read.
