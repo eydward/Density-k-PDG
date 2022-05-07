@@ -2,6 +2,7 @@
 
 #include "counters.h"
 #include "fraction.h"
+#include "tkproblem/graph_tk.h"
 
 // Custom hash and compare for the Graph type. Treat isomorphic graphs as being equal.
 struct GraphHasher {
@@ -104,7 +105,7 @@ std::vector<Graph> Grower::grow_step(int n, const std::vector<Graph>& base_graph
     // Loop through all ((K+1)^\binom{n-1}{k-1} - 1) edge combinations, add them to g, and check
     // add to canonicals unless it's isomorphic to an existing one.
     while (edge_gen.next(copy)) {
-      if (copy.contains_Tk(n - 1)) {
+      if (contains_Tk(copy, n - 1)) {
         edge_gen.notify_contain_tk_skip();
         continue;
       }
@@ -211,7 +212,7 @@ void Grower::worker_thread_main(int thread_id) {
         }
       }
 
-      if (copy.contains_Tk(Graph::N - 1)) {
+      if (contains_Tk(copy, Graph::N - 1)) {
         edge_gen.notify_contain_tk_skip();
         continue;
       }

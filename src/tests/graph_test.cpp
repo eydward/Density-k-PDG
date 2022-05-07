@@ -329,113 +329,6 @@ TEST(GraphTest, Isomorphic_C) {
   EXPECT_TRUE(h.is_isomorphic(g));
 }
 
-TEST(GraphTest, ContainsT3) {
-  Graph g = get_T3();
-  Graph h;
-
-  int p[5]{0, 1, 2, 3, 4};
-  do {
-    g.permute_for_testing(p, h);
-    EXPECT_TRUE(h.contains_Tk(p[0]));
-    EXPECT_TRUE(h.contains_Tk(p[3]));
-    EXPECT_FALSE(h.contains_Tk(p[4]));
-    EXPECT_TRUE(h.contains_Tk(p[2]));
-    EXPECT_TRUE(h.contains_Tk(p[1]));
-  } while (std::next_permutation(p, p + 5));
-}
-
-TEST(GraphTest, ContainsT3_B) {
-  Graph::set_global_graph_info(3, 7);
-  Graph g = parse_edges("{012>0, 013>3, 024>4, 025>0, 045>4, 145>5, 245>4, 345>4}");
-  EXPECT_TRUE(g.contains_Tk(5));
-  EXPECT_TRUE(g.contains_Tk(4));
-  EXPECT_TRUE(g.contains_Tk(2));
-  EXPECT_TRUE(g.contains_Tk(0));
-  EXPECT_FALSE(g.contains_Tk(1));
-  EXPECT_FALSE(g.contains_Tk(3));
-  EXPECT_FALSE(g.contains_Tk(6));
-}
-
-TEST(GraphTest, ContainsT3_C) {
-  Graph::set_global_graph_info(3, 7);
-  Graph g = parse_edges("{013>3, 035, 135>3}");
-  for (int v = 0; v < 7; v++) {
-    EXPECT_FALSE(g.contains_Tk(0));
-  }
-}
-
-TEST(GraphTest, ContainsT3_D) {
-  Graph::set_global_graph_info(3, 7);
-  Graph g = parse_edges("{012>0, 013>3, 024>4, 125, 035, 135>3, 245>5, 345>4}");
-  for (int v = 0; v < 7; v++) {
-    EXPECT_FALSE(g.contains_Tk(0));
-  }
-}
-
-TEST(GraphTest, ContainsT3_E) {
-  Graph::set_global_graph_info(3, 7);
-  Graph g = parse_edges("{012>1, 013>3, 024>0, 134>4, 015>1, 125, 235, 045>0, 345>5}");
-  for (int v = 0; v < 7; v++) {
-    EXPECT_FALSE(g.contains_Tk(0));
-  }
-}
-
-TEST(GraphTest, ContainsT3_F) {
-  Graph::set_global_graph_info(3, 7);
-  Graph g = parse_edges("{013>3, 014>4, 024>4, 124, 234>4, 135>5, 045>4, 245>4, 345>4}");
-  for (int v = 0; v < 7; v++) {
-    EXPECT_FALSE(g.contains_Tk(0));
-  }
-}
-
-TEST(GraphTest, ContainsT3_G) {
-  Graph::set_global_graph_info(3, 7);
-  Graph g = parse_edges("{012>1, 013>3, 134, 125>1, 135>5, 235>5, 045>4, 245>4}");
-  EXPECT_TRUE(g.contains_Tk(1));
-  EXPECT_TRUE(g.contains_Tk(2));
-  EXPECT_TRUE(g.contains_Tk(3));
-  EXPECT_TRUE(g.contains_Tk(5));
-  EXPECT_FALSE(g.contains_Tk(0));
-  EXPECT_FALSE(g.contains_Tk(4));
-  EXPECT_FALSE(g.contains_Tk(6));
-}
-
-TEST(GraphTest, ContainsT3_H) {
-  Graph::set_global_graph_info(3, 7);
-  Graph g = parse_edges("{012>1, 013>3, 134, 125>1, 135, 235, 045>4, 245>4}");
-  EXPECT_TRUE(g.contains_Tk(1));
-  EXPECT_TRUE(g.contains_Tk(2));
-  EXPECT_TRUE(g.contains_Tk(3));
-  EXPECT_TRUE(g.contains_Tk(5));
-  EXPECT_FALSE(g.contains_Tk(0));
-  EXPECT_FALSE(g.contains_Tk(4));
-  EXPECT_FALSE(g.contains_Tk(6));
-}
-
-TEST(GraphTest, NotContainsT3) {
-  Graph h;
-  Graph g = parse_edges("{013, 123, 023}");
-  g.canonicalize();
-
-  int p[5]{0, 1, 2, 3, 4};
-  do {
-    g.permute_for_testing(p, h);
-    for (int i = 0; i < 5; i++) {
-      EXPECT_FALSE(h.contains_Tk(i));
-    }
-  } while (std::next_permutation(p, p + 5));
-}
-
-TEST(GraphTest, ContainsT2) {
-  Graph::set_global_graph_info(2, 5);
-  Graph g = parse_edges("{01>0, 12>1, 03>3, 13>3, 04>4, 24>4, 34>4}");
-  EXPECT_TRUE(g.contains_Tk(4));
-  EXPECT_TRUE(g.contains_Tk(3));
-  EXPECT_TRUE(g.contains_Tk(0));
-  EXPECT_TRUE(g.contains_Tk(1));
-  EXPECT_FALSE(g.contains_Tk(2));
-}
-
 TEST(GraphTest, Theta) {
   Graph g = get_T3();
   EXPECT_EQ(g.get_theta(), Fraction(4, 1));
@@ -463,17 +356,6 @@ TEST(GraphTest, IsomorphicStress) {
       IsomorphismStressTest t(k, n);
       t.run();
     }
-  }
-}
-
-TEST(GraphTest, VertexCount12) {
-  Graph::set_global_graph_info(2, 12);
-  Graph g = parse_edges("{01, 23, 45, 67, 89, 9a, 9b, ab>a}");
-  for (int v = 9; v < 12; v++) {
-    EXPECT_TRUE(g.contains_Tk(v));
-  }
-  for (int v = 0; v < 9; v++) {
-    EXPECT_FALSE(g.contains_Tk(v));
   }
 }
 

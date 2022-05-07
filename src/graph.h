@@ -157,20 +157,6 @@ struct Graph {
   // Returns true if the two graphs are identical (exactly same edge sets).
   bool is_identical(const Graph& other) const;
 
-  // Returns true if the graph contains the generalized triangle T_k as a subgraph, where
-  // v is one of the vertices of the T_k subgraph.
-  // T_k is defined as (K+1)-vertex, 3-edge K-graph, with two undirected edges and one directed
-  // edge, where all edges share the same set of vertices except for {1,2,3}.
-  // For example T_2={12, 13, 23>3}, T_3={124, 134, 234>3}, T_4={1245, 1345, 2345>3}, etc.
-  //
-  // Note that in k-PDG, subgraph definition is subtle: A is a subgraph of B iff A can be obtained
-  // from B, by repeatedly (1) delete a vertex (2) delete an edge (3) forget the direction of
-  // an edge.
-  //
-  // Note: unlike other functions, this function only relies on edges array and therefore
-  // can be called without calling init(), which saves time when doing T_k free growing.
-  bool contains_Tk(int v) const;
-
   // Print the graph to the output stream for debugging purpose.
   // If aligned==true, pad the undirected edges, so the print is easier to read.
   void print_concise(std::ostream& os, bool aligned) const;
@@ -210,8 +196,9 @@ struct Graph {
   bool is_isomorphic_slow(const Graph& other) const;
 
   // Friend declarations for the "contains_xys" functions.
-  friend bool contains_K4D3(Graph&, int);
+  friend bool contains_Tk(const Graph& g, int v);
   friend bool contains_K4(const Graph&, int v);
+  friend bool contains_K4D3(Graph&, int);
 
   // Friend declarations that allows unit testing of some private implementations.
 #define FRIEND_TEST(test_case_name, test_name) friend class test_case_name##_##test_name##_Test

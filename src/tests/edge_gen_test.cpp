@@ -1,5 +1,6 @@
 #include "../edge_gen.h"
 
+#include "../tkproblem/graph_tk.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -290,31 +291,31 @@ TEST(EdgeGeneratorTest, NotifyContainsT2) {
   // Skip generated graphs that don't contain T_2
   for (int i = 1; i < 4 * 4 * 4 + 4 * 4; i++) {
     EXPECT_TRUE(edge_gen.next(copy, false));
-    EXPECT_FALSE(copy.contains_Tk(5));
+    EXPECT_FALSE(contains_Tk(copy, 5));
   }
 
   // The next one contains T_2
   EXPECT_TRUE(edge_gen.next(copy, false));
-  EXPECT_TRUE(copy.contains_Tk(5));
+  EXPECT_TRUE(contains_Tk(copy, 5));
   EXPECT_EQ(copy.serialize_edges(), "{23>2, 25, 35}");
 
   // Notify contains T_2, it should skip over a bunch of graphs.
   edge_gen.notify_contain_tk_skip();
   EXPECT_TRUE(edge_gen.next(copy, false));
   EXPECT_EQ(copy.serialize_edges(), "{23>2, 25>2, 35}");
-  EXPECT_TRUE(copy.contains_Tk(5));
+  EXPECT_TRUE(contains_Tk(copy, 5));
 
   // Again.
   edge_gen.notify_contain_tk_skip();
   EXPECT_TRUE(edge_gen.next(copy, false));
   EXPECT_EQ(copy.serialize_edges(), "{23>2, 25>5, 35}");
-  EXPECT_TRUE(copy.contains_Tk(5));
+  EXPECT_TRUE(contains_Tk(copy, 5));
 
   // Again.
   edge_gen.notify_contain_tk_skip();
   EXPECT_TRUE(edge_gen.next(copy, false));
   EXPECT_EQ(copy.serialize_edges(), "{23>2, 35>3}");
-  EXPECT_FALSE(copy.contains_Tk(5));
+  EXPECT_FALSE(contains_Tk(copy, 5));
 }
 
 TEST(EdgeGeneratorTest, NotifyContainsTk3) {
@@ -328,53 +329,53 @@ TEST(EdgeGeneratorTest, NotifyContainsTk3) {
   // Skip generated graphs that don't contain T_3
   for (int i = 1; i < 32; i++) {
     EXPECT_TRUE(edge_gen.next(copy, false));
-    EXPECT_FALSE(copy.contains_Tk(4));
+    EXPECT_FALSE(contains_Tk(copy, 4));
   }
 
   // Next one contains T_3
   EXPECT_TRUE(edge_gen.next(copy, false));
-  EXPECT_TRUE(copy.contains_Tk(4));
+  EXPECT_TRUE(contains_Tk(copy, 4));
   EXPECT_EQ(copy.serialize_edges(), "{123, 014>0, 024, 124}");
 
   // Notify contains T_3, should be no-op
   edge_gen.notify_contain_tk_skip();
   EXPECT_TRUE(edge_gen.next(copy, false));
   EXPECT_EQ(copy.serialize_edges(), "{123, 014>1, 024, 124}");
-  EXPECT_TRUE(copy.contains_Tk(4));
+  EXPECT_TRUE(contains_Tk(copy, 4));
   // Notify contains T_3, should be no-op again
   edge_gen.notify_contain_tk_skip();
   EXPECT_TRUE(edge_gen.next(copy, false));
   EXPECT_EQ(copy.serialize_edges(), "{123, 014>4, 024, 124}");
-  EXPECT_FALSE(copy.contains_Tk(4));
+  EXPECT_FALSE(contains_Tk(copy, 4));
 
   EXPECT_TRUE(edge_gen.next(copy, false));
   EXPECT_EQ(copy.serialize_edges(), "{123, 024>0, 124}");
-  EXPECT_FALSE(copy.contains_Tk(4));
+  EXPECT_FALSE(contains_Tk(copy, 4));
 
   EXPECT_TRUE(edge_gen.next(copy, false));
   EXPECT_EQ(copy.serialize_edges(), "{123, 014, 024>0, 124}");
-  EXPECT_TRUE(copy.contains_Tk(4));
+  EXPECT_TRUE(contains_Tk(copy, 4));
 
   // Notify contains T_3, should be no-op again
   edge_gen.notify_contain_tk_skip();
   EXPECT_TRUE(edge_gen.next(copy, false));
   EXPECT_EQ(copy.serialize_edges(), "{123, 014>0, 024>0, 124}");
-  EXPECT_TRUE(copy.contains_Tk(4));
+  EXPECT_TRUE(contains_Tk(copy, 4));
   // Notify contains T_3, should be no-op again
   edge_gen.notify_contain_tk_skip();
   EXPECT_TRUE(edge_gen.next(copy, false));
   EXPECT_EQ(copy.serialize_edges(), "{123, 014>1, 024>0, 124}");
-  EXPECT_TRUE(copy.contains_Tk(4));
+  EXPECT_TRUE(contains_Tk(copy, 4));
   // Notify contains T_3, should be no-op again
   edge_gen.notify_contain_tk_skip();
   EXPECT_TRUE(edge_gen.next(copy, false));
   EXPECT_EQ(copy.serialize_edges(), "{123, 014>4, 024>0, 124}");
-  EXPECT_TRUE(copy.contains_Tk(4));
+  EXPECT_TRUE(contains_Tk(copy, 4));
   // Notify contains T_3, should be no-op again
   edge_gen.notify_contain_tk_skip();
   EXPECT_TRUE(edge_gen.next(copy, false));
   EXPECT_EQ(copy.serialize_edges(), "{123, 024>2, 124}");
-  EXPECT_FALSE(copy.contains_Tk(4));
+  EXPECT_FALSE(contains_Tk(copy, 4));
 
   // Skip a lot of graphs.
   for (int i = 1; i < 5 * 5 * 5 * 5 * 5 + 5 * 5 * 5; i++) {
@@ -383,12 +384,12 @@ TEST(EdgeGeneratorTest, NotifyContainsTk3) {
 
   EXPECT_TRUE(edge_gen.next(copy, false));
   EXPECT_EQ(copy.serialize_edges(), "{123, 024>2, 124, 034, 234}");
-  EXPECT_TRUE(copy.contains_Tk(4));
+  EXPECT_TRUE(contains_Tk(copy, 4));
   // Notify contains T_3, it should skip over a bunch of graphs.
   edge_gen.notify_contain_tk_skip();
   EXPECT_TRUE(edge_gen.next(copy, false));
   EXPECT_EQ(copy.serialize_edges(), "{123, 024>4, 124, 034, 234}");
-  EXPECT_FALSE(copy.contains_Tk(5));
+  EXPECT_FALSE(contains_Tk(copy, 5));
 }
 
 TEST(EdgeGeneratorTest, MinTheta1) {

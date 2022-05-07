@@ -1,6 +1,7 @@
 #include "edge_gen.h"
 
 #include "counters.h"
+#include "tkproblem/graph_tk.h"
 
 // Initializes the generator for the given new vertex count.
 // vertex_count = number of vertices to grow to in each new graph.
@@ -237,7 +238,7 @@ void EdgeGenerator::notify_contain_tk_skip() {
     for (int skip_front = 1; skip_front < candidates.edge_candidate_count; skip_front++) {
       generate_graph(copy, skip_front);
       if (copy.get_edge_count() == base.get_edge_count()) return;
-      if (copy.contains_Tk(Graph::N - 1)) {
+      if (contains_Tk(copy, Graph::N - 1)) {
         enum_state[skip_front - 1] = Graph::K + 1;
         ++stats_tk_skip_bits;
       }
