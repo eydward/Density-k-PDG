@@ -1,4 +1,4 @@
-#include "../k4problem/graph_k4.h"
+#include "../forbid_k4/graph_k4.h"
 
 #include "../graph.h"
 #include "gtest/gtest.h"

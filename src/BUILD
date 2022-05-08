@@ -9,7 +9,6 @@ cc_library(
         "graph.h",
         "grower.h",
         "permutator.h",
-        "k4problem/graph_k4.h",
         "k4d3problem/graph_k4d3.h",
         "tkproblem/graph_tk.h",
     ],
@@ -18,13 +17,13 @@ cc_library(
         "edge_gen.cpp",
         "fraction.cpp",
         "graph.cpp",
-        "k4problem/graph_k4.cpp",
         "k4d3problem/graph_k4d3.cpp",
         "tkproblem/graph_tk.cpp",
         "grower.cpp",
         "permutator.cpp",
     ],
     copts=["-std=c++17"],
+    visibility = ["//visibility:public"],
 )
 
 cc_binary(
@@ -36,16 +35,6 @@ cc_binary(
     linkstatic=True,
 )
 
-cc_binary(
-    name="k4problem",
-    srcs=[
-        "k4problem/k4problem.cpp",
-    ],
-    deps=[":graph"],
-    copts=["-std=c++17"],
-    linkopts=["-lpthread"],
-    linkstatic=True,
-)
 
 cc_binary(
     name="collector",
@@ -88,7 +77,6 @@ cc_test(
         "tests/grower_test.cpp",
         "tests/permutator_test.cpp",
         "tests/graph_test.cpp",
-        "tests/graph_K4_test.cpp",
         "tests/graph_K4D3_test.cpp",
     ],
     deps=[
