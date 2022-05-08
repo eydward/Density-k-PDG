@@ -73,6 +73,16 @@ class Grower {
   // The number of graphs that have been dequeued from the to_be_processed queue.
   int to_be_processed_id;
 
+ protected:
+  // Returns the ratio of the given graph.
+  // The subclass must override this function, to implement which ratio to minimize in the search
+  // which may be theta_ratio, zeta_ratio, etc.
+  virtual Fraction get_ratio(const Graph& g) = 0;
+
+  // Returns true if g contains a forbidden subgraph, which has v as a vertex.
+  // The subclass must override this function to implement which subgraph to forbid.
+  virtual bool contains_forbidden_subgraph(Graph& g, int v) = 0;
+
  public:
   // Constructs the Grower object.
   // log_stream is used for status reporting and debugging purpose.

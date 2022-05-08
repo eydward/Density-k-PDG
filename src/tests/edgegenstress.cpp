@@ -4,7 +4,7 @@
 // combinations, and verify that they always match.
 //
 #include "../counters.h"
-#include "../grower.h"
+#include "../tkproblem/graph_tk.h"
 
 #define ASSERT(c)                         \
   if (!(c)) {                             \
@@ -25,19 +25,19 @@ void verify(int k, int n) {
   Graph::set_global_graph_info(k, n);
 
   Counters::initialize();
-  Grower ff(0, false, false, false, 0, 0);
+  GrowerTk ff(0, false, false, false, 0, 0);
   ff.grow();
 
   Counters::initialize();
-  Grower ft(0, false, false, true, 0, 0);
+  GrowerTk ft(0, false, false, true, 0, 0);
   ft.grow();
 
   Counters::initialize();
-  Grower tf(0, false, true, false, 0, 0);
+  GrowerTk tf(0, false, true, false, 0, 0);
   tf.grow();
 
   Counters::initialize();
-  Grower tt(0, false, true, true, 0, 0);
+  GrowerTk tt(0, false, true, true, 0, 0);
   tt.grow();
 
   verify_array_equal(ff.get_results(), ft.get_results());

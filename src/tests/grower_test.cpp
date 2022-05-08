@@ -1,7 +1,6 @@
-#include "../grower.h"
-
 #include "../counters.h"
 #include "../graph.h"
+#include "../tkproblem/graph_tk.h"
 #include "gtest/gtest.h"
 
 using namespace testing;
@@ -20,7 +19,7 @@ void verify_growth_result(int k, int n, Fraction min_theta, const std::string& m
                           int num_threads) {
   Graph::set_global_graph_info(k, n);
   Counters::initialize();
-  Grower s1(num_threads, false, false, false, 0, 0);
+  GrowerTk s1(num_threads, false, false, false, 0, 0);
   s1.grow();
   EXPECT_EQ(Counters::get_min_ratio(), min_theta);
   if (num_threads == 0) {
@@ -30,21 +29,21 @@ void verify_growth_result(int k, int n, Fraction min_theta, const std::string& m
   }
 
   Counters::initialize();
-  Grower s2(num_threads, false, false, true, 0, 0);
+  GrowerTk s2(num_threads, false, false, true, 0, 0);
   s2.grow();
   if (num_threads == 0) {
     EXPECT_TRUE(Counters::get_min_ratio() == min_theta);
   }
 
   Counters::initialize();
-  Grower s3(num_threads, false, true, false, 0, 0);
+  GrowerTk s3(num_threads, false, true, false, 0, 0);
   s3.grow();
   if (num_threads == 0) {
     EXPECT_TRUE(Counters::get_min_ratio() == min_theta);
   }
 
   Counters::initialize();
-  Grower s4(num_threads, false, true, true, 0, 0);
+  GrowerTk s4(num_threads, false, true, true, 0, 0);
   s4.grow();
   if (num_threads == 0) {
     EXPECT_TRUE(Counters::get_min_ratio() == min_theta);
@@ -110,7 +109,7 @@ void verify_thetagraph_search(int k, int n, Fraction theta, int expected_thetagr
   Graph::set_global_graph_info(k, n);
   for (int num_threads = 0; num_threads < 10; num_threads++) {
     Counters::initialize();
-    Grower s1(num_threads, false, true, true, 0, 0, true, theta);
+    GrowerTk s1(num_threads, false, true, true, 0, 0, true, theta);
     s1.grow();
     EXPECT_EQ(Counters::get_min_ratio(), expected_min_theta);
     EXPECT_EQ(Counters::get_ratio_graph_count(), expected_thetagraph_count);
@@ -130,7 +129,7 @@ TEST(GrowerTest, WithLogging) {
   {
     std::stringstream log, log_detail, log_result;
     Counters::initialize(&log);
-    Grower s1(2, false, false, false, 0, 0, false, Fraction(1E8, 1));
+    GrowerTk s1(2, false, false, false, 0, 0, false, Fraction(1E8, 1));
     s1.set_logging(&log, &log_detail, &log_result);
     s1.set_stats_print_interval(1, 0);
     s1.grow();
@@ -139,7 +138,7 @@ TEST(GrowerTest, WithLogging) {
   {
     std::stringstream log, log_detail, log_result;
     Counters::initialize(&log);
-    Grower s1(2, false, false, false, 0, 0, true, Fraction(3, 2));
+    GrowerTk s1(2, false, false, false, 0, 0, true, Fraction(3, 2));
     s1.set_logging(&log, &log_detail, &log_result);
     s1.set_stats_print_interval(1, 0);
     s1.grow();
@@ -148,7 +147,7 @@ TEST(GrowerTest, WithLogging) {
   {
     std::stringstream log, log_detail, log_result;
     Counters::initialize(&log);
-    Grower s1(2, true, false, false, 0, 0, false, Fraction(1E8, 1));
+    GrowerTk s1(2, true, false, false, 0, 0, false, Fraction(1E8, 1));
     s1.set_logging(&log, &log_detail, &log_result);
     s1.set_stats_print_interval(1, 0);
     s1.grow();

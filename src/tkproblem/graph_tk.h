@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../graph.h"
+#include "../grower.h"
 
 // Returns true if the graph contains the generalized triangle T_k as a subgraph, where
 // v is one of the vertices of the T_k subgraph.
@@ -13,3 +14,9 @@
 // (2) deleting edges
 // (3) changing directed edges to undirected by forgetting directions.
 bool contains_Tk(const Graph& g, int v);
+
+class GrowerTk : public Grower {
+  using Grower::Grower;
+  Fraction get_ratio(const Graph& g) override { return g.get_theta_ratio(); }
+  bool contains_forbidden_subgraph(Graph& g, int v) override { return contains_Tk(g, v); }
+};

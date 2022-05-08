@@ -1,6 +1,6 @@
 #include "counters.h"
 #include "graph.h"
-#include "grower.h"
+#include "tkproblem/graph_tk.h"
 
 void print_usage() {
   std::cout << "Usage: kPDG K N T [start_idx, end_idx, [theta_n, theta_d]]\n"
@@ -89,8 +89,8 @@ int main(int argc, char* argv[]) {
 
   Counters::initialize(&log);
 
-  Grower s(t, skip_final_enum, true, true, start_idx, end_idx, search_theta_graphs,
-           Fraction(theta_n, theta_d));
+  GrowerTk s(t, skip_final_enum, true, true, start_idx, end_idx, search_theta_graphs,
+             Fraction(theta_n, theta_d));
   s.set_logging(&log, &detail_log, &result_log);
   s.grow();
 
