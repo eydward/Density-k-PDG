@@ -29,9 +29,9 @@ class Grower {
   int stats_print_every_n_seconds = 20;
 
   // The log files.
-  std::ostream* const log;
-  std::ostream* const log_detail;
-  std::ostream* const log_result;
+  std::ostream* log;
+  std::ostream* log_detail;
+  std::ostream* log_result;
 
   // Returns a collection of graphs with n vertices that are T_k-free, one in each
   // isomorphism class. Note all edges added in this step contains vertex (n-1).
@@ -78,8 +78,10 @@ class Grower {
   // log_stream is used for status reporting and debugging purpose.
   Grower(int num_worker_threads_, bool skip_final_enum_, bool use_min_theta_opt_,
          bool use_contains_Tk_opt_, int start_idx_, int end_idx_, bool search_theta_graph_ = false,
-         Fraction theta_to_search_ = Fraction(1, 1), std::ostream* log_ = nullptr,
-         std::ostream* log_detail_ = nullptr, std::ostream* log_result_ = nullptr);
+         Fraction theta_to_search_ = Fraction(1, 1));
+
+  // Sets the logging streams.
+  void set_logging(std::ostream* summary, std::ostream* detail, std::ostream* result);
 
   // Finds all canonical isomorphism class representations with up to max_n vertices.
   void grow();

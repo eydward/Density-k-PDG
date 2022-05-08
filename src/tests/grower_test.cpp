@@ -130,8 +130,8 @@ TEST(GrowerTest, WithLogging) {
   {
     std::stringstream log, log_detail, log_result;
     Counters::initialize(&log);
-    Grower s1(2, false, false, false, 0, 0, false, Fraction(1E8, 1), &log, &log_detail,
-              &log_result);
+    Grower s1(2, false, false, false, 0, 0, false, Fraction(1E8, 1));
+    s1.set_logging(&log, &log_detail, &log_result);
     s1.set_stats_print_interval(1, 0);
     s1.grow();
     EXPECT_EQ(Counters::get_min_ratio(), Fraction(3, 2));
@@ -139,7 +139,8 @@ TEST(GrowerTest, WithLogging) {
   {
     std::stringstream log, log_detail, log_result;
     Counters::initialize(&log);
-    Grower s1(2, false, false, false, 0, 0, true, Fraction(3, 2), &log, &log_detail, &log_result);
+    Grower s1(2, false, false, false, 0, 0, true, Fraction(3, 2));
+    s1.set_logging(&log, &log_detail, &log_result);
     s1.set_stats_print_interval(1, 0);
     s1.grow();
     EXPECT_EQ(Counters::get_min_ratio(), Fraction(3, 2));
@@ -147,7 +148,8 @@ TEST(GrowerTest, WithLogging) {
   {
     std::stringstream log, log_detail, log_result;
     Counters::initialize(&log);
-    Grower s1(2, true, false, false, 0, 0, false, Fraction(1E8, 1), &log, &log_detail, &log_result);
+    Grower s1(2, true, false, false, 0, 0, false, Fraction(1E8, 1));
+    s1.set_logging(&log, &log_detail, &log_result);
     s1.set_stats_print_interval(1, 0);
     s1.grow();
     EXPECT_EQ(Counters::get_min_ratio(), Fraction(3, 1));

@@ -90,7 +90,8 @@ int main(int argc, char* argv[]) {
   Counters::initialize(&log);
 
   Grower s(t, skip_final_enum, true, true, start_idx, end_idx, search_theta_graphs,
-           Fraction(theta_n, theta_d), &log, &detail_log, &result_log);
+           Fraction(theta_n, theta_d));
+  s.set_logging(&log, &detail_log, &result_log);
   s.grow();
 
   const std::string done_msg = "\n\n***************************\nALL DONE. Final result:\n";

@@ -14,8 +14,7 @@ struct GraphComparer {
 
 Grower::Grower(int num_worker_threads_, bool skip_final_enum_, bool use_min_theta_opt_,
                bool use_contains_Tk_opt_, int start_idx_, int end_idx_, bool search_theta_graph_,
-               Fraction theta_to_search_, std::ostream* log_, std::ostream* log_detail_,
-               std::ostream* log_result_)
+               Fraction theta_to_search_)
     : num_worker_threads(num_worker_threads_),
       skip_final_enum(skip_final_enum_),
       use_min_theta_opt(use_min_theta_opt_),
@@ -24,10 +23,16 @@ Grower::Grower(int num_worker_threads_, bool skip_final_enum_, bool use_min_thet
       end_idx(end_idx_),
       search_theta_graph(search_theta_graph_),
       theta_to_search(theta_to_search_),
-      log(log_),
-      log_detail(log_detail_),
-      log_result(log_result_),
+      log(nullptr),
+      log_detail(nullptr),
+      log_result(nullptr),
       to_be_processed_id(start_idx_) {}
+
+void Grower::set_logging(std::ostream* summary, std::ostream* detail, std::ostream* result) {
+  log = summary;
+  log_detail = detail;
+  log_result = result;
+}
 
 void Grower::set_stats_print_interval(uint64 check_every_n_gen, int print_every_n_seconds) {
   stats_check_every_n_gen = check_every_n_gen;
