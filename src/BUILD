@@ -40,8 +40,6 @@ cc_binary(
     name="k4problem",
     srcs=[
         "k4problem/k4problem.cpp",
-        "k4problem/grower_K4.cpp",
-        "k4problem/grower_K4.h",
     ],
     deps=[":graph"],
     copts=["-std=c++17"],

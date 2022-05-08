@@ -1,6 +1,6 @@
 #include "../counters.h"
 #include "../graph.h"
-#include "grower_K4.h"
+#include "graph_k4.h"
 
 void print_usage() {
   std::cout << "Usage: k4problem N T\n"
@@ -32,7 +32,7 @@ int main(int argc, char* argv[]) {
     t = 0;
   }
 
-  if (n > 8 || 2 > n || t < 0 || t > 128) {
+  if (n > 12 || 2 > n || t < 0 || t > 128) {
     std::cout << "Invalid command line arguments. See usage for details.\n";
     print_usage();
     return -1;
@@ -54,14 +54,14 @@ int main(int argc, char* argv[]) {
   log << arguments;
 
   Counters::initialize(&log);
-
-  K4Grower s(t, skip_final_enum, &log, &detail_log, &result_log);
+  GrowerK4 s(t, skip_final_enum, false, false, 0, 0);
+  s.set_logging(&log, &detail_log, &result_log);
   s.grow();
-
   const std::string done_msg = "\n\n***************************\nALL DONE. Final result:\n";
   std::cout << done_msg;
   log << done_msg;
   Counters::print_counters();
+
   log.flush();
   log.close();
   detail_log.flush();

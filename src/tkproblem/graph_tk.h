@@ -15,6 +15,7 @@
 // (3) changing directed edges to undirected by forgetting directions.
 bool contains_Tk(const Graph& g, int v);
 
+// Derived class to manage the growth search, for T_k-free problem.
 class GrowerTk : public Grower {
   using Grower::Grower;
   Fraction get_ratio(const Graph& g) const override { return g.get_theta_ratio(); }
