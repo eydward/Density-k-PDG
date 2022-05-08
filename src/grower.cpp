@@ -41,10 +41,6 @@ void Grower::set_stats_print_interval(uint64 check_every_n_gen, int print_every_
 // Find all canonical isomorphism class representations with up to max_n vertices.
 void Grower::grow() {
   assert(Graph::N <= MAX_VERTICES);
-  print_config(std::cout);
-  if (log != nullptr) {
-    print_config(*log);
-  }
 
   // Initialize empty graph with k-1 vertices.
   std::vector<Graph> collected_graphs[MAX_VERTICES];
@@ -308,9 +304,4 @@ void Grower::print_state_to_stream(std::ostream& os,
        << ", all_edge_directed= " << all_directed << "\n";
   }
   os << "---------------------------------\n\nStarting final enumeration phase...\n";
-}
-void Grower::print_config(std::ostream& os) const {
-  os << "Searching for all T_k-free k-PDGs\n    K= " << Graph::K
-     << " (number of vertices in each edge)\n    N= " << Graph::N
-     << " (maximum possible number of vertices in each graph)\n";
 }

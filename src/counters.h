@@ -16,8 +16,6 @@ class Counters {
   static std::chrono::time_point<std::chrono::steady_clock> start_time;
   // The time of the last status print.
   static std::chrono::time_point<std::chrono::steady_clock> last_print_time;
-  // The log file, can be nullptr.
-  static std::ostream* log;
   // True if we are already in the final step to enumerate graphs.
   static bool in_final_step;
 
@@ -57,6 +55,21 @@ class Counters {
   static void print_counters_to_stream(std::ostream& os);
 
  public:
+  // The summary/detail/result log files, can be nullptr.
+  static std::ostream* log;
+  static std::ostream* log_detail;
+  static std::ostream* log_result;
+
+  // Constructs the log file names using the given the parameters, and creates the log files.
+  static void initialize_logging(const std::string& prefix, int start_idx, int end_idx, int threads,
+                                 bool search_ratio_graphs, Fraction search_ratio);
+  // Flushes and closes the log files.
+  static void close_logging();
+
+  // Resets all values to 0, and starts the stopwatch, which will be used
+  // by print_counters to calculate elapsed time.
+  static void initialize();
+
   static Fraction get_min_ratio() { return min_ratio; }
   static const Graph& get_min_ratio_graph() { return min_ratio_graph; }
   static uint64 get_ratio_graph_count() { return ratio_graph_count; }
@@ -93,13 +106,15 @@ class Counters {
   static void observe_edgegen_stats(uint64 tk_skip, uint64 tk_skip_bits, uint64 theta_edges_skip,
                                     uint64 theta_directed_edges_skip, uint64 edge_sets);
 
-  // Resets all values to 0, and starts the stopwatch, which will be used
-  // by print_counters to calculate elapsed time.
-  static void initialize(std::ostream* log_stream = nullptr);
-
   // Print status if sufficient time has elapsed since the last print.
   static void print_at_time_interval();
 
+  // Prints the "all done" message to console and summary log.
+  static void print_done_message();
+
   // Prints the counter values to console and log file.
   static void print_counters();
+
+  // Returns current time in YYYYMMDD-HHmmss format. Used in the log file name.
+  static std::string get_current_time();
 };

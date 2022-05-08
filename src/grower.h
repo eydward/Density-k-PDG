@@ -51,8 +51,6 @@ class Grower {
   void print_before_final(const std::vector<Graph> collected_graphs[MAX_VERTICES]) const;
   void print_state_to_stream(std::ostream& os,
                              const std::vector<Graph> collected_graphs[MAX_VERTICES]) const;
-  // Prints the configuration to the given output stream.
-  void print_config(std::ostream& os) const;
 
   // The entry point of the worker thread, used in the final enumeration phase.
   void worker_thread_main(int thread_id);

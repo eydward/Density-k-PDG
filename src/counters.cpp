@@ -22,7 +22,6 @@ uint64 Counters::graph_permute_ops = 0;
 uint64 Counters::graph_permute_canonical_ops = 0;
 std::chrono::time_point<std::chrono::steady_clock> Counters::start_time;
 std::chrono::time_point<std::chrono::steady_clock> Counters::last_print_time;
-std::ostream* Counters::log = nullptr;
 uint64 Counters::growth_vertex_count = 0;
 uint64 Counters::growth_total_graphs_in_current_step = 0;
 uint64 Counters::growth_accumulated_canonicals_in_current_step = 0;
@@ -33,13 +32,60 @@ uint64 Counters::edgegen_theta_edges_skip = 0;
 uint64 Counters::edgegen_theta_directed_edges_skip = 0;
 uint64 Counters::edgegen_edge_sets = 0;
 uint64 Counters::ratio_graph_count = 0;
-
 bool Counters::in_final_step = false;
 
-void Counters::initialize(std::ostream* log_stream) {
+std::ostream* Counters::log = nullptr;
+std::ostream* Counters::log_detail = nullptr;
+std::ostream* Counters::log_result = nullptr;
+
+// The version number that appears in the log file names and summary log.
+constexpr auto VERSION = "V12";
+
+// Constructs the log file names using the given the parameters, and creates the log files.
+void Counters::initialize_logging(const std::string& prefix, int start_idx, int end_idx,
+                                  int threads, bool search_ratio_graphs, Fraction search_ratio) {
+  std::string log_file_name = prefix + "_" + VERSION + "_K" + std::to_string(Graph::K) + "_N" +
+                              std::to_string(Graph::N) + "_" + std::to_string(start_idx) + "_" +
+                              std::to_string(end_idx) + "_T" + std::to_string(threads) + "_" +
+                              get_current_time();
+  std::string arguments =
+      prefix + " " + VERSION + " run arguments: K=" + std::to_string(Graph::K) +
+      ", N=" + std::to_string(Graph::N) + ", TOTAL_EDGES=" + std::to_string(Graph::TOTAL_EDGES) +
+      ", THREADS=" + std::to_string(threads) + ", idx_range=[" + std::to_string(start_idx) + ", " +
+      std::to_string(end_idx) + "]\n" +
+      (search_ratio_graphs ? "Searching graphs with min_ratio " + search_ratio.to_string() + "\n"
+                           : std::string("")) +
+      "\n";
+  std::cout << "Log file path: " << log_file_name + ".log, " << log_file_name + "_detail.log, "
+            << log_file_name + "_result.log\n";
+  log = new std::ofstream(log_file_name + ".log");
+  log_detail = new std::ofstream(log_file_name + "_detail.log");
+  log_result = new std::ofstream(log_file_name + "_result.log");
+  std::cout << arguments;
+  *log << arguments;
+
+  initialize();
+}
+
+// Flushes and closes the log files.
+void Counters::close_logging() {
+  auto close_one = [](std::ostream* file) {
+    if (file != nullptr) {
+      file->flush();
+      delete file;
+    }
+  };
+  close_one(log);
+  log = nullptr;
+  close_one(log_detail);
+  log_detail = nullptr;
+  close_one(log_result);
+  log_result = nullptr;
+}
+
+void Counters::initialize() {
   min_ratio = Fraction::infinity();
   last_print_time = start_time = std::chrono::steady_clock::now();
-  log = log_stream;
 }
 
 // If the given graph's ratio value is less than min_ratio, assign it to min_ratio.
@@ -105,6 +151,15 @@ void Counters::print_counters() {
   }
 }
 
+// Returns current time in YYYYMMDD-HHmmss format. Used in the log file name.
+std::string Counters::get_current_time() {
+  std::time_t current_time = std::time(0);
+  const std::tm* now = std::localtime(&current_time);
+  char buf[80];
+  strftime(buf, sizeof(buf), "%Y%m%d-%H%M%S", now);
+  return buf;
+}
+
 // Helper function: print large numbers in a more readable format with a ` at the 10^6 position.
 std::string fmt(uint64 value) {
   constexpr uint64 M = 1000000;
@@ -154,4 +209,13 @@ void Counters::print_counters_to_stream(std::ostream& os) {
        << fmt(growth_processed_graphs_in_current_step) << ", "
        << fmt(growth_accumulated_canonicals_in_current_step) << ")\n";
   }
+}
+// Prints the "all done" message to console and summary log.
+void Counters::print_done_message() {
+  constexpr auto done_msg = "\n\n***************************\nALL DONE. Final result:\n";
+  std::cout << done_msg;
+  if (log != nullptr) {
+    *log << done_msg;
+  }
+  print_counters();
 }

@@ -18,15 +18,6 @@ void print_usage() {
             << "    the minimum theta value.\n";
 }
 
-// Returns current time in YYYYMMDD-HHmmss format. Used in the log file name.
-std::string get_current_time() {
-  std::time_t current_time = std::time(0);
-  const std::tm* now = std::localtime(&current_time);
-  char buf[80];
-  strftime(buf, sizeof(buf), "%Y%m%d-%H%M%S", now);
-  return buf;
-}
-
 int main(int argc, char* argv[]) {
   if (argc != 4 && argc != 6 && argc != 8) {
     print_usage();
@@ -66,42 +57,13 @@ int main(int argc, char* argv[]) {
   }
 
   Graph::set_global_graph_info(k, n);
-
-  std::string log_file_name = (search_theta_graphs ? "kPDG_thetagraph_v11_K" : "kPDG_v11_K") +
-                              std::to_string(Graph::K) + "_N" + std::to_string(Graph::N) + "_" +
-                              std::to_string(start_idx) + "_" + std::to_string(end_idx) + "_T" +
-                              std::to_string(t) + "_" + get_current_time();
-  std::string arguments =
-      "kPDG run arguments: K=" + std::to_string(Graph::K) + ", N=" + std::to_string(Graph::N) +
-      ", TOTAL_EDGES=" + std::to_string(Graph::TOTAL_EDGES) + ", THREADS=" + std::to_string(t) +
-      ", idx_range=[" + std::to_string(start_idx) + ", " + std::to_string(end_idx) + "]\n" +
-      (search_theta_graphs ? "Searching graphs with theta " + std::to_string(theta_n) + "/" +
-                                 std::to_string(theta_d) + "\n"
-                           : std::string("")) +
-      "\n";
-  std::cout << "Log file path: " << log_file_name + ".log, " << log_file_name + "_detail.log, "
-            << log_file_name + "_result.log\n";
-  std::ofstream log(log_file_name + ".log");
-  std::ofstream detail_log(log_file_name + "_detail.log");
-  std::ofstream result_log(log_file_name + "_result.log");
-  std::cout << arguments;
-  log << arguments;
-
-  Counters::initialize(&log);
-
+  Counters::initialize_logging(search_theta_graphs ? "kPDG_thetagraph" : "kPDG", start_idx, end_idx,
+                               t, search_theta_graphs, Fraction(theta_n, theta_d));
   GrowerTk s(t, skip_final_enum, true, true, start_idx, end_idx, search_theta_graphs,
              Fraction(theta_n, theta_d));
-  s.set_logging(&log, &detail_log, &result_log);
+  s.set_logging(Counters::log, Counters::log_detail, Counters::log_result);
   s.grow();
-
-  const std::string done_msg = "\n\n***************************\nALL DONE. Final result:\n";
-  std::cout << done_msg;
-  log << done_msg;
-  Counters::print_counters();
-  log.flush();
-  log.close();
-  detail_log.flush();
-  detail_log.close();
-  result_log.close();
+  Counters::print_done_message();
+  Counters::close_logging();
   return 0;
 }

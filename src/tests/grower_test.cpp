@@ -128,7 +128,7 @@ TEST(GrowerTest, WithLogging) {
   Graph::set_global_graph_info(2, 3);
   {
     std::stringstream log, log_detail, log_result;
-    Counters::initialize(&log);
+    Counters::initialize();
     GrowerTk s1(2, false, false, false, 0, 0, false, Fraction(1E8, 1));
     s1.set_logging(&log, &log_detail, &log_result);
     s1.set_stats_print_interval(1, 0);
@@ -137,7 +137,7 @@ TEST(GrowerTest, WithLogging) {
   }
   {
     std::stringstream log, log_detail, log_result;
-    Counters::initialize(&log);
+    Counters::initialize();
     GrowerTk s1(2, false, false, false, 0, 0, true, Fraction(3, 2));
     s1.set_logging(&log, &log_detail, &log_result);
     s1.set_stats_print_interval(1, 0);
@@ -146,7 +146,7 @@ TEST(GrowerTest, WithLogging) {
   }
   {
     std::stringstream log, log_detail, log_result;
-    Counters::initialize(&log);
+    Counters::initialize();
     GrowerTk s1(2, true, false, false, 0, 0, false, Fraction(1E8, 1));
     s1.set_logging(&log, &log_detail, &log_result);
     s1.set_stats_print_interval(1, 0);
