@@ -10,7 +10,7 @@ cc_library(
 
 cc_binary(
     name="kPDG-forbid-k4",
-    srcs=["kpdg-forbid-k4.cpp"],
+    srcs=["kpdg_forbid_k4.cpp"],
     deps=[":graph_forbid_k4"],
     copts=["-std=c++17"],
     linkopts=["-lpthread"],

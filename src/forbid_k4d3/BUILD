@@ -8,14 +8,14 @@ cc_library(
   copts=["-std=c++17"],
 )
 
-# cc_binary(
-#     name="kPDG-forbid-k4d3",
-#     srcs=["kpdg-forbid-k4d3.cpp"],
-#     deps=[":graph_forbid_k4d3"],
-#     copts=["-std=c++17"],
-#     linkopts=["-lpthread"],
-#     linkstatic=True,
-# )
+cc_binary(
+    name="kPDG-forbid-k4d3",
+    srcs=["kpdg_forbid_k4d3.cpp"],
+    deps=[":graph_forbid_k4d3"],
+    copts=["-std=c++17"],
+    linkopts=["-lpthread"],
+    linkstatic=True,
+)
 
 cc_test(
     name="graph_forbid_k4d3_test",

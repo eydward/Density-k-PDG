@@ -15,7 +15,7 @@ bool contains_K4(const Graph& g, int v);
 
 // Derived class to manage the growth search, for K4-free problem.
 class GrowerK4 : public Grower {
-  using Grower::Grower;
+  using Grower::Grower;  // Inherite the constructor from the base class.
   Fraction get_ratio(const Graph& g) const override { return g.get_theta_ratio(); }
   bool contains_forbidden_subgraph(Graph& g, int v) const override { return contains_K4(g, v); }
 };

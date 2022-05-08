@@ -17,7 +17,7 @@ bool contains_Tk(const Graph& g, int v);
 
 // Derived class to manage the growth search, for T_k-free problem.
 class GrowerTk : public Grower {
-  using Grower::Grower;
+  using Grower::Grower;  // Inherite the constructor from the base class.
   Fraction get_ratio(const Graph& g) const override { return g.get_theta_ratio(); }
   bool contains_forbidden_subgraph(Graph& g, int v) const override { return contains_Tk(g, v); }
 };
