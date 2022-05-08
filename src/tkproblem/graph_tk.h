@@ -17,6 +17,6 @@ bool contains_Tk(const Graph& g, int v);
 
 class GrowerTk : public Grower {
   using Grower::Grower;
-  Fraction get_ratio(const Graph& g) override { return g.get_theta_ratio(); }
-  bool contains_forbidden_subgraph(Graph& g, int v) override { return contains_Tk(g, v); }
+  Fraction get_ratio(const Graph& g) const override { return g.get_theta_ratio(); }
+  bool contains_forbidden_subgraph(Graph& g, int v) const override { return contains_Tk(g, v); }
 };

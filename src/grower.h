@@ -17,11 +17,11 @@ class Grower {
   // The start index and end index in the final enumeration phase.
   const int start_idx;
   const int end_idx;
-  // If true, search for all graphs that generate the given theta value,
-  // instead of searching for min_theta.
-  const bool search_theta_graph;
-  // The theta value to search for. Ignored unless search_theta_graph==true.
-  const Fraction theta_to_search;
+  // If true, search for all graphs that generate the given ratio value,
+  // instead of searching for min_ratio.
+  const bool search_ratio_graph;
+  // The ratio value to search for. Ignored unless search_ratio_graph==true.
+  const Fraction ratio_to_search;
 
   // The number of generations between checking whether should print statistics.
   uint64 stats_check_every_n_gen = 100000;
@@ -68,7 +68,7 @@ class Grower {
   // Values: 3-tuple (
   //    id of the graph,
   //    the base graph,
-  //    the graph with the minimum theta among all graphs generated from the base graph).
+  //    the graph with the minimum ratio among all graphs generated from the base graph).
   std::vector<std::tuple<int, Graph, Graph>> results;
   // The number of graphs that have been dequeued from the to_be_processed queue.
   int to_be_processed_id;
@@ -77,18 +77,18 @@ class Grower {
   // Returns the ratio of the given graph.
   // The subclass must override this function, to implement which ratio to minimize in the search
   // which may be theta_ratio, zeta_ratio, etc.
-  virtual Fraction get_ratio(const Graph& g) = 0;
+  virtual Fraction get_ratio(const Graph& g) const = 0;
 
   // Returns true if g contains a forbidden subgraph, which has v as a vertex.
   // The subclass must override this function to implement which subgraph to forbid.
-  virtual bool contains_forbidden_subgraph(Graph& g, int v) = 0;
+  virtual bool contains_forbidden_subgraph(Graph& g, int v) const = 0;
 
  public:
   // Constructs the Grower object.
   // log_stream is used for status reporting and debugging purpose.
   Grower(int num_worker_threads_, bool skip_final_enum_, bool use_min_theta_opt_,
-         bool use_contains_Tk_opt_, int start_idx_, int end_idx_, bool search_theta_graph_ = false,
-         Fraction theta_to_search_ = Fraction(1, 1));
+         bool use_contains_Tk_opt_, int start_idx_, int end_idx_, bool search_ratio_graph_ = false,
+         Fraction ratio_to_search_ = Fraction(1, 1));
 
   // Sets the logging streams.
   void set_logging(std::ostream* summary, std::ostream* detail, std::ostream* result);
