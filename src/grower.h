@@ -89,6 +89,8 @@ class Grower {
          Fraction ratio_to_search_ = Fraction(1, 1));
 
   // Sets the logging streams.
+  // If `details_per_graph` is true, print the min ratio value from each base graph into
+  // the details log.
   void set_logging(std::ostream* summary, std::ostream* detail, std::ostream* result);
 
   // Finds all canonical isomorphism class representations with up to max_n vertices.

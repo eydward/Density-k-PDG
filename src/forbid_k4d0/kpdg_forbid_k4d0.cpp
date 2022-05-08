@@ -1,8 +1,8 @@
 #include "../counters.h"
-#include "graph_k4.h"
+#include "graph_k4d0.h"
 
 void print_usage() {
-  std::cout << "Usage: kPDG-forbid-k4 N T\n"
+  std::cout << "Usage: kPDG-forbid-k4d0 N T\n"
             << "  Each argument is an integer\n"
             << "  N = Total number of vertices in a graph.  2 <= N <= 12.\n"
             << "  T = Number of worker threads. (0 means don't use threads,\n"
@@ -29,8 +29,8 @@ int main(int argc, char* argv[]) {
   }
 
   Graph::set_global_graph_info(2, n);
-  Counters::initialize_logging("kPDG-forbid-k4", 0, 0, t, false, Fraction(0, 1), false);
-  GrowerK4 s(t, skip_final_enum, false, false, 0, 0);
+  Counters::initialize_logging("kPDG-forbid-k4d0", 0, 0, t, false, Fraction(0, 1), false);
+  GrowerK4D0 s(t, skip_final_enum, false, false, 0, 0);
   s.set_logging(Counters::log, Counters::log_detail, Counters::log_result);
   s.grow();
   Counters::print_done_message();

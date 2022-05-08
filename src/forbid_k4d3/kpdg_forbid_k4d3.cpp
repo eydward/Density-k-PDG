@@ -29,7 +29,7 @@ int main(int argc, char* argv[]) {
   }
 
   Graph::set_global_graph_info(2, n);
-  Counters::initialize_logging("kPDG-forbid-k4d3", 0, 0, t, false, Fraction(0, 1));
+  Counters::initialize_logging("kPDG-forbid-k4d3", 0, 0, t, false, Fraction(0, 1), false);
   GrowerK4D3 s(t, skip_final_enum, false, false, 0, 0);
   s.set_logging(Counters::log, Counters::log_detail, Counters::log_result);
   s.grow();

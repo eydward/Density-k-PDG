@@ -139,7 +139,7 @@ TEST(GrowerTest, WithLogging) {
     std::stringstream log, log_detail, log_result;
     Counters::initialize();
     GrowerTk s1(2, false, false, false, 0, 0, true, Fraction(3, 2));
-    s1.set_logging(&log, &log_detail, &log_result);
+    s1.set_logging(&log, nullptr, &log_result);
     s1.set_stats_print_interval(1, 0);
     s1.grow();
     EXPECT_EQ(Counters::get_min_ratio(), Fraction(3, 2));

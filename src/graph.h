@@ -199,6 +199,7 @@ struct Graph {
   // Friend declarations for the "contains_xys" functions.
   friend bool contains_Tk(const Graph& g, int v);
   friend bool contains_K4(const Graph&, int v);
+  friend bool contains_K4D0(Graph&, int);
   friend bool contains_K4D3(Graph&, int);
 
   // Friend declarations that allows unit testing of some private implementations.

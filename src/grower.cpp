@@ -65,11 +65,14 @@ void Grower::grow() {
         int base_graph_id = std::get<0>(r);
         const Graph& base_graph = std::get<1>(r);
         const Graph& min_ratio_graph = std::get<2>(r);
-        *log_result << "G[" << base_graph_id
-                    << "] min_ratio=" << get_ratio(min_ratio_graph).to_string() << "\n  ";
-        base_graph.print_concise(*log_result, true);
-        *log_result << "  ";
-        min_ratio_graph.print_concise(*log_result, true);
+        // If the graph's ratio is the global minimum, print into the result log.
+        if (get_ratio(min_ratio_graph) == Counters::get_min_ratio()) {
+          *log_result << "G[" << base_graph_id
+                      << "] min_ratio=" << get_ratio(min_ratio_graph).to_string() << "\n  ";
+          base_graph.print_concise(*log_result, true);
+          *log_result << "  ";
+          min_ratio_graph.print_concise(*log_result, true);
+        }
       }
       log_result->flush();
     }

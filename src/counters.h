@@ -62,7 +62,8 @@ class Counters {
 
   // Constructs the log file names using the given the parameters, and creates the log files.
   static void initialize_logging(const std::string& prefix, int start_idx, int end_idx, int threads,
-                                 bool search_ratio_graphs, Fraction search_ratio);
+                                 bool search_ratio_graphs, Fraction search_ratio,
+                                 bool use_detail_log);
   // Flushes and closes the log files.
   static void close_logging();
 

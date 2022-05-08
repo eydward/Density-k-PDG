@@ -43,7 +43,8 @@ constexpr auto VERSION = "V12";
 
 // Constructs the log file names using the given the parameters, and creates the log files.
 void Counters::initialize_logging(const std::string& prefix, int start_idx, int end_idx,
-                                  int threads, bool search_ratio_graphs, Fraction search_ratio) {
+                                  int threads, bool search_ratio_graphs, Fraction search_ratio,
+                                  bool use_detail_log) {
   std::string log_file_name = prefix + "_" + VERSION + "_K" + std::to_string(Graph::K) + "_N" +
                               std::to_string(Graph::N) + "_" + std::to_string(start_idx) + "_" +
                               std::to_string(end_idx) + "_T" + std::to_string(threads) + "_" +
@@ -56,10 +57,13 @@ void Counters::initialize_logging(const std::string& prefix, int start_idx, int 
       (search_ratio_graphs ? "Searching graphs with min_ratio " + search_ratio.to_string() + "\n"
                            : std::string("")) +
       "\n";
-  std::cout << "Log file path: " << log_file_name + ".log, " << log_file_name + "_detail.log, "
-            << log_file_name + "_result.log\n";
+  std::cout << "Log file path: " << log_file_name + ".log, ";
   log = new std::ofstream(log_file_name + ".log");
-  log_detail = new std::ofstream(log_file_name + "_detail.log");
+  if (use_detail_log) {
+    std::cout << log_file_name + "_detail.log, ";
+    log_detail = new std::ofstream(log_file_name + "_detail.log");
+  }
+  std::cout << log_file_name + "_result.log\n";
   log_result = new std::ofstream(log_file_name + "_result.log");
   std::cout << arguments;
   *log << arguments;
@@ -199,7 +203,8 @@ void Counters::print_counters_to_stream(std::ostream& os) {
        << fmt(compute_vertex_signatures) << ", " << fmt(graph_copies) << ", "
        << fmt(graph_canonicalize_ops) << ", " << fmt(graph_permute_canonical_ops) << ", "
        << fmt(graph_contains_Tk_tests) << ")"
-       << "\n    Isomorphic tests (total, true, expensive, false w/ =hash, identical, codeg_diff)= "
+       << "\n    Isomorphic tests (total, true, expensive, false w/ =hash, identical, "
+          "codeg_diff)= "
        << "\n                     (" << fmt(graph_isomorphic_tests) << ", "
        << fmt(graph_isomorphic_true) << ", " << fmt(graph_isomorphic_expensive) << ", "
        << fmt(graph_isomorphic_hash_no) << ", " << fmt(graph_identical_tests) << ", "

@@ -58,7 +58,7 @@ int main(int argc, char* argv[]) {
 
   Graph::set_global_graph_info(k, n);
   Counters::initialize_logging(search_theta_graphs ? "kPDG_thetagraph" : "kPDG", start_idx, end_idx,
-                               t, search_theta_graphs, Fraction(theta_n, theta_d));
+                               t, search_theta_graphs, Fraction(theta_n, theta_d), true);
   GrowerTk s(t, skip_final_enum, true, true, start_idx, end_idx, search_theta_graphs,
              Fraction(theta_n, theta_d));
   s.set_logging(Counters::log, Counters::log_detail, Counters::log_result);
