@@ -164,8 +164,8 @@ std::string Counters::get_current_time() {
   return buf;
 }
 
-// Helper function: print large numbers in a more readable format with a ` at the 10^6 position.
-std::string fmt(uint64 value) {
+// Helper function: print large numbers in a more readable format with a ` at the 10^6 positions.
+std::string Counters::fmt(uint64 value) {
   constexpr uint64 M = 1000000;
   if (value < M) {
     return std::to_string(value);

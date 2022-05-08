@@ -7,6 +7,9 @@ using namespace testing;
 TEST(GraphK4D3Test, K4) {
   Graph::set_global_graph_info(2, 4);
   Graph g;
+
+  EXPECT_EQ(g.get_zeta_ratio(), Fraction::infinity());
+
   ASSERT_TRUE(Graph::parse_edges("{01, 02, 03, 12>2, 13>3, 23>3}", g));
   EXPECT_EQ(g.get_zeta_ratio(), Fraction(1, 1));
   for (int v = 0; v < 4; v++) {

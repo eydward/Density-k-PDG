@@ -154,3 +154,11 @@ TEST(GrowerTest, WithLogging) {
     EXPECT_EQ(Counters::get_min_ratio(), Fraction(3, 1));
   }
 }
+
+TEST(GrowerTest, StartEndIndex) {
+  Graph::set_global_graph_info(2, 3);
+  Counters::initialize();
+  GrowerTk s(0, false, false, false, 0, 1);
+  s.grow();
+  EXPECT_EQ(Counters::get_min_ratio(), Fraction(3, 2));
+}

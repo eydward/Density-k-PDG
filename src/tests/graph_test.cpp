@@ -1,5 +1,6 @@
 #include "../graph.h"
 
+#include "../counters.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "iso_stress_test.h"
@@ -415,4 +416,15 @@ TEST(GraphTest, GraphPrint) {
     EXPECT_EQ(ss.str(), "{01  , 23  , 45  , 67  , 89  , 9a  , 9b  , ab>a}\n");
   }
   g.print();
+}
+
+TEST(GraphTest, CountersInit) {
+  Graph::set_global_graph_info(3, 5);
+  Counters::initialize_logging("test", 0, 0, 0, false, Fraction(1, 1), true);
+  EXPECT_EQ(Counters::get_min_ratio(), Fraction::infinity());
+  EXPECT_EQ(Counters::fmt(123456ULL), "123456");
+  EXPECT_EQ(Counters::fmt(123456789ULL), "123`456789");
+  EXPECT_EQ(Counters::fmt(12345678901234567ULL), "12345`678901`234567");
+  Counters::print_done_message();
+  Counters::close_logging();
 }

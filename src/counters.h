@@ -54,6 +54,9 @@ class Counters {
   // Prints the counter values the given output stream.
   static void print_counters_to_stream(std::ostream& os);
 
+  // Returns current time in YYYYMMDD-HHmmss format. Used in the log file name.
+  static std::string get_current_time();
+
  public:
   // The summary/detail/result log files, can be nullptr.
   static std::ostream* log;
@@ -116,6 +119,6 @@ class Counters {
   // Prints the counter values to console and log file.
   static void print_counters();
 
-  // Returns current time in YYYYMMDD-HHmmss format. Used in the log file name.
-  static std::string get_current_time();
+  // Helper function: print large numbers in a more readable format with a ` at the 10^6 positions.
+  static std::string fmt(uint64 value);
 };
