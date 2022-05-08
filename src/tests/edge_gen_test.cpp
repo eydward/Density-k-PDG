@@ -1,6 +1,6 @@
 #include "../edge_gen.h"
 
-#include "../tkproblem/graph_tk.h"
+#include "../forbid_tk/graph_tk.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 

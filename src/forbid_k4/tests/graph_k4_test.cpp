@@ -1,6 +1,5 @@
-#include "../forbid_k4/graph_k4.h"
+#include "../graph_k4.h"
 
-#include "../graph.h"
 #include "gtest/gtest.h"
 
 using namespace testing;

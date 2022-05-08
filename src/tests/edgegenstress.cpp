@@ -4,7 +4,7 @@
 // combinations, and verify that they always match.
 //
 #include "../counters.h"
-#include "../tkproblem/graph_tk.h"
+#include "../forbid_tk/graph_tk.h"
 
 #define ASSERT(c)                         \
   if (!(c)) {                             \

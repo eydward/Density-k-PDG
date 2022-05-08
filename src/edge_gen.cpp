@@ -1,7 +1,7 @@
 #include "edge_gen.h"
 
 #include "counters.h"
-#include "tkproblem/graph_tk.h"
+#include "forbid_tk/graph_tk.h"
 
 // Initializes the generator for the given new vertex count.
 // vertex_count = number of vertices to grow to in each new graph.

@@ -1,6 +1,6 @@
 #include "../counters.h"
+#include "../forbid_tk/graph_tk.h"
 #include "../graph.h"
-#include "../tkproblem/graph_tk.h"
 #include "gtest/gtest.h"
 
 using namespace testing;

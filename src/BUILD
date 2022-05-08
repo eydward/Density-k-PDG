@@ -10,7 +10,7 @@ cc_library(
         "grower.h",
         "permutator.h",
         "k4d3problem/graph_k4d3.h",
-        "tkproblem/graph_tk.h",
+        "forbid_tk/graph_tk.h",
     ],
     srcs=[
         "counters.cpp",
@@ -18,7 +18,7 @@ cc_library(
         "fraction.cpp",
         "graph.cpp",
         "k4d3problem/graph_k4d3.cpp",
-        "tkproblem/graph_tk.cpp",
+        "forbid_tk/graph_tk.cpp",
         "grower.cpp",
         "permutator.cpp",
     ],

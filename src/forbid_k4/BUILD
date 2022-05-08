@@ -19,7 +19,7 @@ cc_binary(
 
 cc_test(
     name="graph_forbid_k4_test",
-    srcs=["graph_k4_test.cpp"],
+    srcs=["tests/graph_k4_test.cpp"],
     deps=[
         ":graph_forbid_k4",
         "@gtest//:gtest",

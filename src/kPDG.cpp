@@ -1,6 +1,6 @@
 #include "counters.h"
+#include "forbid_tk/graph_tk.h"
 #include "graph.h"
-#include "tkproblem/graph_tk.h"
 
 void print_usage() {
   std::cout << "Usage: kPDG K N T [start_idx, end_idx, [theta_n, theta_d]]\n"
