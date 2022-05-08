@@ -1,6 +1,5 @@
-#include "../k4d3problem/graph_k4d3.h"
+#include "../graph_k4d3.h"
 
-#include "../graph.h"
 #include "gtest/gtest.h"
 
 using namespace testing;

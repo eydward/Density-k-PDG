@@ -9,7 +9,6 @@ cc_library(
         "graph.h",
         "grower.h",
         "permutator.h",
-        "k4d3problem/graph_k4d3.h",
         "forbid_tk/graph_tk.h",
     ],
     srcs=[
@@ -17,7 +16,6 @@ cc_library(
         "edge_gen.cpp",
         "fraction.cpp",
         "graph.cpp",
-        "k4d3problem/graph_k4d3.cpp",
         "forbid_tk/graph_tk.cpp",
         "grower.cpp",
         "permutator.cpp",
@@ -77,7 +75,6 @@ cc_test(
         "tests/grower_test.cpp",
         "tests/permutator_test.cpp",
         "tests/graph_test.cpp",
-        "tests/graph_K4D3_test.cpp",
     ],
     deps=[
         ":graph",
