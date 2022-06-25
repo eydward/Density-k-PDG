@@ -145,8 +145,8 @@ The goal of the Graph data structure is to enable fast operations, especially th
 * Isomorphism check.
 
 To achieve the goal, the Graph struct contains edges, vertex signatures, and the graph hash, all directly stored in the struct, no pointer indirections.
-An edge is stored in a 16-bit struct. 8-bit is used to store the vertex set, by using bit-mask (e.g. binary `001101` means vertex set `{0, 2, 3}`). The other 8-bit is used to store the head of the edge. `0xFF` means undirected, while other value `n` means the head is `n`.
-We allow at most 35 edges and embed this edge array directly inside the `Graph` struct, to avoid another heap allocation and a pointer. This means we can run all K values for N<=7, but only some K values for N=8.
+An edge is stored in a 16-bit struct. 12-bit is used to store the vertex set, by using bit-mask (e.g. binary `001101` means vertex set `{0, 2, 3}`). The other 4-bit is used to store the head of the edge, with `0x0F` meaning undirected, while other value `n` means the head is `n`.
+We allow at most 70 edges and embed this edge array directly inside the `Graph` struct, to avoid another heap allocation and a pointer. This means we can run all K values for N<=8, but only some K values for N>8 (the K,N combinations that exceeds the 70-edge limit are not computationally feasible anyway).
 
 The vertex signature and  graph hash are explained in the next section.
 
