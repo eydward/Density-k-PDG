@@ -1,13 +1,48 @@
 # Math, Data Structure, and Algorithms
 
-*This document outlines the mathematical background, data structure, and algorithms
-used in the code. Use the [Development](./develop.md) doc for information about development
-environment setup and how to contribute.*
+*This document outlines mathematical background as well as  data structures and algorithms used in the code. Use the [Development](./develop.md) doc for information about the development environment setup, and how to contribute.*
 
 ## Introduction
 This program computes the `min_ratio` value for k-PDGs with a fixed number of vertices and some forbidden sub-structures.
 
-![IMAGE](./kpdg_intro.png?raw=true)
+**Definition 1.** An $n$-vertex, $k$-uniform *partially directed hypergraph*, abbreviated $k$-PDG, is given by a vertex set $V$ and edge set $E$. Each edge $e\in E$ is an ordered pair $e=(\{v_1,\dots,v_k\}, h)$, where $\{v_1,\dots,v_k\}\subseteq V$; $h$ can be either the empty set (in which case we say $e$ is undirected and write it as $e=v_1\dots v_k$), or $h=v_i$ for some $i\in [k]=\{1,\dots,k\}$ (in which case we say $e$ is directed with $v_i$ as the head vertex, and write it as $e=v_1\dots \check{v_i}\dots v_k$).
+
+Edges, directed or undirected, cannot share the same vertex set. Formally, for each $k$-element subset $\{v_1, \dots, v_k\}\subseteq V$, exactly one of the following is true:
+* It is not the vertex set of any edge;
+* It is the vertex set of an undirected edge, namely, $v_1\dots v_k \in E$;
+* It is the vertex set of exactly one directed edge, namely there exists $i\in [k]$ such that $v_1\dots \check{v_i}\dots v_k \in E$.
+
+**Definition 2.** Define $H$ to be a *subgraph* of partially directed hypergraph $G$, denoted by $H\subseteq G$, if $H$ can be obtained from $G$ by deleting vertices, edges, and forgetting direction of edges. We say $G$ is $H$-*free* if $H$ is not a subgraph of $G$.
+
+**Example.** In the following diagram, both $F$ and $G$ are subgraphs of $H$, and no other subgraph relationships exist.
+
+Given a $k$-PDG $H$, we use $\alpha(H)$ and $\beta(H)$ to denote the undirected and directed edge density in $H$, respectively. In other words, the number of undirected edges is $\alpha(H)\binom nk$ and the number of directed edges is $\beta(H)\binom nk$.
+
+**Definition.** For a given integer $n\geq k$ and a $k$-PDG $F$, let $\theta(F, n)$ denote the largest nonnegative real such that all $F$-free, $n$-vertex $H$ satisfy
+$$\alpha(H) + \theta(F, n) \beta(H) \leq 1.$$
+Equivalently, we can define it as 
+$$\theta(F,n) = \min_{\substack{|V(H)|=n,\\ F \not\subseteq H}} \frac{1-\alpha(H)}{\beta(H)}.$$
+In the code we call the quantity $\frac{1-\alpha(H)}{\beta(H)}$ the `theta_ratio` of $H$ (which is infinity when $\beta(H)=0$), and we call $\theta(F,n)$ the `min_theta_ratio` (or simply `min_ratio`) of $F$.
+
+\begin{definition}
+For $k\geq2$, the *partially directed triangle* $T_k$ has vertex set $[k+1]=\{1,\dots,k+1\}$, with two undirected edges  $12 \cup U$ and $13 \cup U$, and one directed edge $2\check3 \cup U$, where $U=[k+1]\setminus\{1,2,3\}$.
+For example, $T_2=\{12, 13, 2\check3\}, T_3=\{124, 134, 2\check34\}, T_4=\{1245, 1345, 2\check345\}$. 
+Note each $T_k$ is a $k$-PDG.
+\end{definition}
+
+The main focus of this code is to compute $\theta(T_k, n)$. 
+But it also contains examples to compute $\zeta(F,n)$ defined below.
+
+\begin{definition}
+Define $H$ to be a \textit{*subgraph} of $G$, denoted by $H\sqsubseteq G$, if $H$ can be obtained from $G$ by deleting vertices, edges, and changing undirected edges to directed oned by arbitrarily assigning head vertices.
+
+Let $\zeta(F,n)$ denote the largest nonnegative real such that all $n$-vertex $H$ with $F\not\sqsubseteq H$ satisfy $\zeta(F,n)\alpha(H)+\beta(H)\leq1$. Or, 
+\[\zeta(F,n) = \min_{\substack{\abs{V(H)}=n,\\ F \not\sqsubseteq H}} \frac{1-\beta(H)}{\alpha(H)}.
+\]
+\end{definition}
+In the code we call the quantity $\frac{1-\beta(H)}{\alpha(H)}$ the \texttt{zeta\_ratio} of $H$ (which is infinity when $\alpha(H)=0$), and we call $\zeta(F,n)$ the \texttt{min\_zeta\_ratio} (or simply \texttt{min\_ratio}) of $F$.
+
+Both in this README below and in code, we use upper case \texttt{K, N} to denote the values of $k, n$ in $\theta(T_k, n)$.
 
 ## Results
 Values in the table are <img src="./theta_kn.png" height="22" /> for the various `K,N` combinations.
