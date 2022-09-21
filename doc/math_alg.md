@@ -5,9 +5,9 @@
 ## Introduction
 This program computes the `min_ratio` value for k-PDGs with a fixed number of vertices and some forbidden sub-structures.
 
-**Definition 1.** An $n$-vertex, $k$-uniform *partially directed hypergraph*, abbreviated $k$-PDG, is given by a vertex set $V$ and edge set $E$. Each edge $e\in E$ is an ordered pair $e=(\{v_1,\dots,v_k\}, h)$, where $\{v_1,\dots,v_k\}\subseteq V$; $h$ can be either the empty set (in which case we say $e$ is undirected and write it as $e=v_1\dots v_k$), or $h=v_i$ for some $i\in [k]=\{1,\dots,k\}$ (in which case we say $e$ is directed with $v_i$ as the head vertex, and write it as $e=v_1\dots \check{v_i}\dots v_k$).
+**Definition 1.** An $n$-vertex, $k$-uniform *partially directed hypergraph*, abbreviated $k$-PDG, is given by a vertex set $V$ and edge set $E$. Each edge $e\in E$ is an ordered pair $e=(\\{v_1,\dots,v_k\\}, h)$, where $\\{v_1,\dots,v_k\\}\subseteq V$; $h$ can be either the empty set (in which case we say $e$ is undirected and write it as $e=v_1\dots v_k$), or $h=v_i$ for some $i\in [k]=\\{1,\dots,k\\}$ (in which case we say $e$ is directed with $v_i$ as the head vertex, and write it as $e=v_1\dots \check{v_i}\dots v_k$).
 
-Edges, directed or undirected, cannot share the same vertex set. Formally, for each $k$-element subset $\{v_1, \dots, v_k\}\subseteq V$, exactly one of the following is true:
+Edges, directed or undirected, cannot share the same vertex set. Formally, for each $k$-element subset $\\{v_1, \dots, v_k\\}\subseteq V$, exactly one of the following is true:
 * It is not the vertex set of any edge;
 * It is the vertex set of an undirected edge, namely, $v_1\dots v_k \in E$;
 * It is the vertex set of exactly one directed edge, namely there exists $i\in [k]$ such that $v_1\dots \check{v_i}\dots v_k \in E$.
@@ -21,31 +21,30 @@ Given a $k$-PDG $H$, we use $\alpha(H)$ and $\beta(H)$ to denote the undirected 
 **Definition.** For a given integer $n\geq k$ and a $k$-PDG $F$, let $\theta(F, n)$ denote the largest nonnegative real such that all $F$-free, $n$-vertex $H$ satisfy
 $$\alpha(H) + \theta(F, n) \beta(H) \leq 1.$$
 Equivalently, we can define it as 
-$$\theta(F,n) = \min_{\substack{|V(H)|=n,\\ F \not\subseteq H}} \frac{1-\alpha(H)}{\beta(H)}.$$
+$$\theta(F,n) = \min_{\substack{|V(H)|=n,\\\\ F \not\subseteq H}} \frac{1-\alpha(H)}{\beta(H)}.$$
 In the code we call the quantity $\frac{1-\alpha(H)}{\beta(H)}$ the `theta_ratio` of $H$ (which is infinity when $\beta(H)=0$), and we call $\theta(F,n)$ the `min_theta_ratio` (or simply `min_ratio`) of $F$.
 
-\begin{definition}
-For $k\geq2$, the *partially directed triangle* $T_k$ has vertex set $[k+1]=\{1,\dots,k+1\}$, with two undirected edges  $12 \cup U$ and $13 \cup U$, and one directed edge $2\check3 \cup U$, where $U=[k+1]\setminus\{1,2,3\}$.
-For example, $T_2=\{12, 13, 2\check3\}, T_3=\{124, 134, 2\check34\}, T_4=\{1245, 1345, 2\check345\}$. 
+**Definition**
+For $k\geq2$, the *partially directed triangle* $T_k$ has vertex set $[k+1]=\\{1,\dots,k+1\\}$, with two undirected edges  $12 \cup U$ and $13 \cup U$, and one directed edge $2\check3 \cup U$, where $U=[k+1]\setminus\\{1,2,3\\}$.
+For example, $T_2=\\{12, 13, 2\check3\\}, T_3=\\{124, 134, 2\check34\\}, T_4=\\{1245, 1345, 2\check345\\}$. 
 Note each $T_k$ is a $k$-PDG.
-\end{definition}
 
 The main focus of this code is to compute $\theta(T_k, n)$. 
 But it also contains examples to compute $\zeta(F,n)$ defined below.
 
-\begin{definition}
-Define $H$ to be a \textit{*subgraph} of $G$, denoted by $H\sqsubseteq G$, if $H$ can be obtained from $G$ by deleting vertices, edges, and changing undirected edges to directed oned by arbitrarily assigning head vertices.
+**Definition**
+Define $H$ to be a **\*subgraph** of $G$, denoted by $H\sqsubseteq G$, if $H$ can be obtained from $G$ by deleting vertices, edges, and changing undirected edges to directed oned by arbitrarily assigning head vertices.
 
 Let $\zeta(F,n)$ denote the largest nonnegative real such that all $n$-vertex $H$ with $F\not\sqsubseteq H$ satisfy $\zeta(F,n)\alpha(H)+\beta(H)\leq1$. Or, 
-\[\zeta(F,n) = \min_{\substack{\abs{V(H)}=n,\\ F \not\sqsubseteq H}} \frac{1-\beta(H)}{\alpha(H)}.
-\]
-\end{definition}
-In the code we call the quantity $\frac{1-\beta(H)}{\alpha(H)}$ the \texttt{zeta\_ratio} of $H$ (which is infinity when $\alpha(H)=0$), and we call $\zeta(F,n)$ the \texttt{min\_zeta\_ratio} (or simply \texttt{min\_ratio}) of $F$.
+$$\zeta(F,n) = \min_{\substack{|V(H)|=n,\\\\ F \not\sqsubseteq H}} \frac{1-\beta(H)}{\alpha(H)}.$$
 
-Both in this README below and in code, we use upper case \texttt{K, N} to denote the values of $k, n$ in $\theta(T_k, n)$.
+
+In the code we call the quantity $\frac{1-\beta(H)}{\alpha(H)}$ the `zeta\_ratio` of $H$ (which is infinity when $\alpha(H)=0$), and we call $\zeta(F,n)$ the `min\_zeta\_ratio` (or simply `min\_ratio`) of $F$.
+
+Both in this README below and in code, we use upper case `K, N` to denote the values of $k, n$ in $\theta(T_k, n)$.
 
 ## Results
-Values in the table are <img src="./theta_kn.png" height="22" /> for the various `K,N` combinations.
+Values in the table are $\theta(T_K, N)$ for the various `K,N` combinations.
 
 | N   | K=2 | K=3 | K=4 | K=5 | K=6 | K=7 | K=8 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -62,7 +61,7 @@ All results shown in this table can be obtained very fast using an optimized bui
 * `K=5, N=7` takes a few minutes on a regular computer
 * `K=6,N=8` took 200 CPU hours (log files from the run in `results/K6N8` directory).
 * `K=3, N=7` took 880 CPU hours (logs files from the run in `results/K3N7` directory).
-* `K=4, N=7` took almost 6600 CPU hours in total on Google Cloud, in 30 batches. The log files are in the `results/K4N7` directory. The `collector` utility is used to verify the consistency of all log files to summarize the final result. The graph that produced `theta_ratio=7/4` value is the following (note it's symmetric over {5,6}, making it easy to verify by hand).
+* `K=4, N=7` took almost 6600 CPU hours in total on Google Cloud, in 30 batches. The log files are in the `results/K4N7` directory. The `collector` utility is used to verify the consistency of all log files to summarize the final result. The graph that produced `theta_ratio=7/4` value is the following (note it's symmetric over $\\{5,6\\}$, making it easy to verify by hand).
     ```
     {
       0123>0, 0124>0, 0134>0, 0234>0, 0125>0, 0135>0, 0235>0, 0145>0, 0245>0, 0345>0,
@@ -73,7 +72,7 @@ All results shown in this table can be obtained very fast using an optimized bui
       0126>6, 0136>6, 0236>6, 1236>6, 0146>6, 0246>6, 1246>6, 0346>6, 1346>6, 2346>6
     }
     ```
-* `K=5,N=8` is not computationally feasible with the current approach. The final enumeration phase has 4722759 base graphs to compute (whereas in the `K=4,N=7` case, there are 29313 base graphs). A quick experiment suggests that processing each base graph will likely take >10^8 CPU hours which implies hueristically that it could take >10^15 CPU hours to compute larger cases, like `K=5,N=8`.
+* `K=5,N=8` is not computationally feasible with the current approach. The final enumeration phase has 4722759 base graphs to compute (whereas in the `K=4,N=7` case, there are 29313 base graphs). A quick experiment suggests that processing each base graph will likely take $>10^8$ CPU hours which implies hueristically that it could take $>10^{15}$ CPU hours to compute larger cases, like `K=5,N=8`.
 
 ## Running the program
 The easiest way to run is to get the binaries from either `bin-linux` or `bin-windows` directories. Alternatively, you can build from source: see the next section for details. To run the program:
