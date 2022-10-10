@@ -1,13 +1,12 @@
 # Development
 
-*This document outlines the build/test environment, and how to modify the code, 
-contribute to the project. As a prerequisite, readers should be familiar with the content in 
+*This document outlines the build/test environment, how to modify the code, and how to contribute to the project.
+As a prerequisite, readers should be familiar with the content in 
 [Math, Data Structure, and Algorithms](./math_alg.md).*
 
 ## Development Environment Setup
 
-In order to build and run the code, a c++ 17 compatible compiler is required. 
-I used `gcc 11.2.0`, but any `gcc-11` release  should work. 
+In order to build and run the code, a C++ 17 compatible compiler is required. I use `gcc 11.2.0`, but any `gcc-11` release  should work. 
   - To install `gcc` on Windows, follow instructions in this 
     [section](https://code.visualstudio.com/docs/languages/cpp#_example-install-mingwx64).
   - On Debian-based Linux distros (including Ubuntu) just run 
@@ -16,7 +15,7 @@ I used `gcc 11.2.0`, but any `gcc-11` release  should work.
     [here](https://stackoverflow.com/questions/67298443/when-gcc-11-will-appear-in-ubuntu-repositories)
     to install `gcc-11`. On Linux distros that don't use `apt`, Google search the installation steps.
 
-It also requires `bazel`, follow instructions on https://bazel.build/install to install. 
+This project also requires `bazel`; follow instructions on https://bazel.build/install to install. 
 On Windows the recommended global `bazel` config is the following (no config is required on Linux):
   ```
   startup --host_jvm_args=--add-opens=java.base/java.nio=ALL-UNNAMED --host_jvm_args=--add-opens=java.base/java.lang=ALL-UNNAMED
@@ -24,7 +23,7 @@ On Windows the recommended global `bazel` config is the following (no config is 
   test --test_output=errors
   ```
 
-Once the above are installed and configured, you can proceeed as follows. Run all commands in the
+Once these have been installed and properly configured, you can proceeed as follows. Run all commands in the
 project root directory. The command line arguments are explained in
 [Math, Data Structure, and Algorithms](./math_alg.md).
 * To execute all unit tests: `bazel test ...`
@@ -48,7 +47,7 @@ All source code is in the `src` directory.
 - `kPDG.cpp`: entry point of the main program.
 - `graph.h, .cpp`: declaration and implementation of the Graph struct, as well as the definition of `Edge` and `VertexSignature`. This is where isomorphism check, hashing, and canonicalization are implemented.
 - `grower.h, .cpp`: declaration and implementation of growing the search tree, see algorithm design below. 
-- `forbid_tk/graph_tk.h, .cpp`: implements the T_k-free check. 
+- `forbid_tk/graph_tk.h, .cpp`: implements the $T_k$-free check. 
 - `permutator.h, .cpp`: simple utility function to generate all permutations with specified ranges.
 - `fraction.h, .cpp`: simple implementation of a fraction. (We store the theta_ratio value as a fraction).
 - `counters.h, .cpp`: the header and implementation of a bunch of statistical counters. The minimum theta_ratio value is stored here with the graph producing it. Also produces data used to track the performance of the algorithm.
