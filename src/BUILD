@@ -79,8 +79,8 @@ cc_test(
     deps=[
         ":graph",
         ":iso_stress_test",
-        "@gtest//:gtest",
-        "@gtest//:gtest_main",
+        "@googletest//:gtest",
+        "@googletest//:gtest_main",
     ],
     copts=["-std=c++17"],
     linkopts=["-lpthread"],

@@ -1,5 +1,6 @@
 bazel-*/**/*
 bazel*
+MODULE.bazel.lock
 
 .VSCodeCounter
 *.exe

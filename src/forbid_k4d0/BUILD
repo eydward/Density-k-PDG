@@ -22,8 +22,8 @@ cc_test(
     srcs=["tests/graph_k4d0_test.cpp"],
     deps=[
         ":graph_forbid_k4d0",
-        "@gtest//:gtest",
-        "@gtest//:gtest_main",
+        "@googletest//:gtest",
+        "@googletest//:gtest_main",
     ],
     copts=["-std=c++17"],
     linkopts=["-lpthread"],
